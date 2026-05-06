@@ -1,0 +1,43 @@
+{
+  "IsSubgraph": true,
+  "Path": "",
+  "Model": "models/dev/box.vmdl",
+  "Title": "",
+  "Description": "",
+  "Category": "",
+  "Icon": "",
+  "AddToNodeLibrary": false,
+  "BlendMode": "Opaque",
+  "ShadingModel": "Lit",
+  "Domain": "Surface",
+  "Metadata": {},
+  "PreviewSettings": {
+    "ViewMode": "Perspective",
+    "RenderBackfaces": false,
+    "EnableShadows": true,
+    "ShowGround": true,
+    "ShowSkybox": true,
+    "BackgroundColor": "1,1,1,1",
+    "Tint": "1,1,1,1"
+  },
+  "nodes": [
+    {
+      "_class": "SubgraphOutput",
+      "ParameterIdentifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc",
+      "Identifier": "0",
+      "Position": "0,0",
+      "HandleOffsets": {}
+    }
+  ],
+  "parameters": [
+    {
+      "_class": "Float3SubgraphOutputParameter",
+      "Name": "SubgraphOutput0",
+      "OutputDescription": "",
+      "PortOrder": 0,
+      "Preview": "Albedo",
+      "Identifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc"
+    }
+  ],
+  "__version": 7
+}
