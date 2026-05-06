@@ -437,40 +437,23 @@ public sealed partial class GraphCompiler
 	/// <summary>
 	/// Register a sampler and return the name of it
 	/// </summary>
-	public string ResultSampler( Sampler sampler, bool alreadyProcessed = false )
+	public string ResultSampler( Sampler sampler )
 	{
-		var name = CleanName( sampler.Name );
-		// For unnamed samplers generate a deterministic key from their settings so that
-		// the same default sampler coming from multiple subgraph invocations doesn't get
-		// registered as a new entry each time (which was causing 60+ duplicate samplers).
-		if ( string.IsNullOrWhiteSpace( name ) )
-		{
-			name = $"Auto_{sampler.GetHashCode():X8}";
-		}
-		var id = name;
+		var name = !string.IsNullOrWhiteSpace( sampler.Name ) ? CleanName( sampler.Name ) : $"Sampler_{sampler.GetHashCode():X8}";
 
 		if ( IsPreview )
 		{
-			// Match non-preview: one global per sampler config. Using ResultValue( sampler )
-			// assigned g_{Stage}_{Attributes.Count} for every call, blowing past API sampler limits.
-			var attribName = $"g_s{id}";
-			SetAttribute( attribName, sampler );
-			return attribName;
+			return ResultValue( sampler, $"g_s{name}", previewNameOverride: true ).Code;
 		}
-
-		if ( IsNotPreview )
+		else 
 		{
-			if ( !ShaderResult.SamplerStates.ContainsKey( id ) )
+			if ( !ShaderResult.SamplerStates.ContainsKey( name ) )
 			{
-				ShaderResult.SamplerStates.Add( id, sampler );
+				ShaderResult.SamplerStates.Add( name, sampler );
 			}
-			else
-			{
-				//SGPLog.Warning( $"ShaderResult.SamplerStates already contains id \"{id}\"" );
-			}
-		}
 
-		return $"g_s{id}";
+			return $"g_s{name}";
+		}
 	}
 
 	/// <summary>
@@ -1236,13 +1219,13 @@ public sealed partial class GraphCompiler
 	/// <summary>
 	/// Get result of a value, in preview mode an attribute will be registered and returned
 	/// </summary>
-	public NodeResult ResultValue<T>( T value, string name = null, bool previewOverride = false )
+	public NodeResult ResultValue<T>( T value, string name = null, bool previewOverride = false, bool previewNameOverride = false )
 	{
 		if ( value is NodeInput nodeInput ) return Result( nodeInput );
 
 		bool isConstant = IsPreview && !previewOverride;
 		bool isNamed = isConstant || !string.IsNullOrWhiteSpace( name );
-		name = isConstant ? $"g_{StageName}_{ShaderResult.Attributes.Count}" : name;
+		name = isConstant && !previewNameOverride ? $"g_{StageName}_{ShaderResult.Attributes.Count}" : name;
 
 		if ( isConstant )
 		{

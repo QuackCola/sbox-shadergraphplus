@@ -925,7 +925,7 @@ public sealed class SamplerNode : ShaderNodePlus//, IParameterNode
 	[Output( typeof( Sampler ) ), Hide]
 	public NodeResult.Func Sampler => ( GraphCompiler compiler ) =>
 	{
-		var samplerResult = compiler.ResultSampler( SamplerState, Processed );
+		var samplerResult = compiler.ResultSampler( SamplerState );
 
 		return new NodeResult( ResultType.Sampler, samplerResult, true );
 	};
