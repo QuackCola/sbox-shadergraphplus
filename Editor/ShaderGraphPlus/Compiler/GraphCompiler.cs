@@ -420,15 +420,11 @@ public sealed partial class GraphCompiler
 	{
 		var result = ShaderResult;
 
-		var name = CleanName( gradientName );
+		var name = !string.IsNullOrWhiteSpace( gradientName ) ? CleanName( gradientName ) : $"Gradient_{result.Gradients.Count}";
 
-		name = string.IsNullOrWhiteSpace( name ) ? $"Gradient{result.Gradients.Count}" : name;
-
-		var id = name;
-
-		if ( !result.Gradients.ContainsKey( id ) )
+		if ( !result.Gradients.ContainsKey( name ) )
 		{
-			result.Gradients.Add( id, gradient );
+			result.Gradients.Add( name, gradient );
 		}
 
 		return name;
