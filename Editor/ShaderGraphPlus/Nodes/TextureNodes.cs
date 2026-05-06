@@ -449,8 +449,10 @@ public sealed class SampleTexture2DTriplanarNode : Texture2DSamplerBase
 	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
+	[InputDefault( nameof( TileInput ) )]
 	public float DefaultTile { get; set; } = 1.0f;
 
+	[InputDefault( nameof( BlendFactorInput ) )]
 	public float DefaultBlendFactor { get; set; } = 4.0f;
 
 	public SampleTexture2DTriplanarNode() : base()
@@ -581,8 +583,10 @@ public sealed class SampleTexture2DNormalMapTriplanarNode : Texture2DSamplerBase
 	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
+	[InputDefault( nameof( TileInput ) )]
 	public float DefaultTile { get; set; } = 1.0f;
 
+	[InputDefault( nameof( BlendFactorInput ) )]
 	public float DefaultBlendFactor { get; set; } = 4.0f;
 
 	protected override TextureInput PreviewUI => new TextureInput
