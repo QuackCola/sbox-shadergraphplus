@@ -70,16 +70,17 @@ public struct Sampler : ISGPJsonUpgradeable
 
 	public override readonly int GetHashCode()
 	{
-		var h = new HashCode();
-		h.Add( Filter );
-		h.Add( AddressModeU );
-		h.Add( AddressModeV );
-		h.Add( AddressModeW );
-		h.Add( MaxAnisotropy );
-		h.Add( MipLodBias );
-		h.Add( IsAttribute );
-		h.Add( BorderColor );
-		return h.ToHashCode();
+		var hashCode = new HashCode();
+		hashCode.Add( Name );
+		hashCode.Add( Filter );
+		hashCode.Add( AddressModeU );
+		hashCode.Add( AddressModeV );
+		hashCode.Add( AddressModeW );
+		hashCode.Add( MaxAnisotropy );
+		hashCode.Add( MipLodBias );
+		hashCode.Add( IsAttribute );
+		hashCode.Add( BorderColor );
+		return hashCode.ToHashCode();
 	}
 
 	public override readonly bool Equals( object obj ) => obj is Sampler other && this == other;
