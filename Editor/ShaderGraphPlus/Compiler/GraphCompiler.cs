@@ -552,6 +552,14 @@ public sealed partial class GraphCompiler
 			}
 		}
 
+		void NodeError( ref BaseNodePlus node, string error )
+		{
+			node.HasError = true;
+			node.ErrorMessage = error;
+
+			NodeErrors[node] = [node.ErrorMessage];
+		}
+
 		if ( !input.IsValid )
 			return default;
 
@@ -644,18 +652,14 @@ public sealed partial class GraphCompiler
 
 			if ( IsVs && customFunctionNode.CompatableStage == CompatableShaderStage.Pixel )
 			{
-				node.HasError = true;
-				node.ErrorMessage = $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the pixel shader stage only!";
+				NodeError( ref node, $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the pixel shader stage only!" );
 
-				NodeErrors[node] = [node.ErrorMessage];
 				return default;
 			}
 			else if ( IsPs && customFunctionNode.CompatableStage == CompatableShaderStage.Vertex )
 			{
-				node.HasError = true;
-				node.ErrorMessage = $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the vertex shader stage only!";
+				NodeError( ref node, $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the vertex shader stage only!" );
 
-				NodeErrors[node] = [node.ErrorMessage];
 				return default;
 			}
 
