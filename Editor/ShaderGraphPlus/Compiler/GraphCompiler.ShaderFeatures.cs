@@ -139,6 +139,11 @@ public sealed partial class GraphCompiler
 
 		foreach ( var (index, result) in blockResults.Index() )
 		{
+			if ( !result.Result.IsValid )
+			{
+				continue;
+			}
+
 			var lastResult = new NodeResult( resultType, result.Result.Cast( resultTypeComponents ) );
 
 			if ( index == 0 )
