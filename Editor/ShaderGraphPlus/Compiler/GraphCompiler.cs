@@ -523,38 +523,35 @@ public sealed partial class GraphCompiler
 	}
 
 	/// <summary>
-	/// When a funcResult of a node is not valid.
-	/// </summary>
-	private void FuncResultError( ref BaseNodePlus node, NodeResult funcResult )
-	{
-		if ( funcResult.IsValid )
-			return;
-
-		if ( !NodeErrors.TryGetValue( node, out var errors ) )
-		{
-			errors = new();
-			NodeErrors.Add( node, errors );
-		}
-
-		if ( funcResult.Errors is null || funcResult.Errors.Length == 0 )
-		{
-			errors.Add( $"Missing input" );
-		}
-		else
-		{
-			node.HasError = true;
-			node.ErrorMessage = funcResult.Errors.FirstOrDefault();
-
-			foreach ( var error in funcResult.Errors )
-				errors.Add( error );
-		}
-	}
-
-	/// <summary>
 	/// Get result of an input
 	/// </summary>
 	public NodeResult Result( NodeInput input )
 	{
+		void Error( ref BaseNodePlus node, NodeResult funcResult )
+		{
+			if ( funcResult.IsValid )
+				return;
+
+			if ( !NodeErrors.TryGetValue( node, out var errors ) )
+			{
+				errors = new();
+				NodeErrors.Add( node, errors );
+			}
+
+			if ( funcResult.Errors is null || funcResult.Errors.Length == 0 )
+			{
+				errors.Add( $"Missing input" );
+			}
+			else
+			{
+				node.HasError = true;
+				node.ErrorMessage = funcResult.Errors.FirstOrDefault();
+
+				foreach ( var error in funcResult.Errors )
+					errors.Add( error );
+			}
+		}
+
 		if ( !input.IsValid )
 			return default;
 
@@ -668,7 +665,7 @@ public sealed partial class GraphCompiler
 
 				if ( !funcResult.IsValid )
 				{
-					FuncResultError( ref node, funcResult );
+					Error( ref node, funcResult );
 
 					InputStack.Remove( input );
 					return default;
@@ -896,7 +893,7 @@ public sealed partial class GraphCompiler
 
 			if ( !funcResult.IsValid )
 			{
-				FuncResultError( ref node, funcResult );
+				Error( ref node, funcResult );
 
 				InputStack.Remove( input );
 				return default;
