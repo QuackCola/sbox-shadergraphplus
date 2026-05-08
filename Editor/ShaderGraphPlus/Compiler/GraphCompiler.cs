@@ -527,7 +527,7 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public NodeResult Result( NodeInput input )
 	{
-		void Error( ref BaseNodePlus node, NodeResult funcResult )
+		void InvalidNodeResult( ref BaseNodePlus node, NodeResult funcResult )
 		{
 			if ( funcResult.IsValid )
 				return;
@@ -665,7 +665,7 @@ public sealed partial class GraphCompiler
 
 				if ( !funcResult.IsValid )
 				{
-					Error( ref node, funcResult );
+					InvalidNodeResult( ref node, funcResult );
 
 					InputStack.Remove( input );
 					return default;
@@ -893,7 +893,7 @@ public sealed partial class GraphCompiler
 
 			if ( !funcResult.IsValid )
 			{
-				Error( ref node, funcResult );
+				InvalidNodeResult( ref node, funcResult );
 
 				InputStack.Remove( input );
 				return default;
