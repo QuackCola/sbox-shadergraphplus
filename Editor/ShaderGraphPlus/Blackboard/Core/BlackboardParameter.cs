@@ -130,7 +130,7 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 	/// </summary>
 	/// <param name="issues">Any issues that are found.</param>
 	/// <returns>False when check has failed otherwise returns true when check has passed.</returns>
-	internal bool CheckParameter( out List<string> issues )
+	public virtual bool CheckParameter( out List<string> issues )
 	{
 		var graph = _graph as ShaderGraphPlus;
 		issues = new List<string>();
