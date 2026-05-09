@@ -72,11 +72,6 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 	[HLSLAssetPath]
 	public string Source { get; set; }
 
-	/// <summary>
-	/// Which shader stage this custom code is compatable with
-	/// </summary>
-	public CompatableShaderStage CompatableStage { get; set; } = CompatableShaderStage.Both;
-
 	[Hide]
 	public string CodeComment { get; set; } = "";
 

@@ -650,19 +650,6 @@ public sealed partial class GraphCompiler
 		{
 			node.ClearError();
 
-			if ( IsVs && customFunctionNode.CompatableStage == CompatableShaderStage.Pixel )
-			{
-				NodeError( ref node, $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the pixel shader stage only!" );
-
-				return default;
-			}
-			else if ( IsPs && customFunctionNode.CompatableStage == CompatableShaderStage.Vertex )
-			{
-				NodeError( ref node, $"{(string.IsNullOrWhiteSpace( customFunctionNode.Name ) ? "" : $" '{customFunctionNode.Name}'")} is ment to be used in the vertex shader stage only!" );
-
-				return default;
-			}
-
 			if ( customFunctionNode.Mode == CustomCodeNodeMode.Generate || customFunctionNode.Mode == CustomCodeNodeMode.File )
 			{
 				var funcResult = customFunctionNode.GetResult( this );
