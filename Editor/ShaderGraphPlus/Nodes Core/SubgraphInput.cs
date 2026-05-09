@@ -100,7 +100,6 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 				graph.UpdateParameterValue( ParameterIdentifier, value );
 
 				Update();
-				IsDirty = true;
 			}
 		}
 	}

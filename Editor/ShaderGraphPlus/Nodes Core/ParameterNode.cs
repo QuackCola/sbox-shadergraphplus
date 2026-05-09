@@ -39,7 +39,6 @@ public abstract class ParameterNode<T, Y> : ShaderNodePlus, IParameterNode where
 				graph.UpdateParameterValue( ParameterIdentifier, value );
 
 				Update();
-				IsDirty = true;
 			}
 		}
 	}

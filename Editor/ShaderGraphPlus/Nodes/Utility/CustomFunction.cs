@@ -138,8 +138,6 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 
 			CreateInputs();
 			Update();
-
-			IsDirty = true;
 		}
 
 		if ( hashCodeOutput != _lastHashCodeOutputs )
@@ -148,8 +146,6 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 
 			CreateOutputs();
 			Update();
-
-			IsDirty = true;
 		}
 	}
 
@@ -164,8 +160,6 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 		CreateOutputs();
 
 		Update();
-
-		IsDirty = true;
 	}
 
 	public void CreateInputs()
