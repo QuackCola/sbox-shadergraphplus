@@ -214,12 +214,10 @@ public sealed partial class GraphCompiler
 		if ( IsVs )
 		{
 			VertexResult = new();
-			VertexResult.Replace( outerResult.Globals, outerResult.Attributes, outerResult.Functions );
 		}
 		else
 		{
 			PixelResult = new();
-			PixelResult.Replace( outerResult.Globals, outerResult.Attributes, outerResult.Functions );
 		}
 
 		InputStack = new();
@@ -250,6 +248,11 @@ public sealed partial class GraphCompiler
 		foreach ( var attribute in ShaderResult.Attributes )
 		{
 			outerResult.Attributes[attribute.Key] = attribute.Value;
+		}
+
+		foreach ( var function in ShaderResult.Functions )
+		{
+			outerResult.Functions.Add( function );
 		}
 
 		if ( IsVs )
