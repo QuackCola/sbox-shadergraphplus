@@ -323,4 +323,33 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 	{
 		throw new NotImplementedException();
 	}
+
+	public override bool CheckParameter( out List<string> issues )
+	{
+		base.CheckParameter( out issues );
+
+		var takenOptions = new List<string>();
+		foreach ( var option in Options )
+		{
+			var index = Options.IndexOf( option );
+
+			if ( string.IsNullOrWhiteSpace( option.Name ) )
+			{
+				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum") } Option at index \"{index}\" must have a name!" );
+
+				continue;
+			}
+
+			if ( !takenOptions.Contains( option.Name ) )
+			{
+				takenOptions.Add( option.Name );
+			}
+			else
+			{
+				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} duplicate option \"{option}\"" );
+			}
+		}
+
+		return !issues.Any();
+	}
 }
