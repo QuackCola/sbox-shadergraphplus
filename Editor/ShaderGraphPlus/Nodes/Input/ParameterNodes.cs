@@ -355,6 +355,25 @@ public sealed class ColorParameterNode : ParameterNode<Color, ColorParameter>
 }
 
 /// <summary>
+/// How a texture is filtered and wrapped when sampled.
+/// </summary>
+[Title( "Sampler State" ), Category( "Textures" ), Icon( "colorize" )]
+[Hide]
+public sealed class SamplerStateParameterNode : ParameterNode<Sampler, SamplerStateParameter>
+{
+	[JsonIgnore, Hide, Browsable( false )]
+	public override bool CanPreview => false;
+
+	[Output( typeof( Sampler ) ), Hide]
+	public NodeResult.Func Sampler => ( GraphCompiler compiler ) =>
+	{
+		var samplerResult = compiler.ResultSampler( Name, Value );
+
+		return new NodeResult( ResultType.Sampler, samplerResult, true );
+	};
+}
+
+/// <summary>
 /// Texture2D
 /// </summary>
 [Title( "Texture 2D" ), Category( "Parameters" ), Icon( "image" ), Order( 7 )]

@@ -175,6 +175,9 @@ public class BlackboardView : Widget
 				var materialParametersMenu = contextManu.FindOrCreateMenu( "Parameters" );
 				materialParametersMenu.Icon = "edit_attributes";
 
+				var attributesMenu = contextManu.FindOrCreateMenu( "Attributes" );
+				attributesMenu.Icon = "edit_attributes";
+
 				var materialCombosMenu = contextManu.FindOrCreateMenu( "Combos" );
 				materialCombosMenu.Icon = "alt_route";
 
@@ -185,6 +188,10 @@ public class BlackboardView : Widget
 				else if ( targetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
 				{
 					menu = materialCombosMenu;
+				}
+				else if ( targetType == typeof( SamplerStateParameter ) )
+				{
+					menu = attributesMenu;
 				}
 
 				AddOption( contextManu, menu, parameterType, icon, description );

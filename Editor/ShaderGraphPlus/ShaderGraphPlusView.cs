@@ -221,14 +221,27 @@ public class ShaderGraphPlusView : GraphView
 		{
 			if ( !isSubgraph )
 			{
-				var newMaterialParameterMenu = menu.AddMenu( $"Create Parameter", "add" );
+				var createParameterMenu = menu.AddMenu( $"Create Parameter", "add" );
+
+				var newMaterialParameterMenu = createParameterMenu.AddMenu( $"Material", "edit_attributes" );
+				var newAttributeMenu = createParameterMenu.AddMenu( $"Attribute", "edit_attributes" );
+				var newComboMenu = createParameterMenu.AddMenu( $"Shader Combo", "alt_route" );
 
 				foreach ( var classType in BlackboardParameter.GetRelevantParameters( AvailableParameters, false ).OrderBy( x =>
 						x.Type.GetAttribute<OrderAttribute>().Value ) )
 				{
-
-					var baseName = !classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) ? "MaterialParameter" : "ShaderFeature";
-					NewParameterMenuOption( newMaterialParameterMenu, baseName, classType, "Add Material Parameter" );
+					if ( classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+					{
+						NewParameterMenuOption( newComboMenu, "ShaderFeature", classType, "Add Material Shader Feature" );
+					}
+					if ( classType.Type.TargetType == typeof( SamplerStateParameter ) )
+					{
+						NewParameterMenuOption( newAttributeMenu, "MaterialSampler", classType, "Add Attribute Parameter" );
+					}
+					else if ( !classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+					{
+						NewParameterMenuOption( newMaterialParameterMenu, "MaterialParameter", classType, "Add Material Parameter" );
+					}
 				}
 			}
 			else

@@ -183,6 +183,7 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 				if ( isSubgraph && targetType == typeof( TextureCubeParameter ) ) return false;
 				if ( isSubgraph && targetType == typeof( ShaderFeatureBooleanParameter ) ) return false;
 				if ( isSubgraph && targetType == typeof( ShaderFeatureEnumParameter ) ) return false;
+				if ( isSubgraph && targetType == typeof( SamplerStateParameter ) ) return false;
 
 				// Only show subgraph input parameters when in a subgraph
 				if ( !isSubgraph && targetType == typeof( BoolSubgraphInputParameter ) ) return false;
@@ -267,6 +268,10 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 				ParameterIdentifier = parameter.Identifier,
 			},
 			ShaderFeatureEnumParameter => new EnumFeatureSwitchNode()
+			{
+				ParameterIdentifier = parameter.Identifier,
+			},
+			SamplerStateParameter => new SamplerStateParameterNode()
 			{
 				ParameterIdentifier = parameter.Identifier,
 			},

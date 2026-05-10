@@ -11,6 +11,7 @@ public struct Sampler : ISGPJsonUpgradeable
 	/// <summary>
 	/// The name of this Sampler.
 	/// </summary>
+	[Hide]
 	public string Name { get; set; }
 
 	/// <summary>
@@ -71,7 +72,6 @@ public struct Sampler : ISGPJsonUpgradeable
 	public override readonly int GetHashCode()
 	{
 		var hashCode = new HashCode();
-		hashCode.Add( Name );
 		hashCode.Add( Filter );
 		hashCode.Add( AddressModeU );
 		hashCode.Add( AddressModeV );
@@ -97,7 +97,7 @@ public struct Sampler : ISGPJsonUpgradeable
 			&& a.BorderColor == b.BorderColor;
 	}
 
-	public static bool operator !=( Sampler a, Sampler b ) => !( a == b );
+	public static bool operator !=( Sampler a, Sampler b ) => !(a == b);
 
 	public static explicit operator SamplerState( Sampler sampler )
 	{

@@ -203,7 +203,7 @@ internal static class PaintHelper
 				return $"p: {angles.pitch:F2}, y: {angles.yaw:F2}, r: {angles.roll:F2}";
 
 			case Sampler sampler:
-				return $"{sampler.Name}";
+				return $"DefaultSampler";
 
 			case TextureInput input:
 				return $"{input.Name}";

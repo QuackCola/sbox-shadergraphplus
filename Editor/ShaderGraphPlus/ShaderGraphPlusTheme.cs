@@ -66,6 +66,7 @@ internal static class ShaderGraphPlusTheme
 			{ typeof( Float2x2SubgraphInputParameter ), new BlackboardConfig( "float2x2", NodeHandleConfigs[typeof( Float2x2 )].Color ) },
 			{ typeof( Float3x3SubgraphInputParameter ), new BlackboardConfig( "float3x3", NodeHandleConfigs[typeof( Float3x3 )].Color ) },
 			{ typeof( Float4x4SubgraphInputParameter ), new BlackboardConfig( "float4x4", NodeHandleConfigs[typeof( Float4x4 )].Color ) },
+			{ typeof( SamplerStateSubgraphInputParameter ), new BlackboardConfig( "SamplerState", NodeHandleConfigs[typeof( Sampler  )].Color ) },
 			{ typeof( Texture2DSubgraphInputParameter ), new BlackboardConfig( "Texture2D", NodeHandleConfigs[typeof( Texture )].Color ) },
 			{ typeof( TextureCubeSubgraphInputParameter ), new BlackboardConfig( "TextureCube", NodeHandleConfigs[typeof( Texture )].Color ) },
 
@@ -79,6 +80,7 @@ internal static class ShaderGraphPlusTheme
 			{ typeof( Float2x2SubgraphOutputParameter ), new BlackboardConfig( "float2x2", NodeHandleConfigs[typeof( Float2x2 )].Color ) },
 			{ typeof( Float3x3SubgraphOutputParameter ), new BlackboardConfig( "float3x3", NodeHandleConfigs[typeof( Float3x3 )].Color ) },
 			{ typeof( Float4x4SubgraphOutputParameter ), new BlackboardConfig( "float4x4", NodeHandleConfigs[typeof( Float4x4 )].Color ) },
+			{ typeof( SamplerStateSubgraphOutputParameter ), new BlackboardConfig( "SamplerState", NodeHandleConfigs[typeof( Sampler )].Color ) },
 			{ typeof( Texture2DSubgraphOutputParameter ),  new BlackboardConfig( "Texture2D", NodeHandleConfigs[typeof( Texture )].Color ) },
 			{ typeof( TextureCubeSubgraphOutputParameter ),new BlackboardConfig( "TextureCube", NodeHandleConfigs[typeof( Texture )].Color ) },
 
@@ -89,6 +91,7 @@ internal static class ShaderGraphPlusTheme
 			{ typeof( Float3Parameter ), new BlackboardConfig( "float3", NodeHandleConfigs[typeof( Vector3 )].Color ) },
 			{ typeof( Float4Parameter ), new BlackboardConfig( "float4", NodeHandleConfigs[typeof( Vector4 )].Color ) },
 			{ typeof( ColorParameter ), new BlackboardConfig( "float4", NodeHandleConfigs[typeof( Color )].Color ) },
+			{ typeof( SamplerStateParameter ), new BlackboardConfig( "SamplerState", NodeHandleConfigs[typeof( Sampler )].Color ) },
 			{ typeof( Texture2DParameter ), new BlackboardConfig( "Texture2D", NodeHandleConfigs[typeof( Texture )].Color ) },
 			{ typeof( TextureCubeParameter ), new BlackboardConfig( "TextureCube", NodeHandleConfigs[typeof( Texture )].Color ) },
 		};

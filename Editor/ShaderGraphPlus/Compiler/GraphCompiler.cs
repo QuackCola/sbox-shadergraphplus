@@ -433,15 +433,15 @@ public sealed partial class GraphCompiler
 	/// <summary>
 	/// Register a sampler and return the name of it
 	/// </summary>
-	public string ResultSampler( Sampler sampler )
+	public string ResultSampler( string name, Sampler sampler )
 	{
-		var name = !string.IsNullOrWhiteSpace( sampler.Name ) ? CleanName( sampler.Name ) : $"Sampler_{sampler.GetHashCode():X8}";
+		name = !string.IsNullOrWhiteSpace( name ) ? CleanName( name ) : $"Sampler_{sampler.GetHashCode():X8}";
 
 		if ( IsPreview )
 		{
 			return ResultValue( sampler, $"g_s{name}", previewNameOverride: true ).Code;
 		}
-		else 
+		else
 		{
 			if ( !ShaderResult.SamplerStates.ContainsKey( name ) )
 			{
@@ -493,7 +493,7 @@ public sealed partial class GraphCompiler
 	public string ResultSamplerOrDefault( NodeInput samplerInput, Sampler defaultSampler )
 	{
 		var resultSampler = Result( samplerInput );
-		return resultSampler.IsValid ? resultSampler.Code : ResultSampler( defaultSampler );
+		return resultSampler.IsValid ? resultSampler.Code : ResultSampler( $"Sampler_{defaultSampler.GetHashCode():X8}", defaultSampler );
 	}
 
 	/// <summary>
@@ -1286,7 +1286,7 @@ public sealed partial class GraphCompiler
 					}
 					else if ( value is Sampler sampler )
 					{
-						var samplerResult = ResultSampler( sampler );
+						var samplerResult = ResultSampler( $"Sampler_{sampler.GetHashCode():X8}", sampler );
 						return new NodeResult( ResultType.Sampler, samplerResult, constant: true );
 					}
 				}

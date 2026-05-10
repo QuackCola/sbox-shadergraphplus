@@ -41,7 +41,7 @@ file static class TextureSamplerExentions
 
 		var newSampler = new Sampler()
 		{
-			Name = name,
+			//Name = name,
 			Filter = filter,
 			AddressModeU = addressModeU,
 			AddressModeV = addressModeV,

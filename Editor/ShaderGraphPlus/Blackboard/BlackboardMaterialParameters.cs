@@ -204,31 +204,35 @@ public sealed class TextureCubeParameter : BlackboardTextureMaterialParameter
 	}
 }
 
-// TODO : Implament the rest of SamplerStateParameter once SamplerState
-// is exposed to the MaterialEditor.
-/*
 /// <summary>
 /// SamplerState material parameter
 /// </summary>
 [Title( "Sampler State" ), Icon( "colorize" ), Order( 8 )]
-public sealed class SamplerStateParameter : BlackboardGenericParameter<Sampler>
+public sealed class SamplerStateParameter : BlackboardParameter
 {
+	[InlineEditor( Label = false ), Group( "Value" )]
+	public Sampler Value { get; set; }
+
 	public SamplerStateParameter() : base()
 	{
 		Value = new Sampler();
 	}
 
-	public SamplerStateParameter( Sampler value )
-		: base( value )
+	public override object GetValue()
 	{
+		return Value;
 	}
 
-	public override BaseNodePlus InitializeNode()
+	public override void SetValue( object value )
 	{
-		throw new NotImplementedException();
+		if ( value.GetType() != typeof( Sampler ) )
+		{
+			throw new InvalidCastException( $"Cannot cast {value.GetType()} to {typeof( Sampler )}" );
+		}
+
+		Value = (Sampler)value;
 	}
 }
-*/
 
 /// <summary>
 ///
@@ -335,7 +339,7 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 
 			if ( string.IsNullOrWhiteSpace( option.Name ) )
 			{
-				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum") } Option at index \"{index}\" must have a name!" );
+				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} Option at index \"{index}\" must have a name!" );
 
 				continue;
 			}

@@ -141,7 +141,7 @@ public sealed class SampleTexture2DNode : Texture2DSamplerBase
 	[Hide]
 	public NodeInput SamplerInput { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
 	public SampleTexture2DNode() : base()
@@ -236,7 +236,7 @@ public sealed class SampleTexture2DLodNode : Texture2DSamplerBase
 	[Hide]
 	public NodeInput LODInput { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
 	[InputDefault( nameof( LODInput ) ), Order( 3 )]
@@ -332,7 +332,7 @@ public sealed class SampleTexture2DGradientNode : Texture2DSamplerBase
 	[Hide]
 	public NodeInput DDYInput { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
 	[InputDefault( nameof( DDXInput ) ), Order( 3 )]
@@ -446,7 +446,7 @@ public sealed class SampleTexture2DTriplanarNode : Texture2DSamplerBase
 	[Hide]
 	public NodeInput BlendFactorInput { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
 	[InputDefault( nameof( TileInput ) )]
@@ -580,7 +580,7 @@ public sealed class SampleTexture2DNormalMapTriplanarNode : Texture2DSamplerBase
 	[Hide]
 	public NodeInput BlendFactorInput { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" ), Order( 2 )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
 	[InputDefault( nameof( TileInput ) )]
@@ -710,7 +710,7 @@ public sealed class SampleTextureCubeNode : ShaderNodePlus
 	[Hide, JsonIgnore]
 	public string Texture { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Sampler" )]
+	[InlineEditor( Label = false ), Group( "Default Sampler" )]
 	[HideIf( nameof( IsSubgraph ), true )]
 	public Sampler SamplerState { get; set; } = new Sampler();
 
@@ -867,70 +867,5 @@ public sealed class TextureCoord : ShaderNodePlus
 			var result = UseSecondaryCoord ? "i.vTextureCoords.zw" : "i.vTextureCoords.xy";
 			return Tiling.IsNearZeroLength ? new( ResultType.Vector2, result ) : new( ResultType.Vector2, $"{result} * {compiler.ResultValue( Tiling )}" );
 		}
-	};
-}
-
-/// <summary>
-/// How a texture is filtered and wrapped when sampled.
-/// </summary>
-[Title( "Sampler State" ), Category( "Textures" ), Icon( "colorize" )]
-public sealed class SamplerNode : ShaderNodePlus//, IParameterNode
-{
-	[JsonIgnore, Hide, Browsable( false )]
-	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.ParameterNode;
-
-	[JsonIgnore, Hide, Browsable( false )]
-	public override bool CanPreview => false;
-
-	public SamplerNode() : base()
-	{
-		ExpandSize = new Vector2( 0, 8 );
-	}
-
-	[InlineEditor( Label = false ), Group( "Sampler" )]
-	[HideIf( nameof( IsSubgraph ), true )]
-	public Sampler SamplerState { get; set; } = new Sampler();
-
-	[Hide]
-	public override string Title
-	{
-		get
-		{
-			var typeName = $"{DisplayInfo.For( this ).Name}";
-
-			if ( !IsSubgraph && !string.IsNullOrWhiteSpace( SamplerState.Name ) )
-			{
-				return $"{SamplerState.Name}";
-			}
-			else if ( !IsSubgraph )
-			{
-				return typeName;
-			}
-			else if ( IsSubgraph && !string.IsNullOrWhiteSpace( Name ) )
-			{
-				return $"{Name}";
-			}
-			else
-			{
-				return typeName;
-			}
-		}
-	}
-
-	[Hide]
-	private bool IsSubgraph => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.IsSubgraph);
-
-	[Hide]
-	public string Name { get; set; }
-
-	[Hide, JsonIgnore]
-	public FloatParameterUI UI { get; set; }
-
-	[Output( typeof( Sampler ) ), Hide]
-	public NodeResult.Func Sampler => ( GraphCompiler compiler ) =>
-	{
-		var samplerResult = compiler.ResultSampler( SamplerState );
-
-		return new NodeResult( ResultType.Sampler, samplerResult, true );
 	};
 }
