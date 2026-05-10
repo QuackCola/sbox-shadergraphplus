@@ -61,6 +61,16 @@ public partial class ShaderGraphPlus
 				}
 			}
 		}
+		else
+		{
+			foreach ( var jsonNode in oldParameterArray )
+			{
+				if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
+					continue;
+
+				newParameterArray.Add( jsonNode.DeepClone() );
+			}
+		}
 
 		//
 		// Upgrade Nodes
