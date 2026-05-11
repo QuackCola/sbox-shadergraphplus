@@ -1,8 +1,4 @@
-﻿using JsonUtilities;
-using Sandbox.Rendering;
-using ShaderGraphPlus.Nodes;
-using System.Text.Json.Nodes;
-
+﻿using System.Text.Json.Nodes;
 
 namespace ShaderGraphPlus;
 
@@ -11,6 +7,22 @@ public partial class ShaderGraphPlus
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 8 )]
 	internal static void Upgrader_v8( JsonObject obj )
 	{
+		static bool ParameterNameExists( string name, JsonArray parameterArray )
+		{
+			foreach ( var jsonNode in parameterArray )
+			{
+				if ( jsonNode["Name"] is not JsonValue nameValue )
+					continue;
+
+				if ( nameValue.GetValue<string>() == name )
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		if ( obj[JsonKeys.ParameterArray] is not JsonArray oldParameterArray )
 			throw new Exception( $"Cannot find jsonArray \'{JsonKeys.ParameterArray}\'" );
 
@@ -46,11 +58,11 @@ public partial class ShaderGraphPlus
 			var nodeElement = JsonSerializer.Deserialize<JsonElement>( jsonNode.AsObject().ToJsonString() );
 			var typeName = classValue.GetValue<string>();
 
-			if ( !isSubgraph && typeName == "SamplerNode" )
+			if ( typeName == "SamplerNode" )
 			{
 				var updatedNodeObject = jsonNode.DeepClone().AsObject();
 
-				if ( JsonUtils.UpdatePropertyValue( updatedNodeObject, JsonKeys.Class, "SamplerStateParameterNode", SerializerOptions() ) )
+				if ( !isSubgraph && JsonUtils.UpdatePropertyValue( updatedNodeObject, JsonKeys.Class, "SamplerStateParameterNode", SerializerOptions() ) )
 				{
 				}
 
@@ -59,15 +71,41 @@ public partial class ShaderGraphPlus
 					updatedNodeObject.Remove( "SamplerState" );
 				}
 
-				var parameter = new SamplerStateParameter()
+				BlackboardParameter parameter;
+				if ( isSubgraph )
 				{
-					Identifier = Guid.NewGuid()
-				};
+					parameter = new SamplerStateSubgraphInputParameter()
+					{
+						Identifier = Guid.NewGuid()
+					};
+				}
+				else
+				{
+					parameter = new SamplerStateParameter()
+					{
+						Identifier = Guid.NewGuid()
+					};
+				}
+
+				parameter.Name = sampler.Name;
+
+				if ( string.IsNullOrWhiteSpace( parameter.Name ) )
+				{
+					var name = $"{(isSubgraph ? "SubgraphInput" : "MaterialParameter")}";
+					var id = name;
+					int count = 0;
+
+					while ( ParameterNameExists( id, newParameterArray ) )
+					{
+						id = $"{name}_{count++}";
+					}
+
+					parameter.Name = id;
+				}
+
+				parameter.SetValue( sampler );
 
 				updatedNodeObject.Add( "ParameterIdentifier", parameter.Identifier );
-
-				parameter.Name = !string.IsNullOrWhiteSpace( sampler.Name ) ? sampler.Name : "MaterialSampler0";
-				parameter.Value = sampler;
 
 				var parameterType = parameter.GetType();
 				var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name } };
@@ -76,11 +114,27 @@ public partial class ShaderGraphPlus
 
 				newParameterArray.Add( parameterObject );
 
-				newNodeArray.Add( updatedNodeObject );
-			}
-			else if ( isSubgraph && typeName == "SamplerNode" )
-			{
-				throw new NotImplementedException( "TODO" );
+				if ( isSubgraph )
+				{
+					JsonUtils.GetPropertyValue<string>( updatedNodeObject, "Identifier", SerializerOptions(), null, out var nodeID );
+
+					var subgraphInput = new SubgraphInput()
+					{
+						Identifier = nodeID,
+						ParameterIdentifier = parameter.Identifier
+					};
+
+					var type = subgraphInput.GetType();
+					var newNodeObject = new JsonObject { { JsonKeys.Class, type.Name } };
+
+					SerializeObject( subgraphInput, newNodeObject, SerializerOptions(), null );
+
+					newNodeArray.Add( newNodeObject );
+				}
+				else
+				{
+					newNodeArray.Add( updatedNodeObject );
+				}
 			}
 			else
 			{
