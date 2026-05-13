@@ -2062,12 +2062,22 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 		{
 			sb.AppendLine();
 			sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
-			sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : BACK );" );
+			if ( Graph.RenderFace == RenderFace.Front )
+				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : BACK );" );
+			else if ( Graph.RenderFace == RenderFace.Back )
+				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : FRONT );" );
+			else
+				sb.AppendLine( "RenderState( CullMode, NONE );" );
 		}
 		else
 		{
 			sb.AppendLine();
-			sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : DEFAULT );" );
+			if ( Graph.RenderFace == RenderFace.Front )
+				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : BACK );" );
+			else if ( Graph.RenderFace == RenderFace.Back )
+				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : FRONT );" );
+			else
+				sb.AppendLine( "RenderState( CullMode, NONE );" );
 		}
 
 		return sb.ToString();
