@@ -1,5 +1,6 @@
 using Editor;
 using NodeEditorPlus;
+using System.Text;
 
 namespace ShaderGraphPlus;
 
@@ -27,7 +28,9 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 
 	public override string GetTooltip()
 	{
-		var tooltip = Name.WithColor( "#9CDCFE" );
+		var sb = new StringBuilder();
+
+		sb.AppendLine( $"<h3>{Name}</h3>" );
 
 		var usrDesc = DisplayInfo.Description;
 
@@ -40,12 +43,10 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 			usrDesc = outputParameter.OutputDescription;
 		}
 
-		var desc = usrDesc ?? "No description given.";
-		tooltip += desc.StartsWith( "<br/>", StringComparison.OrdinalIgnoreCase )
-			? desc
-			: $"<br/>{desc}";
+		sb.AppendLine( $"<br />" );
+		sb.AppendLine( $"<i>{usrDesc}</i>" );
 
-		return tooltip;
+		return sb.ToString();
 	}
 
 	public override bool CanEdit => false;
