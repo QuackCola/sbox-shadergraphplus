@@ -25,14 +25,15 @@ public partial class ShaderGraphPlus
 			if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
 				continue;
 			
-			var parameterElement = JsonSerializer.Deserialize<JsonElement>( jsonNode.AsObject().ToJsonString() );
 			var typeName = classValue.GetValue<string>();
+			var typeDesc = EditorTypeLibrary.GetType<BlackboardParameter>( typeName );
+			var type = new ClassBlackboardParameterType( typeDesc );
 
 			var newParameterObj = jsonNode.DeepClone().AsObject();
 
-			if ( isSubgraph && typeName == "SubgraphInput" || typeName == "SubgraphOutput" )
+			if ( typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ))
 			{
-				JsonUtils.UpdatePropertyKey( newParameterObj, typeName == "SubgraphInput" ? "InputDescription" : "OutputDescription", "Description" );
+				JsonUtils.UpdatePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
 
 				newParameterArray.Add( newParameterObj );
 			}
