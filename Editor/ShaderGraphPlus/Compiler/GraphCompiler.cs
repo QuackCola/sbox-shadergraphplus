@@ -493,7 +493,7 @@ public sealed partial class GraphCompiler
 	public string ResultSamplerOrDefault( NodeInput samplerInput, Sampler defaultSampler )
 	{
 		var resultSampler = Result( samplerInput );
-		return resultSampler.IsValid ? resultSampler.Code : ResultSampler( $"Sampler_{defaultSampler.GetHashCode():X8}", defaultSampler );
+		return resultSampler.IsValid && resultSampler.ResultType == ResultType.Sampler ? resultSampler.Code : ResultSampler( $"Sampler_{defaultSampler.GetHashCode():X8}", defaultSampler );
 	}
 
 	/// <summary>
