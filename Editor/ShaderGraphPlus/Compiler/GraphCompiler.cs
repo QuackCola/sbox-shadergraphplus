@@ -785,12 +785,9 @@ public sealed partial class GraphCompiler
 
 				if ( value == null )
 				{
-					subgraphNode.HasError = true;
-					subgraphNode.ErrorMessage = $"Missing internal input \'{resultInput.DisplayInfo.Name}\' in node \'{Subgraph.Path}\'";
+					NodeError( ref node, $"Missing internal input \'{resultInput.DisplayInfo.Name}\' in node \'{Subgraph.Path}\'" );
 
 					SGPLogger.Error( subgraphNode.ErrorMessage );
-
-					NodeErrors[subgraphNode] = [subgraphNode.ErrorMessage];
 
 					return default;
 				}
