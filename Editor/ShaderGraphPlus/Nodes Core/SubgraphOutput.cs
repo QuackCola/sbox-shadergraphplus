@@ -51,7 +51,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 	public string OutputName => GetParameter().Name;
 
 	[JsonIgnore, Hide, Browsable( false )]
-	public string OutputDescription => GetParameter().OutputDescription;
+	public string OutputDescription => GetParameter().Description;
 
 	[JsonIgnore, Hide, Browsable( false )]
 	public SubgraphPortType OutputType => GetParameter().OutputType;
@@ -147,7 +147,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 			{
 				Name = parameter.Name,
 				Fullname = type.FullName,
-				Description = parameter.OutputDescription,
+				Description = parameter.Description,
 			}
 		};
 

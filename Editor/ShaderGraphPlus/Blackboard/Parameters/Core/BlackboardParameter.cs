@@ -31,15 +31,11 @@ public interface IRangedBlackboardMaterialParameter : IBlackboardParameter
 
 public interface IBlackboardSubgraphParameter : IBlackboardParameter
 {
+	string Description { get; set; }
 }
 
 public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParameter
 {
-	/// <summary>
-	/// Description of what this input does
-	/// </summary>
-	string InputDescription { get; set; }
-
 	/// <summary>
 	/// Whether this input is required (must have a connection in order to compile)
 	/// </summary>
@@ -56,11 +52,6 @@ public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParamete
 public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParameter
 {
 	bool IsValid { get; }
-
-	/// <summary>
-	/// Description of what this output does
-	/// </summary>
-	string OutputDescription { get; set; }
 
 	SubgraphOutputPreviewType Preview { get; set; }
 
@@ -454,8 +445,9 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 	/// <summary>
 	/// Description of what this input does
 	/// </summary>
+	[Title( "Input Description" )]
 	[TextArea]
-	public string InputDescription { get; set; } = "";
+	public string Description { get; set; } = "";
 
 	[InlineEditor( Label = false ), Group( "Value" )]
 	public virtual T Value { get; set; }
@@ -502,8 +494,9 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 	/// <summary>
 	/// Description of what this output does
 	/// </summary>
+	[Title( "Output Description" )]
 	[TextArea]
-	public string OutputDescription { get; set; } = "";
+	public string Description { get; set; } = "";
 
 	/// <summary>
 	/// The order of this output port

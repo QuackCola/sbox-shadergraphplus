@@ -163,12 +163,11 @@ public partial class ShaderGraphPlus
 				};
 
 				parameter.Name = outputName;
-				parameter.OutputDescription = outputDescription;
 				parameter.Preview = previewType;
 				parameter.PortOrder = portOrder;
 
 				var parameterType = parameter.GetType();
-				var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name } };
+				var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name }, { "OutputDescription", outputDescription } };
 
 				SerializeObject( parameter, parameterObject, SerializerOptions() );
 

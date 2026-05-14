@@ -34,13 +34,9 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 
 		var usrDesc = DisplayInfo.Description;
 
-		if ( Value is IBlackboardSubgraphInputParameter inputParameter )
+		if ( Value is IBlackboardSubgraphParameter subgraphParameter )
 		{
-			usrDesc = inputParameter.InputDescription;
-		}
-		else if ( Value is IBlackboardSubgraphOutputParameter outputParameter )
-		{
-			usrDesc = outputParameter.OutputDescription;
+			usrDesc = subgraphParameter.Description;
 		}
 
 		sb.AppendLine( $"<br />" );

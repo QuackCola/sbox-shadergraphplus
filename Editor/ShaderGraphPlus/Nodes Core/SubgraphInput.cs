@@ -80,7 +80,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 	/// Description of what this input does
 	/// </summary>
 	[Hide, JsonIgnore]
-	public string InputDescription => GetParameter().InputDescription;
+	public string InputDescription => GetParameter().Description;
 
 	/// <summary>
 	/// The type of the input parameter
