@@ -5,25 +5,25 @@ namespace ShaderGraphPlus;
 
 public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 {
-	private DisplayInfo DisplayInfo => Value.DisplayInfo;
-
 	public BlackboardParameterNode( BlackboardParameter p ) : base( p )
 	{
 		Height = Theme.RowHeight;
 	}
 
-	public override bool HasChildren => false;
+	private DisplayInfo DisplayInfo => Value.DisplayInfo;
 
-	///<summary>
-	///Called when a blackboard parameter is deleated.
-	///</summary>
-	public Action<BlackboardParameter> OnParameterDeleted { get; set; }
+	public override bool HasChildren => false;
 
 	public override string Name
 	{
 		get => Value.Name;
 		set => Value.Name = value;
 	}
+
+	///<summary>
+	///Called when a blackboard parameter is deleated.
+	///</summary>
+	public Action<BlackboardParameter> OnParameterDeleted { get; set; }
 
 	public override string GetTooltip()
 	{
