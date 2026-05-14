@@ -81,8 +81,8 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 			typeColor = blackboardConfig.Color;
 		}
 
-
 		Paint.ClearPen();
+
 		if ( selected )
 		{
 			Paint.SetBrush( Theme.Blue.WithAlpha( 0.1f ) );
@@ -133,7 +133,6 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 		Paint.SetPen( Theme.TextControl.WithAlpha( textAlpha * 1.0f ) );
 		Paint.DrawText( nameRect.Grow( 0f, 0f, 400, 0f ), Value.Name, TextFlag.LeftCenter | TextFlag.SingleLine );
 	}
-
 
 	public override bool OnDragStart()
 	{
