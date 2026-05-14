@@ -60,7 +60,7 @@ public class PreviewSettings
 public partial class ShaderGraphPlus : INodeGraph
 {
 	[Hide]
-	public int Version => 8;
+	public int Version => 9;
 
 	[Hide, JsonIgnore]
 	public IEnumerable<BaseNodePlus> Nodes => _nodes.Values;
