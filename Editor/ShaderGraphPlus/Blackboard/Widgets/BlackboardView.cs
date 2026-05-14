@@ -172,13 +172,13 @@ public class BlackboardView : Widget
 
 			if ( !_graph.IsSubgraph )
 			{
-				var materialParametersMenu = contextManu.FindOrCreateMenu( "Parameters" );
+				var materialParametersMenu = contextManu.FindOrCreateMenu( "Parameter" );
 				materialParametersMenu.Icon = "edit_attributes";
 
-				var attributesMenu = contextManu.FindOrCreateMenu( "Attributes" );
+				var attributesMenu = contextManu.FindOrCreateMenu( "Attribute" );
 				attributesMenu.Icon = "edit_attributes";
 
-				var materialCombosMenu = contextManu.FindOrCreateMenu( "Combos" );
+				var materialCombosMenu = contextManu.FindOrCreateMenu( "Combo" );
 				materialCombosMenu.Icon = "alt_route";
 
 				if ( targetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) || targetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) )

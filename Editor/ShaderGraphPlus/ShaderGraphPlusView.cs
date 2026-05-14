@@ -225,7 +225,7 @@ public class ShaderGraphPlusView : GraphView
 
 				var newMaterialParameterMenu = createParameterMenu.AddMenu( $"Material", "edit_attributes" );
 				var newAttributeMenu = createParameterMenu.AddMenu( $"Attribute", "edit_attributes" );
-				var newComboMenu = createParameterMenu.AddMenu( $"Shader Combo", "alt_route" );
+				var newComboMenu = createParameterMenu.AddMenu( $"Combo", "alt_route" );
 
 				foreach ( var classType in BlackboardParameter.GetRelevantParameters( AvailableParameters, false ).OrderBy( x =>
 						x.Type.GetAttribute<OrderAttribute>().Value ) )
