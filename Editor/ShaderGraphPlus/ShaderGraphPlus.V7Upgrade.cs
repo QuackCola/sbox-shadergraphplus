@@ -101,75 +101,34 @@ public partial class ShaderGraphPlus
 				JsonUtils.GetPropertyValue<SubgraphOutputPreviewType>( updatedNodeObject, "Preview", SerializerOptions(), SubgraphOutputPreviewType.None, out var previewType );
 				JsonUtils.GetPropertyValue<int>( updatedNodeObject, "PortOrder", SerializerOptions(), 0, out var portOrder );
 
-				IBlackboardSubgraphOutputParameter parameter = outputType switch
+				string parameterTypeName = outputType switch
 				{
-					SubgraphPortType.Bool => new BoolSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Int => new IntSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Float => new FloatSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Vector2 => new Float2SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Vector3 => new Float3SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Vector4 => new Float4SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Color => new ColorSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Float2x2 => new Float2x2SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Float3x3 => new Float3x3SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Float4x4 => new Float4x4SubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Gradient => new GradientSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.SamplerState => new SamplerStateSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.Texture2DObject => new Texture2DSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
-					SubgraphPortType.TextureCubeObject => new TextureCubeSubgraphOutputParameter()
-					{
-						Identifier = parameterIdentifier
-					},
+					SubgraphPortType.Bool => "BoolSubgraphOutputParameter",
+					SubgraphPortType.Int => "IntSubgraphOutputParameter",
+					SubgraphPortType.Float => "FloatSubgraphOutputParameter",
+					SubgraphPortType.Vector2 => "Float2SubgraphOutputParameter",
+					SubgraphPortType.Vector3 => "Float3SubgraphOutputParameter",
+					SubgraphPortType.Vector4 => "Float4SubgraphOutputParameter",
+					SubgraphPortType.Color => "ColorSubgraphOutputParameter",
+					SubgraphPortType.Float2x2 => "Float2x2SubgraphOutputParameter",
+					SubgraphPortType.Float3x3 => "Float3x3SubgraphOutputParameter",
+					SubgraphPortType.Float4x4 => "Float4x4SubgraphOutputParameter",
+					SubgraphPortType.Gradient => "GradientSubgraphOutputParameter",
+					SubgraphPortType.SamplerState => "SamplerStateSubgraphOutputParameter",
+					SubgraphPortType.Texture2DObject => "Texture2DSubgraphOutputParameter",
+					SubgraphPortType.TextureCubeObject => "TextureCubeSubgraphOutputParameter",
 					_ => throw new NotImplementedException( $"Unknown OutputType \'{outputType}\'" ),
 				};
 
-				parameter.Name = outputName;
-				parameter.Preview = previewType;
-				parameter.PortOrder = portOrder;
-
-				var parameterType = parameter.GetType();
-				var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name }, { "OutputDescription", outputDescription } };
-
-				SerializeObject( parameter, parameterObject, SerializerOptions() );
+				var parameterObject = new JsonObject
+				{ 
+					{ JsonKeys.Class, JsonSerializer.SerializeToNode( parameterTypeName, SerializerOptions() ) },
+					{ "Identifier", JsonSerializer.SerializeToNode( parameterIdentifier, SerializerOptions() ) },
+					{ "Name", JsonSerializer.SerializeToNode( outputName, SerializerOptions() ) },
+					{ "OutputDescription", JsonSerializer.SerializeToNode( outputDescription, SerializerOptions() ) },
+					{ "PortOrder", JsonSerializer.SerializeToNode( portOrder, SerializerOptions() ) },
+					{ "Preview", JsonSerializer.SerializeToNode( previewType, SerializerOptions() ) },
+				};
 
 				newParameterArray.Add( parameterObject );
 
