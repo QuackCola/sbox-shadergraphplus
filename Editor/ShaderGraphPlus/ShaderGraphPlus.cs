@@ -35,6 +35,16 @@ public enum ShaderDomain
 	PostProcess,
 }
 
+public enum RenderFace
+{
+	[Icon( "visibility" )]
+	Front,
+	[Icon( "visibility_off" )]
+	Back,
+	[Icon( "visibility_off" )]
+	Both,
+}
+
 public class PreviewSettings
 {
 	public ViewMode ViewMode { get; set; } = ViewMode.Perspective;
@@ -104,6 +114,9 @@ public partial class ShaderGraphPlus : INodeGraph
 
 	[ShowIf( nameof( ShowShadingModel ), true )]
 	public ShadingModel ShadingModel { get; set; }
+
+	[ShowIf( nameof( ShowShadingModel ), true )]
+	public RenderFace RenderFace { get; set; }
 
 	[Hide] private bool ShowShadingModel => Domain != ShaderDomain.PostProcess;
 
