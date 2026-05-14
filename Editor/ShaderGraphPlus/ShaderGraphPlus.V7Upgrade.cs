@@ -68,6 +68,10 @@ public partial class ShaderGraphPlus
 				if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
 					continue;
 
+				var typeName = classValue.GetValue<string>();
+				var typeDesc = EditorTypeLibrary.GetType<BlackboardParameter>( typeName );
+				var type = new ClassBlackboardParameterType( typeDesc );
+
 				newParameterArray.Add( jsonNode.DeepClone() );
 			}
 		}
@@ -83,8 +87,9 @@ public partial class ShaderGraphPlus
 			if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
 				continue;
 
-			var nodeElement = JsonSerializer.Deserialize<JsonElement>( jsonNode.AsObject().ToJsonString() );
 			var typeName = classValue.GetValue<string>();
+			var typeDesc = EditorTypeLibrary.GetType<BaseNodePlus>( typeName );
+			var type = new ClassNodeType( typeDesc );
 
 			if ( typeName == "SubgraphOutput" )
 			{

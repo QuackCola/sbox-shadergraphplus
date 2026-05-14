@@ -27,8 +27,9 @@ public partial class ShaderGraphPlus
 			if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
 				continue;
 
-			var nodeElement = JsonSerializer.Deserialize<JsonElement>( jsonNode.AsObject().ToJsonString() );
 			var typeName = classValue.GetValue<string>();
+			var typeDesc = EditorTypeLibrary.GetType<BaseNodePlus>( typeName );
+			var type = new ClassNodeType( typeDesc );
 
 			if ( typeName == "CustomFunctionNode" )
 			{
@@ -36,9 +37,9 @@ public partial class ShaderGraphPlus
 
 				if ( updatedNodeObject.ContainsKey( "Type" ) )
 				{
-					var type = updatedNodeObject["Type"].Deserialize<string>( SerializerOptions() );
+					var customFunctionType = updatedNodeObject["Type"].Deserialize<string>( SerializerOptions() );
 
-					if ( type == "Inline" )
+					if ( customFunctionType == "Inline" )
 					{
 						updatedNodeObject.Remove( "Type" );
 						updatedNodeObject["Mode"] = "Generate";
@@ -49,9 +50,9 @@ public partial class ShaderGraphPlus
 					updatedNodeObject["Mode"] = "Generate";
 				}
 
-				CopyToNewKey( updatedNodeObject, "Body", "Code" );
-				CopyToNewKey( updatedNodeObject, "ExpressionInputs", "FunctionInputs" );
-				CopyToNewKey( updatedNodeObject, "ExpressionOutputs", "FunctionOutputs" );
+				JsonUtils.UpdatePropertyKey( updatedNodeObject, "Body", "Code" );
+				JsonUtils.UpdatePropertyKey( updatedNodeObject, "ExpressionInputs", "FunctionInputs" );
+				JsonUtils.UpdatePropertyKey( updatedNodeObject, "ExpressionOutputs", "FunctionOutputs" );
 
 				if ( updatedNodeObject.ContainsKey( "PixelStageOnly" ) )
 				{
