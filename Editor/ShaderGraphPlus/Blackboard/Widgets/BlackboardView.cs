@@ -570,7 +570,7 @@ file class BlackboardParameterNode : TreeNode<BlackboardParameter>
 		return tooltip;
 	}
 
-	public override bool CanEdit => true;
+	public override bool CanEdit => false;
 
 	public override int ValueHash
 	{
