@@ -9,6 +9,7 @@
   "AddToNodeLibrary": false,
   "BlendMode": "Opaque",
   "ShadingModel": "UnLit",
+  "RenderFace": "Front",
   "Domain": "Surface",
   "Metadata": {
     "ProjectTemplate": {
@@ -39,5 +40,5 @@
     }
   ],
   "parameters": [],
-  "__version": 7
+  "__version": 8
 }

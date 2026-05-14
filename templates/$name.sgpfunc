@@ -9,6 +9,7 @@
   "AddToNodeLibrary": false,
   "BlendMode": "Opaque",
   "ShadingModel": "Lit",
+  "RenderFace": "Front",
   "Domain": "Surface",
   "Metadata": {},
   "PreviewSettings": {
@@ -39,5 +40,5 @@
       "Identifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc"
     }
   ],
-  "__version": 7
+  "__version": 8
 }
