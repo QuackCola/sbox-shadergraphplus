@@ -126,7 +126,7 @@ public partial class ShaderGraphPlus
 				};
 
 				var parameterObject = new JsonObject
-				{ 
+				{
 					{ JsonKeys.Class, JsonSerializer.SerializeToNode( parameterTypeName, SerializerOptions() ) },
 					{ "Identifier", JsonSerializer.SerializeToNode( parameterIdentifier, SerializerOptions() ) },
 					{ "Name", JsonSerializer.SerializeToNode( outputName, SerializerOptions() ) },
