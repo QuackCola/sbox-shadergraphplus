@@ -10,11 +10,11 @@ public interface IBlackboardParameter
 
 	string Name { get; set; }
 
-	object GetValue();
+	public object GetValue();
 
-	void SetValue( object value );
+	public void SetValue( object value );
 
-	IGraphNode ToNode();
+	public IGraphNode ToNode();
 }
 
 public interface IBlackboardMaterialParameter : IBlackboardParameter
