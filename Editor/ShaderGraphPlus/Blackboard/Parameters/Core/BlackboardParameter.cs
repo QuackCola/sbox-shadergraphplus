@@ -54,13 +54,6 @@ public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParamet
 	bool CannotPreviewOutputType { get; }
 }
 
-public interface IBlackboardParameterType
-{
-	public TypeDescription Type { get; }
-
-	IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" );
-}
-
 public abstract class BlackboardParameter : IBlackboardParameter, IValid
 {
 	[Hide, Browsable( false )]
