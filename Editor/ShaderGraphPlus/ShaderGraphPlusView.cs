@@ -601,7 +601,7 @@ public class ShaderGraphPlusView : GraphView
 
 	private BaseNodePlus CreateNewParameterNode( IBlackboardParameter parameter, Vector2 position )
 	{
-		var node = BlackboardParameter.InitializeParameterNode( parameter );
+		var node = parameter.ToNode() as BaseNodePlus;
 		node.Graph = Graph;
 		node.Position = position.SnapToGrid( GridSize );
 

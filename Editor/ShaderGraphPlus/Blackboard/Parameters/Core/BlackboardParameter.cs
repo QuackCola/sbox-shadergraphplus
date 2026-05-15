@@ -1,6 +1,4 @@
-﻿using ShaderGraphPlus.Nodes;
-
-namespace ShaderGraphPlus;
+﻿namespace ShaderGraphPlus;
 
 public record struct BlackboardConfig( string Name, Color Color );
 
@@ -15,6 +13,8 @@ public interface IBlackboardParameter
 	object GetValue();
 
 	void SetValue( object value );
+
+	IGraphNode ToNode();
 }
 
 public interface IBlackboardMaterialParameter : IBlackboardParameter
@@ -154,6 +154,8 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 		return true;
 	}
 
+	public abstract IGraphNode ToNode();
+
 	public static IEnumerable<IBlackboardParameterType> GetRelevantParameters( Dictionary<string, IBlackboardParameterType> availableParameters, bool isSubgraph )
 	{
 		return availableParameters.Values.Where( x =>
@@ -211,193 +213,6 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 
 			return true;
 		} );
-	}
-
-	public static BaseNodePlus InitializeParameterNode( IBlackboardParameter parameter )
-	{
-		return parameter switch
-		{
-			// Material Parameters
-			BoolParameter => new BoolParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			IntParameter => new IntParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			FloatParameter => new FloatParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float2Parameter => new Float2ParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float3Parameter => new Float3ParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float4Parameter => new Float4ParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			ColorParameter => new ColorParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Texture2DParameter => new Texture2DParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			TextureCubeParameter => new TextureCubeParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			ShaderFeatureBooleanParameter => new BooleanFeatureSwitchNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			ShaderFeatureEnumParameter => new EnumFeatureSwitchNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			SamplerStateParameter => new SamplerStateParameterNode()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-
-			// Subgraph Inputs
-			BoolSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = false,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			IntSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = 0,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			FloatSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = 0.0f,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float2SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = Vector2.Zero,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float3SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = Vector3.Zero,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float4SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = Vector4.Zero,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			ColorSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = Color.White,
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float2x2SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new Float2x2(),
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float3x3SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new Float3x3(),
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float4x4SubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new Float4x4(),
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Texture2DSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new TextureInput() { Type = TextureType.Tex2D },
-				ParameterIdentifier = parameter.Identifier,
-			},
-			TextureCubeSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new TextureInput() { Type = TextureType.TexCube },
-				ParameterIdentifier = parameter.Identifier,
-			},
-			SamplerStateSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new Sampler(),
-				ParameterIdentifier = parameter.Identifier,
-			},
-			GradientSubgraphInputParameter => new SubgraphInput()
-			{
-				DefaultValue = new Gradient(),
-				ParameterIdentifier = parameter.Identifier,
-			},
-
-			// Subgraph Outputs
-			BoolSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			IntSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			FloatSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float2SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float3SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float4SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			ColorSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float2x2SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float3x3SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Float4x4SubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			Texture2DSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			TextureCubeSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			SamplerStateSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			GradientSubgraphOutputParameter => new SubgraphOutput()
-			{
-				ParameterIdentifier = parameter.Identifier,
-			},
-			_ => throw new NotImplementedException( $"Unknown parameter : {parameter.GetType()}" ),
-		};
 	}
 }
 
@@ -484,6 +299,14 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 
 		Value = (T)value;
 	}
+
+	public override IGraphNode ToNode()
+	{
+		return new SubgraphInput()
+		{
+			ParameterIdentifier = Identifier,
+		};
+	}
 }
 
 public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter, IBlackboardSubgraphOutputParameter
@@ -538,6 +361,14 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 
 	public override void SetValue( object value )
 	{
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new SubgraphOutput()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 

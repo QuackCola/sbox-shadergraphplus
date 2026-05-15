@@ -1,4 +1,5 @@
-﻿using static ShaderGraphPlus.ShaderGraphPlusGlobals;
+﻿using ShaderGraphPlus.Nodes;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -12,6 +13,14 @@ public sealed class BoolParameter : BlackboardMaterialParameter<bool, GenericPar
 	{
 		Value = false;
 		UI = new GenericParameterUI();
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new BoolParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -41,6 +50,14 @@ public sealed class IntParameter : BlackboardMaterialParameter<int, GenericParam
 	{
 		return Max;
 	}
+
+	public override IGraphNode ToNode()
+	{
+		return new IntParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
+	}
 }
 
 /// <summary>
@@ -68,6 +85,14 @@ public sealed class FloatParameter : BlackboardMaterialParameter<float, FloatPar
 	public object GetRangeMax()
 	{
 		return Max;
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new FloatParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -97,6 +122,14 @@ public sealed class Float2Parameter : BlackboardMaterialParameter<Vector2, Float
 	{
 		return Max;
 	}
+
+	public override IGraphNode ToNode()
+	{
+		return new Float2ParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
+	}
 }
 
 /// <summary>
@@ -124,6 +157,14 @@ public sealed class Float3Parameter : BlackboardMaterialParameter<Vector3, Float
 	public object GetRangeMax()
 	{
 		return Max;
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new Float3ParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -153,6 +194,14 @@ public sealed class Float4Parameter : BlackboardMaterialParameter<Vector4, Float
 	{
 		return Max;
 	}
+
+	public override IGraphNode ToNode()
+	{
+		return new Float4ParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
+	}
 }
 
 /// <summary>
@@ -165,6 +214,14 @@ public sealed class ColorParameter : BlackboardMaterialParameter<Color, GenericP
 	{
 		Value = Color.White;
 		UI = new GenericParameterUI();
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new ColorParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -184,6 +241,14 @@ public sealed class Texture2DParameter : BlackboardTextureMaterialParameter
 			DefaultColor = Color.White,
 		};
 	}
+
+	public override IGraphNode ToNode()
+	{
+		return new Texture2DParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
+	}
 }
 
 /// <summary>
@@ -200,6 +265,14 @@ public sealed class TextureCubeParameter : BlackboardTextureMaterialParameter
 			Type = TextureType.TexCube,
 			SrgbRead = true,
 			DefaultColor = Color.White,
+		};
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new TextureCubeParameterNode()
+		{
+			ParameterIdentifier = Identifier,
 		};
 	}
 }
@@ -231,6 +304,14 @@ public sealed class SamplerStateParameter : BlackboardParameter
 		}
 
 		Value = (Sampler)value;
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new SamplerStateParameterNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -275,6 +356,14 @@ public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackb
 	public override void SetValue( object value )
 	{
 		throw new NotImplementedException();
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new BooleanFeatureSwitchNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }
 
@@ -355,5 +444,13 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 		}
 
 		return !issues.Any();
+	}
+
+	public override IGraphNode ToNode()
+	{
+		return new EnumFeatureSwitchNode()
+		{
+			ParameterIdentifier = Identifier,
+		};
 	}
 }

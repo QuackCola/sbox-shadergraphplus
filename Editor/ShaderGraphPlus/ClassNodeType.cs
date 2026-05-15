@@ -169,7 +169,7 @@ public sealed class ParameterNodeType : ClassNodeType
 
 			sg.AddParameter( Parameter );
 
-			var node = BlackboardParameter.InitializeParameterNode( Parameter );
+			var node = Parameter.ToNode() as BaseNodePlus;
 			node.Graph = sg;
 
 			OnNodeCreated?.Invoke();
@@ -178,7 +178,7 @@ public sealed class ParameterNodeType : ClassNodeType
 		}
 		else
 		{
-			var node = BlackboardParameter.InitializeParameterNode( Parameter );
+			var node = Parameter.ToNode() as BaseNodePlus;
 			node.Graph = sg;
 			return node;
 		}
