@@ -32,15 +32,18 @@ public class BlackboardParameterNode : TreeNode<BlackboardParameter>
 
 		sb.AppendLine( $"<h3>{Name}</h3>" );
 
-		var usrDesc = DisplayInfo.Description;
+		var usrDesc = "";
 
 		if ( Value is IBlackboardSubgraphParameter subgraphParameter )
 		{
 			usrDesc = subgraphParameter.Description;
 		}
 
-		sb.AppendLine( $"<br />" );
-		sb.AppendLine( $"<i>{usrDesc}</i>" );
+		if ( !string.IsNullOrWhiteSpace( usrDesc ) )
+		{
+			sb.AppendLine( $"<br />" );
+			sb.AppendLine( $"<i>{usrDesc}</i>" );
+		}
 
 		return sb.ToString();
 	}
