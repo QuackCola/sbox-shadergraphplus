@@ -20,13 +20,13 @@ public interface IBlackboardParameter
 public interface IBlackboardMaterialParameter : IBlackboardParameter
 {
 	bool IsAttribute { get; set; }
-	IParameterUI GetParameterUI();
+	public IParameterUI GetParameterUI();
 }
 
 public interface IRangedBlackboardMaterialParameter : IBlackboardParameter
 {
-	object GetRangeMin();
-	object GetRangeMax();
+	public object GetRangeMin();
+	public object GetRangeMax();
 }
 
 public interface IBlackboardSubgraphParameter : IBlackboardParameter
