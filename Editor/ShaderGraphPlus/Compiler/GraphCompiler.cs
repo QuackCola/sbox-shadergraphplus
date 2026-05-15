@@ -758,7 +758,7 @@ public sealed partial class GraphCompiler
 			{
 				//value = GetDefaultValue( subgraphNode, input.Output, resultInput.Type );
 
-				switch ( resultNode.OutputType )
+				switch ( resultNode.PortType )
 				{
 					case SubgraphPortType.Bool:
 						value = false;
@@ -984,7 +984,7 @@ public sealed partial class GraphCompiler
 				case Type t when t == typeof( Sampler ):
 					return new Sampler();
 				case Type t when t == typeof( Texture ):
-					var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.InputType;
+					var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.PortType;
 
 					return new TextureInput() { Type = (inputType == SubgraphPortType.Texture2DObject ? TextureType.Tex2D : TextureType.TexCube) };
 			}
@@ -1039,7 +1039,7 @@ public sealed partial class GraphCompiler
 			}
 			else if ( type == typeof( Texture ) )
 			{
-				var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.InputType;
+				var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.PortType;
 				var textureInput = JsonSerializer.Deserialize<TextureInput>( el, ShaderGraphPlus.SerializerOptions() );
 
 				value = textureInput with { Type = (inputType == SubgraphPortType.Texture2DObject ? TextureType.Tex2D : TextureType.TexCube) };
@@ -1271,7 +1271,7 @@ public sealed partial class GraphCompiler
 					Subgraph = lastSubgraph;
 					SubgraphNode = lastNode;
 
-					var inputNodeInputType = parentInput.Value.inputNode.InputType;
+					var inputNodeInputType = parentInput.Value.inputNode.PortType;
 					if ( inputNodeInputType == SubgraphPortType.Texture2DObject || inputNodeInputType == SubgraphPortType.TextureCubeObject )
 					{
 						var resultType = (inputNodeInputType == SubgraphPortType.Texture2DObject ? ResultType.Texture2D : ResultType.TextureCube);

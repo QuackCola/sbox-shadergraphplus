@@ -83,7 +83,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 
 		foreach ( var subgraphInput in subgraphInputs )
 		{
-			var type = subgraphInput.InputType switch
+			var type = subgraphInput.PortType switch
 			{
 				SubgraphPortType.Bool => typeof( bool ),
 				SubgraphPortType.Int => typeof( int ),
@@ -137,7 +137,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 
 		foreach ( var subgraphOutput in Subgraph.Nodes.OfType<SubgraphOutput>().OrderBy( x => x.PortOrder ) )
 		{
-			var outputType = subgraphOutput.OutputType switch
+			var outputType = subgraphOutput.PortType switch
 			{
 				SubgraphPortType.Bool => typeof( bool ),
 				SubgraphPortType.Int => typeof( int ),
@@ -152,7 +152,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				SubgraphPortType.Gradient => typeof( Gradient ),
 				SubgraphPortType.SamplerState => typeof( Sampler ),
 				SubgraphPortType.Texture2DObject => typeof( Texture ),
-				_ => throw new Exception( $"Unknown PortType \"{subgraphOutput.OutputType}\"" )
+				_ => throw new Exception( $"Unknown PortType \"{subgraphOutput.PortType}\"" )
 			};
 
 			if ( outputType is null ) continue;
@@ -283,7 +283,7 @@ internal class SubgraphNodeControlWidget : ControlWidget
 		{
 			var name = inputRef.Key.Identifier;
 			var type = inputRef.Value.inputNodeValueType;
-			var inputType = inputRef.Value.inputNode.InputType;
+			var inputType = inputRef.Value.inputNode.PortType;
 			var getter = () =>
 			{
 				if ( Node.DefaultValues.ContainsKey( name ) )

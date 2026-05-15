@@ -54,7 +54,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 	public string OutputDescription => GetParameter().Description;
 
 	[JsonIgnore, Hide, Browsable( false )]
-	public SubgraphPortType OutputType => GetParameter().OutputType;
+	public SubgraphPortType PortType => GetParameter().PortType;
 
 	[JsonIgnore, Hide, Browsable( false )]
 	public SubgraphOutputPreviewType Preview => GetParameter().Preview;
@@ -78,7 +78,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 	public override void OnFrame()
 	{
 		var hashCodeInput = 0;
-		hashCodeInput = System.HashCode.Combine( ParameterIdentifier, OutputName, OutputDescription, OutputType, PortOrder );
+		hashCodeInput = System.HashCode.Combine( ParameterIdentifier, OutputName, OutputDescription, PortType, PortOrder );
 
 		if ( hashCodeInput != _lastHashCode )
 		{
@@ -119,7 +119,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 		if ( !parameter.IsValid )
 			return;
 
-		var type = OutputType switch
+		var type = PortType switch
 		{
 			SubgraphPortType.Bool => typeof( bool ),
 			SubgraphPortType.Int => typeof( int ),
@@ -135,7 +135,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 			SubgraphPortType.SamplerState => typeof( Sampler ),
 			SubgraphPortType.Texture2DObject => typeof( Texture ),
 			SubgraphPortType.TextureCubeObject => typeof( Texture ),
-			_ => throw new Exception( $"Unknown PortType \"{OutputType}\"" )
+			_ => throw new Exception( $"Unknown PortType \"{PortType}\"" )
 		};
 
 		var info = new PlugInfo()

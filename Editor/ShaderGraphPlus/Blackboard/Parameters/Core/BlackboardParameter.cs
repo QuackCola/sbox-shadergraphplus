@@ -33,6 +33,8 @@ public interface IBlackboardSubgraphParameter : IBlackboardParameter
 {
 	string Description { get; set; }
 	int PortOrder { get; set; }
+
+	abstract SubgraphPortType PortType { get; }
 }
 
 public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParameter
@@ -41,8 +43,6 @@ public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParamete
 	/// Whether this input is required (must have a connection in order to compile)
 	/// </summary>
 	bool IsRequired { get; set; }
-
-	abstract SubgraphPortType InputType { get; }
 }
 
 public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParameter
@@ -50,8 +50,6 @@ public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParamet
 	bool IsValid { get; }
 
 	SubgraphOutputPreviewType Preview { get; set; }
-
-	abstract SubgraphPortType OutputType { get; }
 
 	bool CannotPreviewOutputType { get; }
 }
@@ -270,7 +268,7 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 	public int PortOrder { get; set; } = 0;
 
 	[Hide, JsonIgnore]
-	public abstract SubgraphPortType InputType { get; }
+	public abstract SubgraphPortType PortType { get; }
 
 	public BlackboardSubgraphInputParameter() : base()
 	{
@@ -319,7 +317,7 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 	public int PortOrder { get; set; } = 0;
 
 	[Hide, JsonIgnore]
-	public abstract SubgraphPortType OutputType { get; }
+	public abstract SubgraphPortType PortType { get; }
 
 	[HideIf( nameof( CannotPreviewOutputType ), true )]
 	public SubgraphOutputPreviewType Preview { get; set; }
@@ -329,14 +327,14 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 	{
 		get
 		{
-			return (OutputType == SubgraphPortType.Bool ||
-				OutputType == SubgraphPortType.Float2x2 ||
-				OutputType == SubgraphPortType.Float3x3 ||
-				OutputType == SubgraphPortType.Float4x4 ||
-				OutputType == SubgraphPortType.Gradient ||
-				OutputType == SubgraphPortType.Texture2DObject ||
-				OutputType == SubgraphPortType.TextureCubeObject ||
-				OutputType == SubgraphPortType.SamplerState);
+			return (PortType == SubgraphPortType.Bool ||
+				PortType == SubgraphPortType.Float2x2 ||
+				PortType == SubgraphPortType.Float3x3 ||
+				PortType == SubgraphPortType.Float4x4 ||
+				PortType == SubgraphPortType.Gradient ||
+				PortType == SubgraphPortType.Texture2DObject ||
+				PortType == SubgraphPortType.TextureCubeObject ||
+				PortType == SubgraphPortType.SamplerState);
 		}
 	}
 

@@ -46,7 +46,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 	[Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
 	$"Subgraph Input" :
-	$"{Name} ({InputType})";
+	$"{Name} ({PortType})";
 
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.SubgraphNode;
@@ -86,7 +86,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 	/// The type of the input parameter
 	/// </summary>
 	[Hide, JsonIgnore]
-	public SubgraphPortType InputType => GetParameter().InputType;
+	public SubgraphPortType PortType => GetParameter().PortType;
 
 	//[Editor( "subgraphInputDefaultValue" )]
 	[Hide, JsonIgnore]
@@ -149,7 +149,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 
 		// Use the appropriate default value based on input type
 		var outputValue = DefaultValue;
-		var resultType = InputType switch
+		var resultType = PortType switch
 		{
 			SubgraphPortType.Bool => ResultType.Bool,
 			SubgraphPortType.Int => ResultType.Int,
@@ -165,18 +165,18 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 			SubgraphPortType.SamplerState => ResultType.Sampler,
 			SubgraphPortType.Texture2DObject => ResultType.Texture2D,
 			SubgraphPortType.TextureCubeObject => ResultType.TextureCube,
-			_ => throw new NotImplementedException( $"Unknown InputType \"{InputType}\"" ),
+			_ => throw new NotImplementedException( $"Unknown InputType \"{PortType}\"" ),
 		};
 
 		// If we're in a subgraph context, just return the value directly
 		if ( compiler.Graph.IsSubgraph )
 		{
-			if ( InputType == SubgraphPortType.Texture2DObject || InputType == SubgraphPortType.TextureCubeObject )
+			if ( PortType == SubgraphPortType.Texture2DObject || PortType == SubgraphPortType.TextureCubeObject )
 			{
-				return new NodeResult( resultType, ProcessTexture2D( compiler, (TextureInput)outputValue, InputType == SubgraphPortType.Texture2DObject ), true );
+				return new NodeResult( resultType, ProcessTexture2D( compiler, (TextureInput)outputValue, PortType == SubgraphPortType.Texture2DObject ), true );
 			}
 
-			if ( InputType == SubgraphPortType.Gradient )
+			if ( PortType == SubgraphPortType.Gradient )
 			{
 				var gradientValue = (Gradient)outputValue;
 
@@ -197,12 +197,12 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IErroringNod
 		}
 		else
 		{
-			if ( InputType == SubgraphPortType.Texture2DObject || InputType == SubgraphPortType.TextureCubeObject )
+			if ( PortType == SubgraphPortType.Texture2DObject || PortType == SubgraphPortType.TextureCubeObject )
 			{
-				return new NodeResult( resultType, ProcessTexture2D( compiler, (TextureInput)outputValue, InputType == SubgraphPortType.Texture2DObject ), true );
+				return new NodeResult( resultType, ProcessTexture2D( compiler, (TextureInput)outputValue, PortType == SubgraphPortType.Texture2DObject ), true );
 			}
 
-			if ( InputType == SubgraphPortType.Gradient )
+			if ( PortType == SubgraphPortType.Gradient )
 			{
 				var gradientValue = (Gradient)outputValue;
 

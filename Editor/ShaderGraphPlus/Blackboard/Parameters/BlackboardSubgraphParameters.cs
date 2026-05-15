@@ -8,7 +8,7 @@
 public sealed class BoolSubgraphInputParameter : BlackboardSubgraphInputParameter<bool>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Bool;
+	public override SubgraphPortType PortType => SubgraphPortType.Bool;
 
 	public BoolSubgraphInputParameter() : base()
 	{
@@ -24,7 +24,7 @@ public sealed class BoolSubgraphInputParameter : BlackboardSubgraphInputParamete
 public sealed class BoolSubgraphOutputParameter : BlackboardSubgraphOutputParameter<bool>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Bool;
+	public override SubgraphPortType PortType => SubgraphPortType.Bool;
 
 	public BoolSubgraphOutputParameter() : base()
 	{
@@ -39,7 +39,7 @@ public sealed class BoolSubgraphOutputParameter : BlackboardSubgraphOutputParame
 public sealed class IntSubgraphInputParameter : BlackboardSubgraphInputParameter<int>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Int;
+	public override SubgraphPortType PortType => SubgraphPortType.Int;
 
 	[Group( "Range" )] public int Min { get; set; }
 	[Group( "Range" )] public int Max { get; set; }
@@ -60,7 +60,7 @@ public sealed class IntSubgraphInputParameter : BlackboardSubgraphInputParameter
 public sealed class IntSubgraphOutputParameter : BlackboardSubgraphOutputParameter<int>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Int;
+	public override SubgraphPortType PortType => SubgraphPortType.Int;
 
 	public IntSubgraphOutputParameter() : base()
 	{
@@ -75,7 +75,7 @@ public sealed class IntSubgraphOutputParameter : BlackboardSubgraphOutputParamet
 public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParameter<float>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Float;
+	public override SubgraphPortType PortType => SubgraphPortType.Float;
 
 	[Group( "Range" )] public float Min { get; set; }
 	[Group( "Range" )] public float Max { get; set; }
@@ -96,7 +96,7 @@ public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParamet
 public sealed class FloatSubgraphOutputParameter : BlackboardSubgraphOutputParameter<float>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Float;
+	public override SubgraphPortType PortType => SubgraphPortType.Float;
 
 	public FloatSubgraphOutputParameter() : base()
 	{
@@ -111,7 +111,7 @@ public sealed class FloatSubgraphOutputParameter : BlackboardSubgraphOutputParam
 public sealed class Float2SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector2>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Vector2;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector2;
 
 	[Group( "Range" )] public Vector2 Min { get; set; }
 	[Group( "Range" )] public Vector2 Max { get; set; }
@@ -132,7 +132,7 @@ public sealed class Float2SubgraphInputParameter : BlackboardSubgraphInputParame
 public sealed class Float2SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector2>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Vector2;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector2;
 
 	public Float2SubgraphOutputParameter() : base()
 	{
@@ -147,7 +147,7 @@ public sealed class Float2SubgraphOutputParameter : BlackboardSubgraphOutputPara
 public sealed class Float3SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector3>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Vector3;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector3;
 
 	[Group( "Range" )] public Vector3 Min { get; set; }
 	[Group( "Range" )] public Vector3 Max { get; set; }
@@ -168,7 +168,7 @@ public sealed class Float3SubgraphInputParameter : BlackboardSubgraphInputParame
 public sealed class Float3SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector3>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Vector3;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector3;
 
 	public Float3SubgraphOutputParameter() : base()
 	{
@@ -183,7 +183,7 @@ public sealed class Float3SubgraphOutputParameter : BlackboardSubgraphOutputPara
 public sealed class Float4SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector4>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Vector4;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector4;
 
 	[Group( "Range" )] public Vector4 Min { get; set; }
 	[Group( "Range" )] public Vector4 Max { get; set; }
@@ -204,7 +204,7 @@ public sealed class Float4SubgraphInputParameter : BlackboardSubgraphInputParame
 public sealed class Float4SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector4>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Vector4;
+	public override SubgraphPortType PortType => SubgraphPortType.Vector4;
 
 	public Float4SubgraphOutputParameter() : base()
 	{
@@ -219,7 +219,7 @@ public sealed class Float4SubgraphOutputParameter : BlackboardSubgraphOutputPara
 public sealed class ColorSubgraphInputParameter : BlackboardSubgraphInputParameter<Color>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Color;
+	public override SubgraphPortType PortType => SubgraphPortType.Color;
 
 	public ColorSubgraphInputParameter()
 	{
@@ -235,7 +235,7 @@ public sealed class ColorSubgraphInputParameter : BlackboardSubgraphInputParamet
 public sealed class ColorSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Color>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Color;
+	public override SubgraphPortType PortType => SubgraphPortType.Color;
 
 	public ColorSubgraphOutputParameter() : base()
 	{
@@ -250,7 +250,7 @@ public sealed class ColorSubgraphOutputParameter : BlackboardSubgraphOutputParam
 public sealed class Float2x2SubgraphInputParameter : BlackboardSubgraphInputParameter<Float2x2>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Float2x2;
+	public override SubgraphPortType PortType => SubgraphPortType.Float2x2;
 
 	public Float2x2SubgraphInputParameter() : base()
 	{
@@ -266,7 +266,7 @@ public sealed class Float2x2SubgraphInputParameter : BlackboardSubgraphInputPara
 public sealed class Float2x2SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float2x2>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Float2x2;
+	public override SubgraphPortType PortType => SubgraphPortType.Float2x2;
 
 	public Float2x2SubgraphOutputParameter() : base()
 	{
@@ -281,7 +281,7 @@ public sealed class Float2x2SubgraphOutputParameter : BlackboardSubgraphOutputPa
 public sealed class Float3x3SubgraphInputParameter : BlackboardSubgraphInputParameter<Float3x3>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Float3x3;
+	public override SubgraphPortType PortType => SubgraphPortType.Float3x3;
 
 	public Float3x3SubgraphInputParameter() : base()
 	{
@@ -297,7 +297,7 @@ public sealed class Float3x3SubgraphInputParameter : BlackboardSubgraphInputPara
 public sealed class Float3x3SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float3x3>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Float3x3;
+	public override SubgraphPortType PortType => SubgraphPortType.Float3x3;
 
 	public Float3x3SubgraphOutputParameter() : base()
 	{
@@ -312,7 +312,7 @@ public sealed class Float3x3SubgraphOutputParameter : BlackboardSubgraphOutputPa
 public sealed class Float4x4SubgraphInputParameter : BlackboardSubgraphInputParameter<Float4x4>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Float4x4;
+	public override SubgraphPortType PortType => SubgraphPortType.Float4x4;
 
 	public Float4x4SubgraphInputParameter() : base()
 	{
@@ -328,7 +328,7 @@ public sealed class Float4x4SubgraphInputParameter : BlackboardSubgraphInputPara
 public sealed class Float4x4SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float4x4>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Float4x4;
+	public override SubgraphPortType PortType => SubgraphPortType.Float4x4;
 
 	public Float4x4SubgraphOutputParameter() : base()
 	{
@@ -343,7 +343,7 @@ public sealed class Float4x4SubgraphOutputParameter : BlackboardSubgraphOutputPa
 public sealed class GradientSubgraphInputParameter : BlackboardSubgraphInputParameter<Gradient>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Gradient;
+	public override SubgraphPortType PortType => SubgraphPortType.Gradient;
 
 	public GradientSubgraphInputParameter() : base()
 	{
@@ -360,7 +360,7 @@ public sealed class GradientSubgraphInputParameter : BlackboardSubgraphInputPara
 public sealed class GradientSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Gradient>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Gradient;
+	public override SubgraphPortType PortType => SubgraphPortType.Gradient;
 
 	public GradientSubgraphOutputParameter() : base()
 	{
@@ -374,7 +374,7 @@ public sealed class GradientSubgraphOutputParameter : BlackboardSubgraphOutputPa
 public sealed class Texture2DSubgraphInputParameter : BlackboardSubgraphInputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.Texture2DObject;
+	public override SubgraphPortType PortType => SubgraphPortType.Texture2DObject;
 
 	[Hide, JsonIgnore]
 	public override bool IsRequired { get; set; } = true;
@@ -401,7 +401,7 @@ public sealed class Texture2DSubgraphInputParameter : BlackboardSubgraphInputPar
 public sealed class Texture2DSubgraphOutputParameter : BlackboardSubgraphOutputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.Texture2DObject;
+	public override SubgraphPortType PortType => SubgraphPortType.Texture2DObject;
 
 	public Texture2DSubgraphOutputParameter() : base()
 	{
@@ -415,7 +415,7 @@ public sealed class Texture2DSubgraphOutputParameter : BlackboardSubgraphOutputP
 public sealed class TextureCubeSubgraphInputParameter : BlackboardSubgraphInputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.TextureCubeObject;
+	public override SubgraphPortType PortType => SubgraphPortType.TextureCubeObject;
 
 	[Hide, JsonIgnore]
 	public override bool IsRequired { get; set; } = true;
@@ -441,7 +441,7 @@ public sealed class TextureCubeSubgraphInputParameter : BlackboardSubgraphInputP
 public sealed class TextureCubeSubgraphOutputParameter : BlackboardSubgraphOutputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.TextureCubeObject;
+	public override SubgraphPortType PortType => SubgraphPortType.TextureCubeObject;
 
 	public TextureCubeSubgraphOutputParameter() : base()
 	{
@@ -456,7 +456,7 @@ public sealed class TextureCubeSubgraphOutputParameter : BlackboardSubgraphOutpu
 public sealed class SamplerStateSubgraphInputParameter : BlackboardSubgraphInputParameter<Sampler>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType InputType => SubgraphPortType.SamplerState;
+	public override SubgraphPortType PortType => SubgraphPortType.SamplerState;
 
 	public SamplerStateSubgraphInputParameter() : base()
 	{
@@ -472,7 +472,7 @@ public sealed class SamplerStateSubgraphInputParameter : BlackboardSubgraphInput
 public sealed class SamplerStateSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Sampler>
 {
 	[Hide, JsonIgnore]
-	public override SubgraphPortType OutputType => SubgraphPortType.SamplerState;
+	public override SubgraphPortType PortType => SubgraphPortType.SamplerState;
 
 	public SamplerStateSubgraphOutputParameter() : base()
 	{
