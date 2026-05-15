@@ -32,6 +32,7 @@ public interface IRangedBlackboardMaterialParameter : IBlackboardParameter
 public interface IBlackboardSubgraphParameter : IBlackboardParameter
 {
 	string Description { get; set; }
+	int PortOrder { get; set; }
 }
 
 public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParameter
@@ -41,11 +42,6 @@ public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParamete
 	/// </summary>
 	bool IsRequired { get; set; }
 
-	/// <summary>
-	/// The order of this input port.
-	/// </summary>
-	int PortOrder { get; set; }
-
 	abstract SubgraphPortType InputType { get; }
 }
 
@@ -54,11 +50,6 @@ public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParamet
 	bool IsValid { get; }
 
 	SubgraphOutputPreviewType Preview { get; set; }
-
-	/// <summary>
-	/// The order of this output port.
-	/// </summary>
-	int PortOrder { get; set; }
 
 	abstract SubgraphPortType OutputType { get; }
 
