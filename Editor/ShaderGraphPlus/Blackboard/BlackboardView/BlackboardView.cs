@@ -327,7 +327,7 @@ public class BlackboardView : Widget
 	{
 		var parameterType = new ClassBlackboardParameterType( type );
 
-		// use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
+		// Use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
 		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) ||
 			 type.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) ||
 			 type.TargetType.IsAssignableTo( typeof( SamplerStateParameter ) )
