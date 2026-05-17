@@ -1,8 +1,6 @@
 ﻿using Editor;
-using Editor.ShaderGraph;
 using NodeEditorPlus;
 using ShaderGraphPlus.Nodes;
-using System.Collections.Immutable;
 
 namespace ShaderGraphPlus;
 
