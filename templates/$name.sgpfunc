@@ -34,11 +34,11 @@
     {
       "_class": "Float3SubgraphOutputParameter",
       "Name": "SubgraphOutput0",
-      "OutputDescription": "",
+      "Description": "",
       "PortOrder": 0,
       "Preview": "Albedo",
       "Identifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc"
     }
   ],
-  "__version": 8
+  "__version": 9
 }
