@@ -105,6 +105,23 @@ public class ShaderGraphPlusView : GraphView
 	{
 		var parameterType = new ClassBlackboardParameterType( type );
 
+		// use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( SamplerStateParameter ) )
+			)
+		{
+			parameterType = new MaterialParameterType( type );
+		}
+		else if ( type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
+		{
+			parameterType = new SubgraphParameterType( type );
+		}
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+		{
+			parameterType = new ShaderFeatureParameterType( type );
+		}
+
 		AvailableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
 
@@ -197,16 +214,7 @@ public class ShaderGraphPlusView : GraphView
 			{
 				using var undoScope = UndoScope( undoScopeName );
 
-				var baseName = baseParameterName;
-				var id = 0;
-				while ( Graph.HasParameterWithName( $"{baseName}{id}" ) )
-				{
-					id++;
-				}
-
 				var parameter = CreateNewParameter( classType );
-				parameter.Name = $"{baseName}{id}";
-
 				var node = CreateNewParameterNode( parameter, clickPos );
 
 				SelectNode( node );
@@ -426,14 +434,7 @@ public class ShaderGraphPlusView : GraphView
 
 					Graph.RemoveNode( baseNode );
 
-					var baseName = $"{(Graph.IsSubgraph ? "SubgraphInput" : "MaterialParameter")}";
-					var id = 0;
-					while ( Graph.HasParameterWithName( $"{baseName}{id}" ) )
-					{
-						id++;
-					}
-
-					lastNode = ConvertConstantNodeToParameter( constantNode, $"{baseName}{id}", selectedNode.Position, oldOutputConnections );
+					lastNode = ConvertConstantNodeToParameter( constantNode, selectedNode.Position, oldOutputConnections );
 				}
 
 				RebuildFromGraph();
@@ -480,14 +481,7 @@ public class ShaderGraphPlusView : GraphView
 
 						Graph.RemoveNode( baseNode );
 
-						var baseName = $"{(Graph.IsSubgraph ? "SubgraphInput" : "MaterialParameter")}";
-						var id = 0;
-						while ( Graph.HasParameterWithName( $"{baseName}{id}" ) )
-						{
-							id++;
-						}
-
-						var parameterNode = ConvertConstantNodeToParameter( constantNode, $"{baseName}{id}", item.Node.Position, oldOutputConnections );
+						var parameterNode = ConvertConstantNodeToParameter( constantNode, item.Node.Position, oldOutputConnections );
 
 						RebuildFromGraph();
 
@@ -522,7 +516,7 @@ public class ShaderGraphPlusView : GraphView
 		return oldConnections;
 	}
 
-	private BaseNodePlus ConvertConstantNodeToParameter( IConstantNode constantNode, string parameterName, Vector2 nodePosition, Dictionary<IPlugIn, IPlugOut> oldOutputConnections )
+	private BaseNodePlus ConvertConstantNodeToParameter( IConstantNode constantNode, Vector2 nodePosition, Dictionary<IPlugIn, IPlugOut> oldOutputConnections )
 	{
 		var parameterFullTypeName = "";
 
@@ -558,7 +552,6 @@ public class ShaderGraphPlusView : GraphView
 		if ( AvailableParameters.TryGetValue( parameterFullTypeName, out var parameterType ) )
 		{
 			var parameter = CreateNewParameter( parameterType );
-			parameter.Name = parameterName;
 			parameter.SetValue( constantNode.GetValue() );
 
 			var parameterNode = CreateNewParameterNode( parameter, nodePosition );
@@ -589,9 +582,9 @@ public class ShaderGraphPlusView : GraphView
 		throw new Exception( $"Unable to convert constant node \"{constantNode.GetType()}\" to {(Graph.IsSubgraph ? "subgraph input" : "material")} parameter" );
 	}
 
-	private IBlackboardParameter CreateNewParameter( IBlackboardParameterType type )
+	private IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "" )
 	{
-		return _blackboard.CreateNewParameter( type );
+		return _blackboard.CreateNewParameter( type, name );
 	}
 
 	private T CreatenNewParameter<T>( ShaderGraphPlus graph ) where T : IBlackboardParameter

@@ -7,6 +7,8 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 
 	public DisplayInfo DisplayInfo { get; protected set; }
 
+	protected virtual string DefaultBaseName => "Parameter";
+
 	public ClassBlackboardParameterType( TypeDescription type )
 	{
 		Type = type;
@@ -17,55 +19,73 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 			DisplayInfo = new DisplayInfo();
 	}
 
-	public virtual IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" )
+	private string CheckName( ShaderGraphPlus graph, string name )
 	{
-		var sg = graph as ShaderGraphPlus;
-
 		if ( string.IsNullOrWhiteSpace( name ) )
 		{
-			string baseName;
-			if ( Type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) )
-			{
-				baseName = "SubgraphInput";
-			}
-			else if ( Type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphOutputParameter ) ) )
-			{
-				baseName = "SubgraphOutput";
-			}
-			else if ( Type.TargetType == typeof( ShaderFeatureBooleanParameter ) || Type.TargetType == typeof( ShaderFeatureEnumParameter ) )
-			{
-				baseName = "ShaderFeature";
-			}
-			else
-			{
-				baseName = "MaterialParameter";
-			}
-
 			var id = 0;
-			while ( sg.HasParameterWithName( $"{baseName}{id}" ) )
+			while ( graph.HasParameterWithName( $"{DefaultBaseName}{id}" ) )
 			{
 				id++;
 			}
 
-			name = $"{baseName}{id}";
-		}
-
-		if ( EditorTypeLibrary.Create( Type.Name, Type.TargetType ) is BlackboardParameter parameter )
-		{
-			parameter.Name = name;
-			parameter.Graph = graph;
-
-			if ( parameter is ShaderFeatureEnumParameter shaderFeatureEnumParameter )
-			{
-				shaderFeatureEnumParameter.Options.Add( new ShaderFeatureEnumOption() { Name = "A" } );
-				shaderFeatureEnumParameter.Options.Add( new ShaderFeatureEnumOption() { Name = "B" } );
-			}
-
-			return parameter;
+			return $"{DefaultBaseName}{id}";
 		}
 		else
 		{
-			throw new Exception( $"Failed to create parameter instance of type \"{Type.Name}\"" );
+			return name;
 		}
+	}
+
+	public virtual IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" )
+	{
+		var sg = graph as ShaderGraphPlus;
+
+		var parameter = Type.Create<BlackboardParameter>();
+		parameter.Name = CheckName( sg, name );
+		parameter.Graph = sg;
+
+		return parameter;
+	}
+}
+
+public sealed class MaterialParameterType : ClassBlackboardParameterType
+{
+	protected override string DefaultBaseName => "MaterialParameter";
+
+	public MaterialParameterType( TypeDescription type ) : base( type )
+	{
+	}
+}
+
+public sealed class SubgraphParameterType : ClassBlackboardParameterType
+{
+	protected override string DefaultBaseName => Type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "SubgraphInput" : "SubgraphOutput";
+
+	public SubgraphParameterType( TypeDescription type ) : base( type )
+	{
+	}
+}
+
+public sealed class ShaderFeatureParameterType : ClassBlackboardParameterType
+{
+	protected override string DefaultBaseName => "ShaderFeature";
+
+	public ShaderFeatureParameterType( TypeDescription type ) : base( type )
+	{
+	}
+
+	public override IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" )
+	{
+		var sg = graph as ShaderGraphPlus;
+		var parameter = base.CreateParameter( graph );
+
+		if ( parameter is ShaderFeatureEnumParameter shaderFeatureEnum )
+		{
+			shaderFeatureEnum.Options.Add( new ShaderFeatureEnumOption() { Name = "A" } );
+			shaderFeatureEnum.Options.Add( new ShaderFeatureEnumOption() { Name = "B" } );
+		}
+
+		return parameter;
 	}
 }

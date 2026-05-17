@@ -142,7 +142,7 @@ public class BlackboardView : Widget
 		}
 	}
 
-	private void AddOption( ContextMenu contextMenu, Menu menu, ClassBlackboardParameterType parameterType, string icon, string description )
+	private void AddOption( ContextMenu contextMenu, Menu menu, IBlackboardParameterType parameterType, string icon, string description )
 	{
 		var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
 		{
@@ -327,15 +327,32 @@ public class BlackboardView : Widget
 	{
 		var parameterType = new ClassBlackboardParameterType( type );
 
+		// use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( SamplerStateParameter ) )
+			)
+		{
+			parameterType = new MaterialParameterType( type );
+		}
+		else if ( type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
+		{
+			parameterType = new SubgraphParameterType( type );
+		}
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+		{
+			parameterType = new ShaderFeatureParameterType( type );
+		}
+
 		_availableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
 
-	public IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, Action onCreated = null )
+	public IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "", Action onCreated = null )
 	{
 		if ( type == null )
 			return null;
 
-		var parameter = type.CreateParameter( Graph );
+		var parameter = type.CreateParameter( Graph, name );
 
 		if ( parameter == null )
 			return null;
