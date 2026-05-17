@@ -142,21 +142,21 @@ public class BlackboardView : Widget
 		}
 	}
 
-	private void AddOption( ContextMenu contextMenu, Menu menu, IBlackboardParameterType parameterType, string icon, string description )
-	{
-		var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
-		{
-			CreateNewParameter( parameterType );
-
-			contextMenu.Update();
-			contextMenu.Close();
-		} );
-
-		option.ToolTip = description;
-	}
-
 	private void TypeSelectionMenu()
 	{
+		void AddOption( ContextMenu contextMenu, Menu menu, IBlackboardParameterType parameterType, string icon, string description )
+		{
+			var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
+			{
+				CreateNewParameter( parameterType );
+
+				contextMenu.Update();
+				contextMenu.Close();
+			} );
+
+			option.ToolTip = description;
+		}
+
 		var contextManu = new ContextMenu( _treeView );
 
 		IBlackboardParameterType[] avalibleTypes = BlackboardParameter.GetRelevantParameters( _availableParameters, Graph.IsSubgraph ).ToArray();
