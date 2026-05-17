@@ -8,18 +8,18 @@ public class ShaderGraphPlusView : GraphView
 {
 	private enum DragEventSource
 	{
+		None,
 		NodePallete,
 		SubgraphAsset,
 		ImageFile,
 		BlackboardParameter,
-		Invalid
 	}
 
 	private readonly MainWindow _window;
 	private readonly BlackboardView _blackboard;
 	private readonly UndoStack _undoStack;
 
-	private DragEventSource _currentDragEventSource = DragEventSource.Invalid;
+	private DragEventSource _currentDragEventSource = DragEventSource.None;
 
 	protected override string ClipboardIdent => "shadergraphplus";
 
@@ -872,12 +872,12 @@ public class ShaderGraphPlusView : GraphView
 			}
 		}
 
-		_currentDragEventSource = DragEventSource.Invalid;
+		_currentDragEventSource = DragEventSource.None;
 	}
 
 	protected override void OnDragDropFinish()
 	{
-		_currentDragEventSource = DragEventSource.Invalid;
+		_currentDragEventSource = DragEventSource.None;
 	}
 
 	[EditorEvent.Frame]
