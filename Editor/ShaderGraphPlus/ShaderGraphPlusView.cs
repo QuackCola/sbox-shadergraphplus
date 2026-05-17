@@ -1,6 +1,8 @@
 ﻿using Editor;
+using Editor.ShaderGraph;
 using NodeEditorPlus;
 using ShaderGraphPlus.Nodes;
+using System.Collections.Immutable;
 
 namespace ShaderGraphPlus;
 
@@ -388,6 +390,83 @@ public class ShaderGraphPlusView : GraphView
 
 	protected override void OnOpenContextMenu( Menu menu, NodePlug targetPlug )
 	{
+		BaseNodePlus ConvertConstantNodeToParameter( IConstantNode constantNode )
+		{
+			var baseNode = constantNode as BaseNodePlus;
+			var nodePosition = baseNode.Position;
+			Dictionary<IPlugIn, IPlugOut> oldOutputConnections = new();
+
+			if ( !Graph.IsSubgraph )
+			{
+				oldOutputConnections = GatherConnectedOutputs( baseNode );
+			}
+
+			Graph.RemoveNode( baseNode );
+
+			var parameterFullTypeName = "";
+
+			if ( !Graph.IsSubgraph )
+			{
+				parameterFullTypeName = constantNode switch
+				{
+					BoolConstantNode => DisplayInfo.ForType( typeof( BoolParameter ) ).Fullname,
+					IntConstantNode => DisplayInfo.ForType( typeof( IntParameter ) ).Fullname,
+					FloatConstantNode => DisplayInfo.ForType( typeof( FloatParameter ) ).Fullname,
+					Float2ConstantNode => DisplayInfo.ForType( typeof( Float2Parameter ) ).Fullname,
+					Float3ConstantNode => DisplayInfo.ForType( typeof( Float3Parameter ) ).Fullname,
+					Float4ConstantNode => DisplayInfo.ForType( typeof( Float4Parameter ) ).Fullname,
+					ColorConstantNode => DisplayInfo.ForType( typeof( ColorParameter ) ).Fullname,
+					_ => throw new NotImplementedException( $"Unknown type : {constantNode.GetType()}" ),
+				};
+			}
+			else
+			{
+				parameterFullTypeName = constantNode switch
+				{
+					BoolConstantNode => DisplayInfo.ForType( typeof( BoolSubgraphInputParameter ) ).Fullname,
+					IntConstantNode => DisplayInfo.ForType( typeof( IntSubgraphInputParameter ) ).Fullname,
+					FloatConstantNode => DisplayInfo.ForType( typeof( FloatSubgraphInputParameter ) ).Fullname,
+					Float2ConstantNode => DisplayInfo.ForType( typeof( Float2SubgraphInputParameter ) ).Fullname,
+					Float3ConstantNode => DisplayInfo.ForType( typeof( Float3SubgraphInputParameter ) ).Fullname,
+					Float4ConstantNode => DisplayInfo.ForType( typeof( Float4SubgraphInputParameter ) ).Fullname,
+					ColorConstantNode => DisplayInfo.ForType( typeof( ColorSubgraphInputParameter ) ).Fullname,
+					_ => throw new NotImplementedException( $"Unknown type : {constantNode.GetType()}" ),
+				};
+			}
+
+			if ( AvailableParameters.TryGetValue( parameterFullTypeName, out var parameterType ) )
+			{
+				var parameter = CreateNewParameter( parameterType );
+				parameter.SetValue( constantNode.GetValue() );
+
+				var parameterNode = CreateNewParameterNode( parameter, nodePosition );
+
+				if ( !Graph.IsSubgraph && oldOutputConnections.Any() )
+				{
+					// fixup any valid output connections
+					foreach ( var node in Graph.Nodes )
+					{
+						foreach ( var input in node.Inputs )
+						{
+							if ( input.ConnectedOutput is null && oldOutputConnections.TryGetValue( input, out var correspondingOutput ) )
+							{
+								node.ConnectNode( input.Identifier, correspondingOutput.Identifier, parameterNode.Identifier );
+
+								continue;
+							}
+						}
+					}
+				}
+
+				if ( parameterNode != null )
+				{
+					return parameterNode;
+				}
+			}
+
+			return baseNode;
+		}
+
 		base.OnOpenContextMenu( menu, targetPlug );
 
 		var selectedNodes = SelectedItems.OfType<NodeUI>().ToArray();
@@ -410,11 +489,10 @@ public class ShaderGraphPlusView : GraphView
 		//	} );
 		//}
 
-		//if ( selectedNodes.Length > 1 && selectedNodes.All( x => x.Node is IConstantNode && x.Node is not IConstantMatrixNode ) )
-
 		if ( selectedNodes.Length > 1 && selectedNodes.All( x => x.Node is IConstantNode && x.Node is not IConstantMatrixNode ) )
 		{
-			var optionName = $"Convert {selectedNodes.Count()} constants to {(Graph.IsSubgraph ? "Subgraph Inputs" : "Material Parameters")}";
+			var optionName = $"Convert {selectedNodes.Length} Constants to {(Graph.IsSubgraph ? "Subgraph Inputs" : "Material Parameters")}";
+
 			var convertOption = menu.AddOption( optionName, "swap_horiz", () =>
 			{
 				using var undoScope = UndoScope( optionName );
@@ -423,18 +501,7 @@ public class ShaderGraphPlusView : GraphView
 
 				foreach ( var selectedNode in selectedNodes )
 				{
-					var baseNode = selectedNode.Node as BaseNodePlus;
-					var constantNode = baseNode as IConstantNode;
-					Dictionary<IPlugIn, IPlugOut> oldOutputConnections = new();
-
-					if ( !Graph.IsSubgraph )
-					{
-						oldOutputConnections = GatherConnectedOutputs( baseNode );
-					}
-
-					Graph.RemoveNode( baseNode );
-
-					lastNode = ConvertConstantNodeToParameter( constantNode, selectedNode.Position, oldOutputConnections );
+					lastNode = ConvertConstantNodeToParameter( selectedNode.Node as IConstantNode );
 				}
 
 				RebuildFromGraph();
@@ -454,41 +521,19 @@ public class ShaderGraphPlusView : GraphView
 
 			if ( item.Node is BaseNodePlus baseNode && baseNode is IConstantNode constantNode )
 			{
-				string nodeTypeTitle = constantNode.GetType() switch
+				var optionName = $"Convert Constant to {(Graph.IsSubgraph ? "Subgraph Input" : "Material Parameter")}";
+
+				var convertOption = menu.AddOption( optionName, "swap_horiz", () =>
 				{
-					Type t when t == typeof( BoolConstantNode ) => "Bool",
-					Type t when t == typeof( IntConstantNode ) => "Int",
-					Type t when t == typeof( FloatConstantNode ) => "Float",
-					Type t when t == typeof( Float2ConstantNode ) => "Float2",
-					Type t when t == typeof( Float3ConstantNode ) => "Float3",
-					Type t when t == typeof( Float4ConstantNode ) => "Float4",
-					Type t when t == typeof( Color ) => "Color",
-					_ => ""
-				};
+					using var undoScope = UndoScope( optionName );
 
-				if ( !string.IsNullOrWhiteSpace( nodeTypeTitle ) )
-				{
-					var convertOption = menu.AddOption( $"Convert constant to {(Graph.IsSubgraph ? "Subgraph Input" : "Material Parameter")}", "swap_horiz", () =>
-					{
-						using var undoScope = UndoScope( $"Convert constant to {(Graph.IsSubgraph ? "Subgraph Input" : "Material Parameter")}" );
+					var parameterNode = ConvertConstantNodeToParameter( constantNode );
 
-						Dictionary<IPlugIn, IPlugOut> oldOutputConnections = new();
+					RebuildFromGraph();
 
-						if ( !Graph.IsSubgraph )
-						{
-							oldOutputConnections = GatherConnectedOutputs( baseNode );
-						}
-
-						Graph.RemoveNode( baseNode );
-
-						var parameterNode = ConvertConstantNodeToParameter( constantNode, item.Node.Position, oldOutputConnections );
-
-						RebuildFromGraph();
-
-						_window.OnSelected( parameterNode );
-						SelectNode( parameterNode );
-					} );
-				}
+					_window.OnSelected( parameterNode );
+					SelectNode( parameterNode );
+				} );
 			}
 		}
 	}
@@ -514,72 +559,6 @@ public class ShaderGraphPlusView : GraphView
 		}
 
 		return oldConnections;
-	}
-
-	private BaseNodePlus ConvertConstantNodeToParameter( IConstantNode constantNode, Vector2 nodePosition, Dictionary<IPlugIn, IPlugOut> oldOutputConnections )
-	{
-		var parameterFullTypeName = "";
-
-		if ( !Graph.IsSubgraph )
-		{
-			parameterFullTypeName = constantNode switch
-			{
-				BoolConstantNode => DisplayInfo.ForType( typeof( BoolParameter ) ).Fullname,
-				IntConstantNode => DisplayInfo.ForType( typeof( IntParameter ) ).Fullname,
-				FloatConstantNode => DisplayInfo.ForType( typeof( FloatParameter ) ).Fullname,
-				Float2ConstantNode => DisplayInfo.ForType( typeof( Float2Parameter ) ).Fullname,
-				Float3ConstantNode => DisplayInfo.ForType( typeof( Float3Parameter ) ).Fullname,
-				Float4ConstantNode => DisplayInfo.ForType( typeof( Float4Parameter ) ).Fullname,
-				ColorConstantNode => DisplayInfo.ForType( typeof( ColorParameter ) ).Fullname,
-				_ => throw new NotImplementedException( $"Unknown type : {constantNode.GetType()}" ),
-			};
-		}
-		else
-		{
-			parameterFullTypeName = constantNode switch
-			{
-				BoolConstantNode => DisplayInfo.ForType( typeof( BoolSubgraphInputParameter ) ).Fullname,
-				IntConstantNode => DisplayInfo.ForType( typeof( IntSubgraphInputParameter ) ).Fullname,
-				FloatConstantNode => DisplayInfo.ForType( typeof( FloatSubgraphInputParameter ) ).Fullname,
-				Float2ConstantNode => DisplayInfo.ForType( typeof( Float2SubgraphInputParameter ) ).Fullname,
-				Float3ConstantNode => DisplayInfo.ForType( typeof( Float3SubgraphInputParameter ) ).Fullname,
-				Float4ConstantNode => DisplayInfo.ForType( typeof( Float4SubgraphInputParameter ) ).Fullname,
-				ColorConstantNode => DisplayInfo.ForType( typeof( ColorSubgraphInputParameter ) ).Fullname,
-				_ => throw new NotImplementedException( $"Unknown type : {constantNode.GetType()}" ),
-			};
-		}
-
-		if ( AvailableParameters.TryGetValue( parameterFullTypeName, out var parameterType ) )
-		{
-			var parameter = CreateNewParameter( parameterType );
-			parameter.SetValue( constantNode.GetValue() );
-
-			var parameterNode = CreateNewParameterNode( parameter, nodePosition );
-
-			if ( !Graph.IsSubgraph && oldOutputConnections.Any() )
-			{
-				// fixup any valid output connections
-				foreach ( var node in Graph.Nodes )
-				{
-					foreach ( var input in node.Inputs )
-					{
-						if ( input.ConnectedOutput is null && oldOutputConnections.TryGetValue( input, out var correspondingOutput ) )
-						{
-							node.ConnectNode( input.Identifier, correspondingOutput.Identifier, parameterNode.Identifier );
-
-							continue;
-						}
-					}
-				}
-			}
-
-			if ( parameterNode != null )
-			{
-				return parameterNode;
-			}
-		}
-
-		throw new Exception( $"Unable to convert constant node \"{constantNode.GetType()}\" to {(Graph.IsSubgraph ? "subgraph input" : "material")} parameter" );
 	}
 
 	private IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "" )
