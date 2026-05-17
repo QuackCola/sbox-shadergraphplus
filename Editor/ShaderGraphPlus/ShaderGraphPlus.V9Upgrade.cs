@@ -31,7 +31,7 @@ public partial class ShaderGraphPlus
 
 			var newParameterObj = jsonNode.DeepClone().AsObject();
 
-			if ( typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
+			if ( isSubgraph & typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
 			{
 				JsonUtils.UpdatePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
 
