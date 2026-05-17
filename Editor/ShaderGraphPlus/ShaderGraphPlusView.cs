@@ -10,9 +10,9 @@ public class ShaderGraphPlusView : GraphView
 	{
 		None,
 		NodePallete,
+		BlackboardParameter,
 		SubgraphAsset,
 		ImageFile,
-		BlackboardParameter,
 	}
 
 	private readonly MainWindow _window;
