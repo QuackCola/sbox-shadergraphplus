@@ -208,7 +208,7 @@ public class ShaderGraphPlusView : GraphView
 
 	protected override void OnPopulateNodeMenuSpecialOptions( Menu menu, Vector2 clickPos, NodePlug targetPlug, string filter )
 	{
-		void NewParameterMenuOption( Menu menu, string baseParameterName, IBlackboardParameterType classType, string undoScopeName )
+		void NewParameterMenuOption( Menu menu, IBlackboardParameterType classType, string undoScopeName )
 		{
 			var option = menu.AddOption( classType.Type.Title, classType.Type.Icon, () =>
 			{
@@ -240,15 +240,15 @@ public class ShaderGraphPlusView : GraphView
 				{
 					if ( classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
 					{
-						NewParameterMenuOption( newComboMenu, "ShaderFeature", classType, "Add Material Shader Feature" );
+						NewParameterMenuOption( newComboMenu, classType, "Add Material Shader Feature" );
 					}
 					if ( classType.Type.TargetType == typeof( SamplerStateParameter ) )
 					{
-						NewParameterMenuOption( newAttributeMenu, "MaterialSampler", classType, "Add Attribute Parameter" );
+						NewParameterMenuOption( newAttributeMenu, classType, "Add Attribute Parameter" );
 					}
 					else if ( !classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
 					{
-						NewParameterMenuOption( newMaterialParameterMenu, "MaterialParameter", classType, "Add Material Parameter" );
+						NewParameterMenuOption( newMaterialParameterMenu, classType, "Add Material Parameter" );
 					}
 				}
 			}
@@ -260,7 +260,7 @@ public class ShaderGraphPlusView : GraphView
 					x.Type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ).OrderBy( x =>
 						x.Type.GetAttribute<OrderAttribute>().Value ) )
 				{
-					NewParameterMenuOption( newSubgraphInputParameterMenu, "SubgraphInput", classType, "Add Subgraph Input Parameter" );
+					NewParameterMenuOption( newSubgraphInputParameterMenu, classType, "Add Subgraph Input Parameter" );
 				}
 
 				var newSubgraphOutputParameterMenu = menu.AddMenu( $"Create Subgraph Output", "add" );
@@ -269,7 +269,7 @@ public class ShaderGraphPlusView : GraphView
 					x.Type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphOutputParameter ) ) ).OrderBy( x =>
 						x.Type.GetAttribute<OrderAttribute>().Value ) )
 				{
-					NewParameterMenuOption( newSubgraphOutputParameterMenu, "SubgraphOutput", classType, "Add Subgraph Output Parameter" );
+					NewParameterMenuOption( newSubgraphOutputParameterMenu, classType, "Add Subgraph Output Parameter" );
 				}
 			}
 
