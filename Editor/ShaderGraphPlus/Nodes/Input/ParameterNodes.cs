@@ -378,7 +378,7 @@ public sealed class SamplerStateParameterNode : ParameterNode<Sampler, SamplerSt
 /// </summary>
 [Title( "Texture 2D" ), Category( "Parameters" ), Icon( "image" ), Order( 7 )]
 [Hide]
-public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode
+public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode, IBlackboardNode
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -429,7 +429,7 @@ public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode
 /// </summary>
 [Title( "Texture Cube" ), Category( "Parameters" ), Icon( "image" ), Order( 8 )]
 [Hide]
-public sealed class TextureCubeParameterNode : ShaderNodePlus, IParameterNode
+public sealed class TextureCubeParameterNode : ShaderNodePlus, IParameterNode, IBlackboardNode
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?

@@ -2,7 +2,7 @@ namespace ShaderGraphPlus.Nodes;
 
 [Title( "Boolean Combo Switch" ), Category( "Utility/Logic" ), Icon( "alt_route" )]
 [InternalNode]
-public sealed class BooleanFeatureSwitchNode : ShaderNodePlus, IParameterNode
+public sealed class BooleanFeatureSwitchNode : ShaderNodePlus, IParameterNode, IBlackboardNode
 {
 	[Hide, JsonIgnore, Browsable( false )]
 	public override Color NodeTitleColor { get; set; } = ShaderGraphPlusTheme.NodeHeaderColors.LogicNode;

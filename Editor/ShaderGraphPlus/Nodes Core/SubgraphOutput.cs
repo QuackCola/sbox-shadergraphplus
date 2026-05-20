@@ -30,7 +30,7 @@ public enum SubgraphOutputPreviewType
 /// </summary>
 [Title( "Subgraph Output" ), Icon( "output" ), SubgraphOnly]
 [InternalNode]
-public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, IErroringNode
+public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, IBlackboardNode, IErroringNode
 {
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.SubgraphNode;

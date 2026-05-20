@@ -208,31 +208,14 @@ public class MainWindow : DockWindow
 				_blackboardView.ClearSelection();
 			}
 
-			if ( node is IParameterNode parameterNode )
+			if ( node is IBlackboardNode blackboardNode )
 			{
 				// For now only select a blackboard parameter when _graphView only has 1 selection.
 				if ( _graphView.SelectedItems.Count() == 1 )
 				{
-					if ( parameterNode.ParameterIdentifier != default )
+					if ( blackboardNode.ParameterIdentifier != default )
 					{
-						var blackboardParameter = _graph.FindParameter( parameterNode.ParameterIdentifier );
-						_blackboardView.SetSelection( blackboardParameter );
-						_properties.Target = blackboardParameter;
-					}
-				}
-				else
-				{
-					_properties.Target = _graph;
-				}
-			}
-			else if ( node is SubgraphOutput subgraphOutput )
-			{
-				// For now only select a blackboard parameter when _graphView only has 1 selection.
-				if ( _graphView.SelectedItems.Count() == 1 )
-				{
-					if ( subgraphOutput.ParameterIdentifier != default )
-					{
-						var blackboardParameter = _graph.FindParameter( subgraphOutput.ParameterIdentifier );
+						var blackboardParameter = _graph.FindParameter( blackboardNode.ParameterIdentifier );
 						_blackboardView.SetSelection( blackboardParameter );
 						_properties.Target = blackboardParameter;
 					}

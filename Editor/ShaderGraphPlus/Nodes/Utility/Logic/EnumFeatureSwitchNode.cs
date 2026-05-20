@@ -2,7 +2,7 @@ namespace ShaderGraphPlus.Nodes;
 
 [Title( "Enum Combo Switch" ), Category( "Utility/Logic" ), Icon( "alt_route" )]
 [InternalNode]
-public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitializeNode, IParameterNode, IErroringNode
+public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitializeNode, IParameterNode, IBlackboardNode, IErroringNode
 {
 	[Hide, JsonIgnore, Browsable( false )]
 	public override Color NodeTitleColor { get; set; } = ShaderGraphPlusTheme.NodeHeaderColors.LogicNode;
