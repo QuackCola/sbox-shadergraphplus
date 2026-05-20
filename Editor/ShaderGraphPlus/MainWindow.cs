@@ -7,7 +7,7 @@ using System.Text;
 namespace ShaderGraphPlus;
 
 [EditorForAssetType( ShaderGraphPlusGlobals.SubgraphAssetTypeExtension )]
-public class MainWindowFunc : MainWindow, IAssetEditor
+public class MainWindowShaderFunc : MainWindow, IAssetEditor
 {
 	public override bool IsSubgraph => true;
 	public override string FileType => $"{ShaderGraphPlusGlobals.AssetTypeName} Sub-Graph";
