@@ -156,12 +156,9 @@ public class MainWindow : DockWindow
 		if ( asset == null || string.IsNullOrWhiteSpace( asset.AbsolutePath ) )
 			return;
 
-		if ( ProjectCreator != null )
-		{
-			// We dont need the project creator when opening an existing asset. So lets forceably close it.
-			ProjectCreator.Close();
-			ProjectCreator = null;
-		}
+		// We dont need the project creator when opening an existing asset. So lets forceably close it.
+		ProjectCreator?.Close();
+		ProjectCreator = null;
 
 
 		Open( asset.AbsolutePath );
