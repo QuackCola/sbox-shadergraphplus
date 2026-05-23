@@ -8,9 +8,6 @@ public class ColorValueEditor : ValueEditor
 	public Color Value { get; set; }
 	public NodeUI Node { get; set; }
 
-	//private SubgraphNode BoundNode;
-	//private string BoundParameter;
-
 	public ColorValueEditor( GraphicsItem parent ) : base( parent )
 	{
 		HoverEvents = true;
@@ -96,22 +93,10 @@ public class ColorValueEditor : ValueEditor
 		ColorPicker.OpenColorPopup( Value, ( v ) =>
 		{
 			Value = v;
-			//if ( BoundNode is not null )
-			//{
-			//	BoundNode.DefaultValues[BoundParameter] = v;
-			//}
 			Node.Graph.ChildValuesChanged( null );
 			Node.Update();
 		}, position );
 
 		e.Accepted = true;
 	}
-
-	//public void BindToParameter( SubgraphNode subgraphNode, string parameter )
-	//{
-	//	BoundNode = subgraphNode;
-	//	BoundParameter = parameter;
-	//
-	//	Value = Color.Parse( subgraphNode.DefaultValues[parameter].ToString() ) ?? Color.White;
-	//}
 }

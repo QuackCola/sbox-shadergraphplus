@@ -1,5 +1,4 @@
 ﻿using Facepunch.ActionGraphs;
-
 using Editor;
 
 namespace NodeEditorPlus;
