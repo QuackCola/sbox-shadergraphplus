@@ -135,7 +135,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 			SubgraphPortType.SamplerState => typeof( Sampler ),
 			SubgraphPortType.Texture2DObject => typeof( Texture ),
 			SubgraphPortType.TextureCubeObject => typeof( Texture ),
-			_ => throw new Exception( $"Unknown PortType \"{PortType}\"" )
+			_ => throw new NotImplementedException( $"Unknown PortType \'{PortType}\'" )
 		};
 
 		var info = new PlugInfo()
