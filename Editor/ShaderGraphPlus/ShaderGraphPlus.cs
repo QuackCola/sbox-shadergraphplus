@@ -72,12 +72,12 @@ public class PreviewSettings
 	/// If true we'll render shadows
 	/// </summary>
 	public bool EnableShadows { get; set; } = true;
-	
+
 	/// <summary>
 	/// If true we'll show the ground plane
 	/// </summary>
 	public bool ShowGround { get; set; } = false;
-	
+
 	/// <summary>
 	/// If true we'll show the shybox
 	/// </summary>
