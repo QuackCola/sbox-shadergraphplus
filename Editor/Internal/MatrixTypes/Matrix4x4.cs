@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Numerics;
 
-[JsonConverter( typeof( ShaderGraphPlus.Internal.JsonConvert.Matrix4x4Converter ) )]
+[JsonConverter( typeof( MatrixTypes.Matrix4x4Converter ) )]
 public struct Float4x4
 {
 	[Hide]
@@ -205,52 +205,35 @@ public struct Float4x4
 		}
 	}
 
-	//
-	// Summary:
-	//     Initializes this flaot4x4 to identity.
+	/// <summary>
+	/// Initializes this flaot4x4 to identity.
+	/// </summary>
 	public Float4x4()
 	{
 		_mat4x4 = Matrix4x4.Identity;
 
 	}
 
-	//
-	// Summary:
-	//	   Initializes the 4x4 matrix from given components.
-	//
-	// Parameters:
-	//	 m11:
-	//		 The value for the first element in the first row.
-	//	 m12:
-	//		 The value for the second element in the first row.
-	//	 m13:
-	//		 The value for the third element in the first row.
-	//	 m14:
-	//		 The value for the fourth element in the first row.
-	//	 m21:
-	//		 The value for the first element in the second row.
-	//	 m22:
-	//		 The value for the second element in the second row.
-	//	 m23:
-	//		 The value for the third element in the second row.
-	//	 m24:
-	//		 The value for the third element in the second row.
-	//	 m31:
-	//		 The value for the first element in the third row.
-	//	 m32:
-	//		 The value for the second element in the third row.
-	//	 m33:
-	//		 The value for the third element in the third row.
-	//	 m34:
-	//		 The value for the fourth element in the third row.
-	//	 m41:
-	//		 The value for the first element in the fourth row.
-	//	 m42:
-	//		 The value for the second element in the fourth row.
-	//	 m43:
-	//		 The value for the third element in the fourth row.
-	//	 m44:
-	//		 The value for the fourth element in the fourth row.
+
+	/// <summary>
+	/// Initializes the 4x4 matrix from given components.
+	/// </summary>
+	/// <param name="m11">The value for the first element in the first row.</param>
+	/// <param name="m12">The value for the second element in the first row.</param>
+	/// <param name="m13">The value for the third element in the first row.</param>
+	/// <param name="m14">The value for the fourth element in the first row.</param>
+	/// <param name="m21">The value for the first element in the second row.</param>
+	/// <param name="m22">The value for the second element in the second row.</param>
+	/// <param name="m23">The value for the third element in the second row.</param>
+	/// <param name="m24">The value for the fourth element in the second row.</param>
+	/// <param name="m31">The value for the first element in the third row.</param>
+	/// <param name="m32">The value for the second element in the third row.</param>
+	/// <param name="m33">The value for the third element in the third row.</param>
+	/// <param name="m34">The value for the fourth element in the third row.</param>
+	/// <param name="m41">The value for the first element in the fourth row.</param>
+	/// <param name="m42">The value for the second element in the fourth row.</param>
+	/// <param name="m43">The value for the third element in the fourth row.</param>
+	/// <param name="m44">The value for the fourth element in the fourth row.</param>
 	public Float4x4( float m11, float m12, float m13, float m14,
 					float m21, float m22, float m23, float m24,
 					float m31, float m32, float m33, float m34,

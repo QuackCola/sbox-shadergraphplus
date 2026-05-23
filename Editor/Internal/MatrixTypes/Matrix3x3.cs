@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-[JsonConverter( typeof( ShaderGraphPlus.Internal.JsonConvert.Matrix3x3Converter ) )]
+[JsonConverter( typeof( MatrixTypes.Matrix3x3Converter ) )]
 public struct Float3x3
 {
 	[Hide]

@@ -1,8 +1,7 @@
-﻿using ShaderGraphPlus;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-[JsonConverter( typeof( ShaderGraphPlus.Internal.JsonConvert.Matrix2x2Converter ) )]
+[JsonConverter( typeof( MatrixTypes.Matrix2x2Converter ) )]
 public struct Float2x2
 {
 	[Hide]
