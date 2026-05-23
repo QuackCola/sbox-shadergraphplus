@@ -1,5 +1,4 @@
 ﻿using Editor;
-using Editor.ShaderGraph;
 
 namespace ShaderGraphPlus;
 
@@ -35,7 +34,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 	[JsonIgnore, Hide]
 	public override bool CanPreview => false;
 
-	[global::Editor( "subgraphplus.defaultvalues" ), WideMode( HasLabel = false )]
+	[Editor( "subgraphplus.defaultvalues" ), WideMode( HasLabel = false )]
 	public Dictionary<string, object> DefaultValues { get; set; } = new();
 
 	[Hide]
@@ -92,6 +91,11 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				SubgraphPortType.Vector3 => typeof( Vector3 ),
 				SubgraphPortType.Vector4 => typeof( Vector4 ),
 				SubgraphPortType.Color => typeof( Color ),
+				SubgraphPortType.Float2x2 => typeof( Float2x2 ),
+				SubgraphPortType.Float3x3 => typeof( Float3x3 ),
+				SubgraphPortType.Float4x4 => typeof( Float4x4 ),
+				SubgraphPortType.Gradient => typeof( Gradient ),
+				SubgraphPortType.SamplerState => typeof( Sampler ),
 				SubgraphPortType.Texture2DObject => typeof( Texture ),
 				SubgraphPortType.TextureCubeObject => typeof( Texture ),
 				_ => throw new NotImplementedException()
@@ -152,6 +156,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				SubgraphPortType.Gradient => typeof( Gradient ),
 				SubgraphPortType.SamplerState => typeof( Sampler ),
 				SubgraphPortType.Texture2DObject => typeof( Texture ),
+				SubgraphPortType.TextureCubeObject => typeof( Texture ),
 				_ => throw new Exception( $"Unknown PortType \"{subgraphOutput.PortType}\"" )
 			};
 
