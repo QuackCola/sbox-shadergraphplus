@@ -16,8 +16,14 @@ public enum BlendMode
 
 public enum ShadingModel
 {
+	/// <summary>
+	/// Default Valve lighting model
+	/// </summary>
 	[Icon( "tungsten" )]
 	Lit,
+	/// <summary>
+	/// No Lighting model
+	/// </summary>
 	[Icon( "brightness_3" )]
 	Unlit,
 	//[Icon( "build" )] // TODO
@@ -37,22 +43,54 @@ public enum ShaderDomain
 
 public enum RenderFace
 {
+	/// <summary>
+	/// Render only the front faces
+	/// </summary>
 	[Icon( "visibility" )]
 	Front,
+	/// <summary>
+	/// Render only the back faces
+	/// </summary>
 	[Icon( "visibility_off" )]
 	Back,
+	/// <summary>
+	/// Render both the front and back faces
+	/// </summary>
 	[Icon( "visibility_off" )]
 	Both,
 }
 
 public class PreviewSettings
 {
+	/// <summary>
+	/// Current viewmode of the preview veiwport
+	/// </summary>
 	public ViewMode ViewMode { get; set; } = ViewMode.Perspective;
 	public bool RenderBackfaces { get; set; } = false;
+
+	/// <summary>
+	/// If true we'll render shadows
+	/// </summary>
 	public bool EnableShadows { get; set; } = true;
+	
+	/// <summary>
+	/// If true we'll show the ground plane
+	/// </summary>
 	public bool ShowGround { get; set; } = false;
+	
+	/// <summary>
+	/// If true we'll show the shybox
+	/// </summary>
 	public bool ShowSkybox { get; set; } = true;
+
+	/// <summary>
+	/// Color of the background when the skybox is not being drawn
+	/// </summary>
 	public Color BackgroundColor { get; set; } = Color.Black;
+
+	/// <summary>
+	/// Color tint of the model in the preview
+	/// </summary>
 	public Color Tint { get; set; } = Color.White;
 }
 

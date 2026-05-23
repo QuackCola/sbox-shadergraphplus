@@ -541,6 +541,9 @@ public sealed class Preview : SceneRenderingWidget
 	}
 
 	private bool _enableShadows = true;
+	/// <summary>
+	/// If true we'll render shadows
+	/// </summary>
 	public bool EnableShadows
 	{
 		get => _enableShadows;
@@ -555,6 +558,9 @@ public sealed class Preview : SceneRenderingWidget
 		}
 	}
 
+	/// <summary>
+	/// If true we'll show the shybox
+	/// </summary>
 	public bool ShowSkybox
 	{
 		get => _sky.IsValid() && _sky.Enabled;
@@ -567,6 +573,9 @@ public sealed class Preview : SceneRenderingWidget
 		}
 	}
 
+	/// <summary>
+	/// If true we'll show the ground plane
+	/// </summary>
 	public bool ShowGround
 	{
 		get => _ground.RenderingEnabled;
@@ -588,6 +597,9 @@ public sealed class Preview : SceneRenderingWidget
 		}
 	}
 
+	/// <summary>
+	/// Color of the background when the skybox is not being drawn
+	/// </summary>
 	public Color BackgroundColor
 	{
 		get => Scene.Camera.IsValid() ? Scene.Camera.BackgroundColor : default;
@@ -603,6 +615,9 @@ public sealed class Preview : SceneRenderingWidget
 	private DirectionalLight _sun = null;
 	private HashSet<PointLight> _pointLights = new();
 	private Angles _sunAngles = Rotation.FromPitch( 50 );
+	/// <summary>
+	/// Angle the directional light in the preview
+	/// </summary>
 	public Angles SunAngle
 	{
 		get => _sunAngles;
@@ -616,6 +631,9 @@ public sealed class Preview : SceneRenderingWidget
 		}
 	}
 	private Color _sunColor = new Color( 0.91f, 0.98f, 1.00f );
+	/// <summary>
+	/// Color of the directional light in the preview
+	/// </summary>
 	public Color SunColor
 	{
 		get => _sunColor;
@@ -629,6 +647,9 @@ public sealed class Preview : SceneRenderingWidget
 		}
 	}
 	private bool _enablePointLights = true;
+	/// <summary>
+	/// If true we'll show the enable lights in the current scene
+	/// </summary>
 	public bool EnablePointLights
 	{
 		get => _enablePointLights;
@@ -699,6 +720,9 @@ public sealed class Preview : SceneRenderingWidget
 	}
 
 	private Color _tint = Color.White;
+	/// <summary>
+	/// Color tint of the model in the preview
+	/// </summary>
 	public Color Tint
 	{
 		get => _tint;
@@ -711,6 +735,9 @@ public sealed class Preview : SceneRenderingWidget
 	}
 
 	private float _modelHeightOffset;
+	/// <summary>
+	/// Height offset of the model in the preview
+	/// </summary>
 	public float ModelHeightOffset
 	{
 		get => _modelHeightOffset;
@@ -726,6 +753,9 @@ public sealed class Preview : SceneRenderingWidget
 	}
 
 	private float _modelYawRotation;
+	/// <summary>
+	/// Yaw rotation of the model in the preview
+	/// </summary>
 	public float ModelYawRotation
 	{
 		get => _modelYawRotation;
@@ -741,6 +771,9 @@ public sealed class Preview : SceneRenderingWidget
 	}
 
 	private Model _model;
+	/// <summary>
+	/// The model in the preview
+	/// </summary>
 	public Model Model
 	{
 		get => _model;
