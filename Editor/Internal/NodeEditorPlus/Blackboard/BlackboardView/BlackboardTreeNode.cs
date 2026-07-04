@@ -1,7 +1,7 @@
 using Editor;
 using static Editor.BaseItemWidget;
 
-namespace ShaderGraphPlus;
+namespace NodeEditorPlus.Blackboard;
 
 public abstract class BlackboardTreeNode : TreeNode
 {
@@ -25,56 +25,6 @@ public abstract class BlackboardTreeNode : TreeNode
 
 	public BlackboardTreeNode() : this( null )
 	{
-	}
-
-	protected static void PaintTypeLabel( Rect rect, string typeName, Color typeColor )
-	{
-		Color tint = "#48494c";
-
-		var c = tint.ToHsv();
-		var bg = c;
-
-		if ( Paint.HasMouseOver )
-		{
-			bg = c with { Value = (c.Value + 0.1f) };
-		}
-		else
-		{
-			bg = c = Theme.SurfaceLightBackground;
-		}
-
-		if ( bg.Alpha > 0 )
-		{
-			float radius = 3;
-			Paint.Antialiasing = true;
-
-			Paint.ClearPen();
-			Paint.SetBrush( bg with { Value = (bg.Value + 0.04f), Saturation = (c.Saturation * 0.8f) } );
-			Paint.DrawRect( rect, radius );
-
-			Paint.SetBrushLinear( rect.TopLeft, rect.BottomRight, bg, bg with { Value = (bg.Value - 0.03f) } );
-			Paint.DrawRect( rect.Shrink( 1, 1, 1, 1 ), radius );
-			Paint.SetPen( typeColor, 1 );
-			Paint.DrawRect( rect.Shrink( 1, 1, 1, 1 ), radius );
-
-			var r2 = rect.Grow( 1.25f );
-
-			Paint.DrawRect( r2.Grow( 12, 0, 0, 0 ), radius );
-		}
-		else
-		{
-			c = Color.White.WithAlpha( 0.5f );
-		}
-
-		Paint.SetDefaultFont();
-		Paint.SetPen( c with { Value = 0.99f, Saturation = c.Saturation * 0.20f } );
-		Paint.DrawText( rect, typeName );
-
-		var iconRect = rect;
-		iconRect.Left -= 10;
-
-		Paint.Pen = typeColor;
-		Paint.DrawIcon( iconRect, "circle", 12, TextFlag.LeftCenter );
 	}
 
 	public override void OnPaint( VirtualWidget item )
@@ -153,7 +103,6 @@ public abstract class BlackboardTreeNode : TreeNode
 
 	public override DropAction OnDragDrop( BaseItemWidget.ItemDragEvent e )
 	{
-		var graph = TreeView.Graph as ShaderGraphPlus;
 		var targetNode = this;
 
 		if ( e.Data.Object is BlackboardTreeNode sourceNode )
@@ -161,13 +110,13 @@ public abstract class BlackboardTreeNode : TreeNode
 			if ( sourceNode == targetNode || sourceNode.Value == Value )
 				return DropAction.Ignore;
 
-			if ( sourceNode is BlackboardGroupTreeNode && targetNode.IsGrouped )
+			if ( sourceNode.CanHaveChildren && targetNode.IsGrouped )
 				return DropAction.Ignore;
 
 			if ( sourceNode.IsDescendantOf( targetNode ) )
 				return DropAction.Ignore;
 
-			Log.Info( $"Source '{sourceNode.Name}' Target '{Name}' DropEdge '{e.DropEdge}" );
+			//Log.Info( $"Source '{sourceNode.Name}' Target '{Name}' DropEdge '{e.DropEdge}" );
 
 			if ( e.IsDrop )
 			{

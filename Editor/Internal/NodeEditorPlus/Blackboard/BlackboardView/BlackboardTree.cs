@@ -1,6 +1,6 @@
 using Editor;
 
-namespace ShaderGraphPlus;
+namespace NodeEditorPlus.Blackboard;
 
 public abstract class BlackboardTree : TreeView
 {

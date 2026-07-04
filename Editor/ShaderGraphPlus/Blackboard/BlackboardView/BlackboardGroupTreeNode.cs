@@ -107,7 +107,7 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
 			Paint.DrawLine( dropRect.TopLeft, dropRect.TopRight );
 		}
-		else if ( dragEvent.DropEdge.HasFlag( ItemEdge.Bottom )  )
+		else if ( dragEvent.DropEdge.HasFlag( ItemEdge.Bottom ) )
 		{
 			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
 			Paint.DrawLine( dropRect.BottomLeft, dropRect.BottomRight );
@@ -185,6 +185,7 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 			TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetPriority );
 		}
 	}
+
 	private int RemoveFromGroup( IGroupableBlackboardParameter sourceParameter )
 	{
 		if ( TreeView.Graph is ShaderGraphPlus graph )

@@ -1,6 +1,6 @@
 using Editor;
 
-namespace ShaderGraphPlus;
+namespace NodeEditorPlus.Blackboard;
 
 public abstract class BlackboardView : Widget
 {
@@ -188,10 +188,7 @@ public abstract class BlackboardView : Widget
 			RemoveParameter( item );
 		}
 
-		foreach ( var item in _treeView.SelectedItems.OfType<CategoryData>() )
-		{
-			RemoveCategoryData( item );
-		}
+		RemoveSelectionSpecial();
 
 		ClearSelection( true );
 	}
@@ -211,7 +208,9 @@ public abstract class BlackboardView : Widget
 		Graph?.RemoveParameter( parameter );
 	}
 
-	protected abstract void RemoveCategoryData( CategoryData categoryData );
+	protected virtual void RemoveSelectionSpecial()
+	{
+	}
 }
 
 class AddButton : Button

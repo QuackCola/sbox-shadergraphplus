@@ -1,4 +1,4 @@
-﻿namespace ShaderGraphPlus;
+﻿namespace NodeEditorPlus.Blackboard;
 
 public interface IBlackboardParameterType
 {

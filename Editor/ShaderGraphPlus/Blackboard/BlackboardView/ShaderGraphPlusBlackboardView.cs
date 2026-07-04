@@ -225,7 +225,15 @@ public class ShaderGraphPlusBlackboardView : BlackboardView
 		RebuildFromGraph( false );
 	}
 
-	protected override void RemoveCategoryData( CategoryData categoryData )
+	protected override void RemoveSelectionSpecial()
+	{
+		foreach ( var item in _treeView.SelectedItems.OfType<CategoryData>() )
+		{
+			RemoveCategoryData( item );
+		}
+	}
+
+	private void RemoveCategoryData( CategoryData categoryData )
 	{
 		Graph?.RemoveCategoryData( categoryData );
 

@@ -15,3 +15,5 @@ global using System.Text.RegularExpressions;
 global using ShaderGraphPlus.Diagnostics;
 
 global using JsonUtilities;
+
+global using NodeEditorPlus.Blackboard;
