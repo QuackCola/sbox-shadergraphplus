@@ -35,3 +35,11 @@ A few guidelines that will make it easier to review and merge your changes:
 * **Formatting**
     * Your IDE should adhere to the style set in `.editorconfig`.
     * Auto formatting can be done with `dotnet format` with `dotnet_format.cmd`
+
+## AI-assisted contributions
+
+* No use of LLMs for issues.
+
+* No use of LLMs for patches / pull requests.
+
+Violating these LLM rules will lead to a permanent ban from the repository.
