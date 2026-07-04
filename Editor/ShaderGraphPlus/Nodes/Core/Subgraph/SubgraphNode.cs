@@ -74,7 +74,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 		var defaults = new Dictionary<Type, int>();
 		InputReferences.Clear();
 
-		// Get all SubgraphInput nodes only - no more legacy IParameterNode support
+		// Get all SubgraphInput nodes
 		var subgraphInputs = Subgraph.Nodes.OfType<SubgraphInput>()
 			.Where( x => !string.IsNullOrWhiteSpace( x.Name ) )
 			.OrderBy( x => x.PortOrder )

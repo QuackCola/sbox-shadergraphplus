@@ -16,7 +16,6 @@ public interface IParameterUI
 	/// <summary>
 	/// Primary group
 	/// </summary>
-	[InlineEditor( Label = false ), Group( "Group" )]
 	public UIGroup PrimaryGroup { get; set; }
 
 	/// <summary>
@@ -30,9 +29,13 @@ public interface IParameterUI
 
 public struct GenericParameterUI : IParameterUI
 {
+	/// <summary>
+	/// Priority of this value in the group
+	/// </summary>
+	[Hide, JsonIgnore]
 	public int Priority { get; set; }
 
-	[InlineEditor( Label = false ), Group( "Group" )]
+	[Hide, JsonIgnore]
 	public UIGroup PrimaryGroup { get; set; }
 
 	[InlineEditor( Label = false ), Group( "Sub Group" )]
@@ -61,12 +64,13 @@ public struct FloatParameterUI : IParameterUI
 	/// <summary>
 	/// Priority of this value in the group
 	/// </summary>
+	[Hide, JsonIgnore]
 	public int Priority { get; set; }
 
 	/// <summary>
 	/// Primary group
 	/// </summary>
-	[InlineEditor( Label = false ), Group( "Group" )]
+	[Hide, JsonIgnore]
 	public UIGroup PrimaryGroup { get; set; }
 
 	/// <summary>

@@ -190,13 +190,13 @@ public struct TextureInput : IParameterUI
 	/// <summary>
 	/// Priority of this value in the group
 	/// </summary>
+	[Hide, JsonIgnore]
 	public int Priority { get; set; }
 
 	/// <summary>
 	/// Primary group
 	/// </summary>
-	[InlineEditor( Label = false ), Group( "Group" )]
-	[ShowIf( nameof( ShowUIGroups ), true )]
+	[Hide, JsonIgnore]
 	public UIGroup PrimaryGroup { get; set; }
 
 	/// <summary>

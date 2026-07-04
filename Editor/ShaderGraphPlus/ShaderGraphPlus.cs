@@ -95,10 +95,10 @@ public class PreviewSettings
 }
 
 [AssetType( Name = ShaderGraphPlusGlobals.AssetTypeName, Extension = ShaderGraphPlusGlobals.AssetTypeExtension, Flags = AssetTypeFlags.NoEmbedding ), Icon( "account_tree" )]
-public partial class ShaderGraphPlus : INodeGraph
+public partial class ShaderGraphPlus : IBlackboardNodeGraph
 {
 	[Hide]
-	public int Version => 9;
+	public int Version => 10;
 
 	[Hide, JsonIgnore]
 	public IEnumerable<BaseNodePlus> Nodes => _nodes.Values;
@@ -113,7 +113,22 @@ public partial class ShaderGraphPlus : INodeGraph
 	public IEnumerable<BlackboardParameter> Parameters => _parameters.Values;
 
 	[Hide, JsonIgnore]
-	public readonly Dictionary<Guid, BlackboardParameter> _parameters = new();
+	private readonly OrderedDictionary<Guid, BlackboardParameter> _parameters = new();
+
+	[Hide, JsonIgnore]
+	IEnumerable<IBlackboardParameter> IBlackboardNodeGraph.Parameters => Parameters;
+
+	[Hide, JsonIgnore]
+	public IEnumerable<CategoryData> CategoryData => _categoryData.Values;
+
+	[Hide, JsonIgnore]
+	private readonly OrderedDictionary<Guid, CategoryData> _categoryData = new();
+
+	/// <summary>
+	///	Custom key-value storage for this project.
+	/// </summary>
+	[Hide]
+	public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
 
 	[Hide]
 	public bool IsSubgraph { get; set; }
@@ -160,12 +175,6 @@ public partial class ShaderGraphPlus : INodeGraph
 
 	public ShaderDomain Domain { get; set; }
 
-	/// <summary>
-	///	Custom key-value storage for this project.
-	/// </summary>
-	[Hide]
-	public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
-
 	[Hide]
 	public PreviewSettings PreviewSettings { get; set; } = new();
 
@@ -179,10 +188,21 @@ public partial class ShaderGraphPlus : INodeGraph
 		return false;
 	}
 
+	public bool ContainsParameter( Guid id )
+	{
+		if ( _parameters.ContainsKey( id ) ) return true;
+		return false;
+	}
+
 	public void AddNode( BaseNodePlus node )
 	{
 		node.Graph = this;
 		_nodes.Add( node.Identifier, node );
+	}
+
+	public void AddParameter( IBlackboardParameter parameter )
+	{
+		AddParameter( (BlackboardParameter)parameter );
 	}
 
 	public void RemoveNode( BaseNodePlus node )
@@ -201,55 +221,145 @@ public partial class ShaderGraphPlus : INodeGraph
 		return node;
 	}
 
-	public BlackboardParameter FindParameter( Guid identifier )
+	public int GetParameterIndex( BlackboardParameter parameter )
 	{
-		if ( _parameters.TryGetValue( identifier, out var parameter ) )
+		var index = _parameters.IndexOf( parameter.Identifier );
+
+		if ( index != -1 )
 		{
-			return parameter;
+			return index;
 		}
 
-		throw new Exception( $"There is no parameter with the identifier : {identifier}" );
+		return 0;
+	}
+
+	public BlackboardParameter FindParameter( Guid identifier )
+	{
+		_parameters.TryGetValue( identifier, out var parameter );
+		return parameter;
 	}
 
 	public BlackboardParameter FindParameter( string name )
 	{
 		var parameter = _parameters.Values.FirstOrDefault( x => x.Name == name );
+		return parameter;
+	}
 
-		if ( parameter != null )
-			return parameter;
+	public bool TryFindParameter( Guid identifier, out BlackboardParameter parameter )
+	{
+		return _parameters.TryGetValue( identifier, out parameter );
+	}
 
-		throw new Exception( $"There is no parameter with the name : {name}" );
+	public bool TryFindParameter( string name, out BlackboardParameter parameter )
+	{
+		parameter = _parameters.Values.FirstOrDefault( x => x.Name == name );
+
+		return parameter != null;
 	}
 
 	public T FindParameter<T>( Guid identifier ) where T : BlackboardParameter
 	{
-		if ( _parameters.TryGetValue( identifier, out var parameter ) )
-		{
-			return (T)parameter;
-		}
-
-		throw new Exception( $"There is no parameter with the identifier : {identifier}" );
+		_parameters.TryGetValue( identifier, out var parameter );
+		return (T)parameter;
 	}
 
 	public T FindParameter<T>( string name ) where T : BlackboardParameter
 	{
 		var parameter = _parameters.Values.OfType<T>().FirstOrDefault( x => x.Name == name );
+		return parameter;
+	}
 
-		if ( parameter != null )
-			return parameter;
+	public bool TryFindParameter<T>( Guid identifier, out T parameter ) where T : BlackboardParameter
+	{
+		parameter = null;
 
-		throw new Exception( $"There is no parameter with the name : {name}" );
+		if ( _parameters.TryGetValue( identifier, out var foundParameter ) )
+		{
+			parameter = (T)foundParameter;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public bool TryFindParameter<T>( string name, out T parameter ) where T : BlackboardParameter
+	{
+		parameter = (T)_parameters.Values.FirstOrDefault( x => x.Name == name );
+
+		return parameter != null;
+	}
+
+	public bool TryFindCategoryData( Guid identifier, out CategoryData categoryData )
+	{
+		categoryData = null;
+
+		if ( _categoryData.TryGetValue( identifier, out var foundCategoryData ) )
+		{
+			categoryData = foundCategoryData;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public bool HasParameterWithName( string name )
 	{
-		return _parameters.Any( x => x.Value.Name == name );
+		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
 	}
 
-	public void AddParameter( BlackboardParameter parameter )
+	public bool HasCategoryDataWithName( string name )
+	{
+		return _categoryData.Any( x => x.Value.Name == name );
+	}
+
+	public void AddParameter( BlackboardParameter parameter, int index = -1 )
 	{
 		parameter.Graph = this;
-		_parameters.Add( parameter.Identifier, parameter );
+
+		if ( index <= -1 )
+		{
+			_parameters.Add( parameter.Identifier, parameter );
+		}
+		else
+		{
+			_parameters.Insert( index, parameter.Identifier, parameter );
+		}
+	}
+
+	public void AddCategoryData( CategoryData categoryData )
+	{
+		categoryData.Graph = this;
+		_categoryData.Add( categoryData.Identifier, categoryData );
+	}
+
+	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
+	{
+		if ( parameter.Graph != this )
+			return false;
+
+		if ( newIndex <= -1 )
+		{
+			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );
+
+			SGPLogger.Error( $"New Index Invalid '{newIndex}'" );
+
+			return false;
+		}
+
+		_parameters.Remove( parameter.Identifier );
+
+		if ( newIndex > _parameters.Count )
+		{
+			_parameters.Add( parameter.Identifier, parameter );
+		}
+		else
+		{
+			_parameters.Insert( newIndex, parameter.Identifier, parameter );
+		}
+
+		return true;
 	}
 
 	public void UpdateParameter( IBlackboardParameter parameter )
@@ -282,6 +392,22 @@ public partial class ShaderGraphPlus : INodeGraph
 		_parameters.Remove( identifier );
 	}
 
+	public void RemoveCategoryData( CategoryData categoryData )
+	{
+		if ( categoryData.Graph != this )
+			return;
+
+		_categoryData.Remove( categoryData.Identifier );
+	}
+
+	public void UpdateCategoryData( CategoryData categoryData )
+	{
+		if ( categoryData.Graph != this )
+			return;
+
+		_categoryData[categoryData.Identifier] = categoryData;
+	}
+
 	internal NamedRerouteDeclarationNode FindNamedRerouteDeclarationNode( string name )
 	{
 		var node = Nodes.OfType<NamedRerouteDeclarationNode>().Where( x => x.Name == name ).FirstOrDefault();
@@ -306,6 +432,11 @@ public partial class ShaderGraphPlus : INodeGraph
 		_parameters.Clear();
 	}
 
+	public void ClearCategoryData()
+	{
+		_categoryData.Clear();
+	}
+
 	string INodeGraph.SerializeNodes( IEnumerable<IGraphNode> nodes )
 	{
 		return SerializeNodes( nodes.Cast<BaseNodePlus>() );
@@ -314,6 +445,16 @@ public partial class ShaderGraphPlus : INodeGraph
 	IEnumerable<IGraphNode> INodeGraph.DeserializeNodes( string serialized )
 	{
 		return DeserializeNodes( serialized );
+	}
+
+	string IBlackboardNodeGraph.SerializeParameters( IEnumerable<IBlackboardParameter> parameters )
+	{
+		return SerializeParameters( parameters.Cast<BlackboardParameter>() );
+	}
+
+	IEnumerable<IBlackboardParameter> IBlackboardNodeGraph.DeserializeParameters( string serialized )
+	{
+		return DeserializeParameters( serialized );
 	}
 
 	void INodeGraph.AddNode( IGraphNode node )
@@ -326,9 +467,50 @@ public partial class ShaderGraphPlus : INodeGraph
 		RemoveNode( (BaseNodePlus)node );
 	}
 
-	public void AddParameter( IBlackboardParameter parameter )
+	void IBlackboardNodeGraph.AddParameter( IBlackboardParameter parameter )
 	{
 		AddParameter( (BlackboardParameter)parameter );
+	}
+
+	void IBlackboardNodeGraph.RemoveParameter( IBlackboardParameter parameter )
+	{
+		RemoveParameter( (BlackboardParameter)parameter );
+	}
+
+	IBlackboardParameter IBlackboardNodeGraph.FindParameter( Guid identifier )
+	{
+		return FindParameter( identifier );
+	}
+
+	internal void UpdateCategoryPriority( CategoryData target, int newPriority )
+	{
+		var oldPriority = target.Priority;
+		target.Priority = newPriority;
+
+		if ( newPriority > oldPriority ) // Category moved down the list
+		{
+			foreach ( var kvp in _categoryData )
+			{
+				if ( kvp.Value != target &&
+					kvp.Value.Priority > oldPriority &&
+					kvp.Value.Priority <= newPriority )
+				{
+					kvp.Value.Priority--;
+				}
+			}
+		}
+		else if ( newPriority < oldPriority ) // Category moved up the list
+		{
+			foreach ( var kvp in _categoryData )
+			{
+				if ( kvp.Value != target &&
+					kvp.Value.Priority >= newPriority &&
+					kvp.Value.Priority < oldPriority )
+				{
+					kvp.Value.Priority++;
+				}
+			}
+		}
 	}
 
 	/// <summary>
@@ -400,6 +582,4 @@ public partial class ShaderGraphPlus : INodeGraph
 [AssetType( Name = ShaderGraphPlusGlobals.SubgraphAssetTypeName, Extension = ShaderGraphPlusGlobals.SubgraphAssetTypeExtension, Flags = AssetTypeFlags.NoEmbedding )]
 public sealed partial class ShaderGraphPlusSubgraph : ShaderGraphPlus
 {
-
-
 }

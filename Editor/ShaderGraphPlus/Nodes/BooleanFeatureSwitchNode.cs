@@ -33,7 +33,10 @@ public sealed class BooleanFeatureSwitchNode : ShaderNodePlus, IParameterNode, I
 		{
 			var parameter = graph.FindParameter<ShaderFeatureBooleanParameter>( ParameterIdentifier );
 
-			return parameter;
+			if ( parameter != null )
+			{
+				return parameter;
+			}
 		}
 
 		return new ShaderFeatureBooleanParameter();

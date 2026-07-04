@@ -20,6 +20,7 @@ partial class ShaderGraphPlus
 		internal const string Class = "_class";
 		internal const string NodeArray = "nodes";
 		internal const string ParameterArray = "parameters";
+		internal const string CategoryDataArray = "categoryData";
 	}
 
 	internal static JsonSerializerOptions SerializerOptions( bool indented = false )
@@ -46,6 +47,7 @@ partial class ShaderGraphPlus
 		SerializeObject( this, doc, options );
 		SerializeNodes( Nodes, doc, options );
 		SerializeParameters( Parameters, doc, options );
+		SerializeCategoryData( CategoryData, doc, options );
 
 		doc.Add( JsonKeys.Version, JsonSerializer.SerializeToNode( Version, options ) );
 
@@ -65,8 +67,10 @@ partial class ShaderGraphPlus
 		}
 
 		DeserializeObject( this, root, options );
+		DeserializeCategoryData( root, options );
 		DeserializeParameters( root, options );
 		DeserializeNodes( root, options, subgraphPath, fileVersion );
+
 	}
 
 	private bool HandleGraphUpgrades( int fileVersion, JsonObject json, JsonSerializerOptions options, out JsonElement upgradedElement )
@@ -326,9 +330,40 @@ partial class ShaderGraphPlus
 		return parameters.Values;
 	}
 
-	public string SerializeNodes()
+	public IEnumerable<CategoryData> DeserializeCategoryData( string json )
 	{
-		return SerializeNodes( Nodes );
+		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
+		var root = doc.RootElement;
+
+		return DeserializeCategoryData( root, SerializerOptions() );
+	}
+
+	private IEnumerable<CategoryData> DeserializeCategoryData( JsonElement doc, JsonSerializerOptions options )
+	{
+		var data = new Dictionary<string, CategoryData>();
+
+		if ( doc.TryGetProperty( JsonKeys.CategoryDataArray, out var arrayProperty ) )
+		{
+			foreach ( var element in arrayProperty.EnumerateArray() )
+			{
+				var typeName = element.GetProperty( JsonKeys.Class ).GetString();
+				var typeDesc = EditorTypeLibrary.GetType<CategoryData>( typeName );
+
+				CategoryData categoryData;
+
+				if ( typeDesc != null )
+				{
+					categoryData = EditorTypeLibrary.Create<CategoryData>( typeName );
+					DeserializeObject( categoryData, element, options );
+
+					data.Add( categoryData.Name, categoryData );
+
+					AddCategoryData( categoryData );
+				}
+			}
+		}
+
+		return data.Values;
 	}
 
 	public string UndoStackSerialize()
@@ -337,8 +372,14 @@ partial class ShaderGraphPlus
 		var options = SerializerOptions();
 
 		doc = SerializeNodes( Nodes, doc );
+		doc = SerializeParameters( Parameters, doc );
 
-		return SerializeParameters( Parameters, doc ).ToJsonString( options );
+		return SerializeCategoryData( CategoryData, doc ).ToJsonString( options );
+	}
+
+	public string SerializeNodes()
+	{
+		return SerializeNodes( Nodes );
 	}
 
 	public string SerializeNodes( IEnumerable<BaseNodePlus> nodes )
@@ -477,6 +518,47 @@ partial class ShaderGraphPlus
 		}
 
 		doc.Add( JsonKeys.ParameterArray, parameterArray );
+	}
+
+	public string SerializeCategoryData()
+	{
+		return SerializeCategoryData( CategoryData );
+	}
+
+	private string SerializeCategoryData( IEnumerable<CategoryData> data )
+	{
+		var doc = new JsonObject();
+		var options = SerializerOptions();
+
+		SerializeCategoryData( data, doc, options );
+
+		return doc.ToJsonString( options );
+	}
+
+	private JsonObject SerializeCategoryData( IEnumerable<CategoryData> data, JsonObject doc )
+	{
+		var options = SerializerOptions();
+
+		SerializeCategoryData( data, doc, options );
+
+		return doc;
+	}
+
+	private static void SerializeCategoryData( IEnumerable<CategoryData> data, JsonObject doc, JsonSerializerOptions options )
+	{
+		var categoryDataArray = new JsonArray();
+
+		foreach ( var parameter in data )
+		{
+			var type = parameter.GetType();
+			var categoryDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
+
+			SerializeObject( parameter, categoryDataObject, options );
+
+			categoryDataArray.Add( categoryDataObject );
+		}
+
+		doc.Add( JsonKeys.CategoryDataArray, categoryDataArray );
 	}
 
 }

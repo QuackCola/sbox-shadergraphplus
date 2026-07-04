@@ -126,7 +126,10 @@ public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitia
 		{
 			var parameter = graph.FindParameter<ShaderFeatureEnumParameter>( ParameterIdentifier );
 
-			return parameter;
+			if ( parameter != null )
+			{
+				return parameter;
+			}
 		}
 
 		return new ShaderFeatureEnumParameter();

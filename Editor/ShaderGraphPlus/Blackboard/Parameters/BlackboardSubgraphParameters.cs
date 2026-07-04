@@ -86,6 +86,11 @@ public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParamet
 		Min = 0.0f;
 		Max = 1.0f;
 	}
+
+	public override int GetHashCode()
+	{
+		return HashCode.Combine( Name, Description, Value, Min, Max, IsRequired, PortOrder );
+	}
 }
 
 /// <summary>

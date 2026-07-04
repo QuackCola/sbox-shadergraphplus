@@ -41,7 +41,7 @@ public class MainWindow : DockWindow
 
 	private ShaderGraphPlus _graph;
 	private ShaderGraphPlusView _graphView;
-	private BlackboardView _blackboardView;
+	private ShaderGraphPlusBlackboardView _blackboardView;
 	private Asset _asset;
 
 	public string AssetPath => _asset?.Path;
@@ -109,12 +109,16 @@ public class MainWindow : DockWindow
 	private Dictionary<string, ShaderFeatureBase> ShaderFeatures = new();
 	private List<GraphCompiler.GraphIssue> BlackboardIssues { get; set; } = new();
 
+	public SelectionSystem Selection { get; set; }
+
 	public MainWindow()
 	{
 		DeleteOnClose = true;
 
 		Title = FileType;
 		Size = new Vector2( 1700, 1050 );
+
+		Selection = new();
 
 		_graph = new();
 		_graph.IsSubgraph = IsSubgraph;
@@ -172,72 +176,77 @@ public class MainWindow : DockWindow
 		_preview.Material = Material.Load( "materials/core/shader_editor.vmat" );
 	}
 
+
+	public void OnDeselected( object oldSelection )
+	{
+		//if ( oldSelection is BlackboardParameter || oldSelection is CategoryData )
+		//{
+		//	_blackboardView.ClearSelection();
+		//}
+	}
+
 	public void OnSelected( object selection )
 	{
-		if ( selection == null )
+		void SetDefaultSelection()
 		{
-			_blackboardView.ClearSelection();
-			_properties.Target = _graph;
-
-			return;
+			Selection.Set( _graph );
 		}
 
-		var oldTarget = _properties.Target;
-		if ( selection is BlackboardParameter parameter )
+		if ( selection != null )
 		{
-			if ( oldTarget is BaseNodePlus )
+			if ( selection is BaseNodePlus node )
 			{
-				_graphView.ClearSelection();
-			}
 
-			_properties.Target = parameter;
-		}
-		else if ( selection is ShaderGraphPlus )
-		{
-			if ( oldTarget is BlackboardParameter )
-			{
-				_blackboardView.ClearSelection();
-			}
-
-			_properties.Target = _graph;
-		}
-		else if ( selection is BaseNodePlus node )
-		{
-			if ( oldTarget is BlackboardParameter )
-			{
-				_blackboardView.ClearSelection();
-			}
-
-			if ( node is IBlackboardNode blackboardNode )
-			{
-				// For now only select a blackboard parameter when _graphView only has 1 selection.
-				if ( _graphView.SelectedItems.Count() == 1 )
+				if ( node is IBlackboardNode blackboardNode )
 				{
-					if ( blackboardNode.ParameterIdentifier != default )
+					// For now only select a blackboard parameter when _graphView only has 1 selection.
+					if ( _graphView.SelectedItems.Count() == 1 )
 					{
-						var blackboardParameter = _graph.FindParameter( blackboardNode.ParameterIdentifier );
-						_blackboardView.SetSelection( blackboardParameter );
-						_properties.Target = blackboardParameter;
+						if ( blackboardNode.ParameterIdentifier != default )
+						{
+							var blackboardParameter = _graph.FindParameter( blackboardNode.ParameterIdentifier );
+
+							if ( blackboardParameter != null )
+							{
+								_blackboardView.SetSelection( blackboardParameter );
+								_properties.Target = blackboardParameter;
+							}
+							else
+							{
+								_blackboardView.SetSelection( null );
+								SetDefaultSelection();
+							}
+
+						}
+					}
+					else
+					{
+						SetDefaultSelection();
 					}
 				}
 				else
 				{
-					_properties.Target = _graph;
+					Selection.Set( node );
 				}
-			}
-			else
-			{
-				_properties.Target = node;
+
+				if ( EnableNodePreview && (node != null && node.CanPreview) )
+				{
+					_preview.SetStage( node.PreviewID );
+				}
+				else
+				{
+					_preview.SetStage( ShaderGraphPlusGlobals.GraphCompiler.NoNodePreviewID );
+				}
+
+				return;
 			}
 
-			if ( EnableNodePreview && (node != null && node.CanPreview) )
-			{
-				_preview.SetStage( node.PreviewID );
-			}
-			else
-			{
-				_preview.SetStage( ShaderGraphPlusGlobals.GraphCompiler.NoNodePreviewID );
-			}
+			Selection.Set( selection );
+		}
+		else
+		{
+			SetDefaultSelection();
+			return;
 		}
 	}
 
@@ -948,9 +957,11 @@ public class MainWindow : DockWindow
 			_redoOption.Enabled = _undoStack.CanUndo;
 
 			_graph.ClearNodes();
+			_graph.ClearCategoryData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.undoBuffer, true );
+			_graph.DeserializeCategoryData( op.undoBuffer );
 			_graph.DeserializeParameters( op.undoBuffer );
 
 			_graphView.RebuildFromGraph();
@@ -970,9 +981,11 @@ public class MainWindow : DockWindow
 			_redoOption.Enabled = _undoStack.CanRedo;
 
 			_graph.ClearNodes();
+			_graph.ClearCategoryData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.redoBuffer, true );
+			_graph.DeserializeCategoryData( op.redoBuffer );
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
@@ -989,9 +1002,11 @@ public class MainWindow : DockWindow
 			SGPLogger.Info( $"SetUndoLevel ({op.name})" );
 
 			_graph.ClearNodes();
+			_graph.ClearCategoryData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.redoBuffer, true );
+			_graph.DeserializeCategoryData( op.redoBuffer );
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
@@ -1244,6 +1259,8 @@ public class MainWindow : DockWindow
 
 	public void CreateNew()
 	{
+		Selection.Clear();
+
 		_asset = null;
 		_graph = new();
 		_dirty = false;
@@ -1256,9 +1273,8 @@ public class MainWindow : DockWindow
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeTextView.SetTextContents( "" );
-		_properties.Target = _graph;
+		Selection.Set( _graph );
 
-		_blackboardView.Rebuild();
 		_output.ClearErrors();
 		_output.ClearWarnings();
 
@@ -1346,6 +1362,8 @@ public class MainWindow : DockWindow
 		_preview.Model = string.IsNullOrWhiteSpace( graph.Model ) ? null : Model.Load( graph.Model );
 		_preview.LoadSettings( graph.PreviewSettings );
 
+		Selection.Clear();
+
 		_asset = asset;
 		_graph = graph;
 		_dirty = false;
@@ -1356,9 +1374,9 @@ public class MainWindow : DockWindow
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeTextView.SetTextContents( "" );
-		_properties.Target = _graph;
+		Selection.Set( _graph );
 
-		_blackboardView.Rebuild();
+		_blackboardView.RebuildTreeView();
 
 		if ( addToPath )
 			AddFileHistory( path );
@@ -1634,9 +1652,9 @@ public class MainWindow : DockWindow
 		_blackboardCanvas.Layout.Spacing = 8;
 		_blackboardCanvas.Layout.Margin = 4;
 
-		_blackboardView = new BlackboardView( _blackboardCanvas, this );
+		_blackboardView = new ShaderGraphPlusBlackboardView( _blackboardCanvas, this );
 		_blackboardView.Graph = _graph;
-		_blackboardView.OnDirty += () => SetDirty();
+		_blackboardView.OnDirty += ( evaluate ) => SetDirty( evaluate );
 		_blackboardView.OnParameterNodeDeleted += () =>
 		{
 			_graphView.RebuildFromGraph();
@@ -1737,6 +1755,12 @@ public class MainWindow : DockWindow
 		{
 			_preview.SetFeature( value.Key, value.Value );
 		}
+
+		Selection.OnItemAdded += ( x ) =>
+		{
+			_properties.Target = x;
+		};
+		Selection.OnItemRemoved += OnDeselected;
 
 		_properties = new Properties( this );
 		_properties.Target = _graph;

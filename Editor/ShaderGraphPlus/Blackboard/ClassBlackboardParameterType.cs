@@ -47,6 +47,39 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 
 		return parameter;
 	}
+
+	internal static ClassBlackboardParameterType HookupParameterType( TypeDescription type )
+	{
+		var parameterType = new ClassBlackboardParameterType( type );
+
+		// Use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) ||
+			 type.TargetType.IsAssignableTo( typeof( SamplerStateParameter ) )
+		)
+		{
+			parameterType = new MaterialParameterType( type );
+		}
+		else if ( type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
+		{
+			parameterType = new SubgraphParameterType( type );
+		}
+		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+		{
+			parameterType = new ShaderFeatureParameterType( type );
+		}
+
+		return parameterType;
+	}
+}
+
+public sealed class GroupParameterType : ClassBlackboardParameterType
+{
+	protected override string DefaultBaseName => "Group";
+
+	public GroupParameterType( TypeDescription type ) : base( type )
+	{
+	}
 }
 
 public sealed class MaterialParameterType : ClassBlackboardParameterType

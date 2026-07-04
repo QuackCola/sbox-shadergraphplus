@@ -460,13 +460,17 @@ public class GraphView : GraphicsView, IGridSizeView
 		OnSelectionChanged?.Invoke();
 	}
 
-	public void ClearSelection()
+	public void ClearSelection( bool skipEvent = false )
 	{
 		foreach ( var item in SelectedItems )
 		{
 			item.Selected = false;
 		}
-		OnSelectionChanged?.Invoke();
+
+		if ( skipEvent )
+		{
+			OnSelectionChanged?.Invoke();
+		}
 	}
 
 	protected virtual void RemoveNode( NodeUI node )

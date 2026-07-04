@@ -6,7 +6,7 @@ public interface IParameterNode
 	string Name { get; }
 }
 
-public abstract class ParameterNode<T, Y> : ShaderNodePlus, IParameterNode, IBlackboardNode where Y : BlackboardParameter
+public abstract class ParameterNode<T, Y> : BlackboardNode<Y>, IParameterNode where Y : BlackboardParameter
 {
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.ParameterNode;
@@ -16,9 +16,6 @@ public abstract class ParameterNode<T, Y> : ShaderNodePlus, IParameterNode, IBla
 
 	[Hide]
 	protected bool IsSubgraph => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.IsSubgraph);
-
-	[Hide, Browsable( false )]
-	public Guid ParameterIdentifier { get; set; }
 
 	[JsonIgnore, Hide, Browsable( false )]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -61,16 +58,6 @@ public abstract class ParameterNode<T, Y> : ShaderNodePlus, IParameterNode, IBla
 			_lastNameHashCode = nameHashCode;
 			Update();
 		}
-	}
-
-	protected Y GetParameter()
-	{
-		if ( Graph is ShaderGraphPlus graph )
-		{
-			return graph.FindParameter<Y>( ParameterIdentifier );
-		}
-
-		return null;
 	}
 
 	protected NodeResult Component( string component, float value, GraphCompiler compiler )

@@ -10,13 +10,13 @@ public class ShaderGraphPlusView : GraphView
 	{
 		None,
 		NodePallete,
-		BlackboardParameter,
+		Blackboard,
 		SubgraphAsset,
 		ImageFile,
 	}
 
 	private readonly MainWindow _window;
-	private readonly BlackboardView _blackboard;
+	private readonly ShaderGraphPlusBlackboardView _blackboard;
 	private readonly UndoStack _undoStack;
 
 	private DragEventSource _currentDragEventSource = DragEventSource.None;
@@ -50,7 +50,7 @@ public class ShaderGraphPlusView : GraphView
 	? GridConnectionStyle.Instance
 	: ConnectionStyle.Default;
 
-	public ShaderGraphPlusView( Widget parent, MainWindow window, BlackboardView blackboard ) : base( parent )
+	public ShaderGraphPlusView( Widget parent, MainWindow window, ShaderGraphPlusBlackboardView blackboard ) : base( parent )
 	{
 		_window = window;
 		_blackboard = blackboard;
@@ -103,24 +103,7 @@ public class ShaderGraphPlusView : GraphView
 
 	public void AddParameterType( TypeDescription type )
 	{
-		var parameterType = new ClassBlackboardParameterType( type );
-
-		// Use these specific ClassBlackboardParameterType's instead. Fallback to the default just in case.
-		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) ||
-			 type.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) ||
-			 type.TargetType.IsAssignableTo( typeof( SamplerStateParameter ) )
-			)
-		{
-			parameterType = new MaterialParameterType( type );
-		}
-		else if ( type.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
-		{
-			parameterType = new SubgraphParameterType( type );
-		}
-		if ( type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
-		{
-			parameterType = new ShaderFeatureParameterType( type );
-		}
+		var parameterType = ClassBlackboardParameterType.HookupParameterType( type );
 
 		AvailableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
@@ -154,11 +137,11 @@ public class ShaderGraphPlusView : GraphView
 			}
 		}
 
-		if ( ev.Data.Object is BlackboardParameter blackboardParameter )
+		if ( ev.Data.Object is not BlackboardGroupTreeNode && ev.Data.Object is ShaderGraphPlusParameterTreeNode parameterTreeNode && parameterTreeNode.Value is BlackboardParameter parameter )
 		{
-			_currentDragEventSource = DragEventSource.BlackboardParameter;
+			_currentDragEventSource = DragEventSource.Blackboard;
 
-			return new ParameterNodeType( blackboardParameter );
+			return new ParameterNodeType( parameter );
 		}
 
 		_currentDragEventSource = DragEventSource.NodePallete;
@@ -588,9 +571,8 @@ public class ShaderGraphPlusView : GraphView
 		return node;
 	}
 
-	/// <summary>
-	/// TODO : FIXME!!!
-	/// </summary>
+	// TODO : FIXME!!!
+	/*
 	private void CreateSubgraphFromSelection( string filePath )
 	{
 		if ( string.IsNullOrWhiteSpace( filePath ) ) return;
@@ -723,101 +705,102 @@ public class ShaderGraphPlusView : GraphView
 		}
 
 		// Create Output/Result node
-		//var frNode = FindNodeType( typeof( FunctionResult ) ).CreateNode( subgraph );
-		//if ( frNode is FunctionResult resultNode )
-		//{
-		//	resultNode.Position = rightmostPos + new Vector2( 240, 0 );
-		//	resultNode.FunctionOutputs = new();
-		//	foreach ( var node in subgraph.Nodes )
-		//	{
-		//		foreach ( var output in node.Outputs )
-		//		{
-		//			var correspondingNode = Graph.Nodes.FirstOrDefault( x => !subgraph.Nodes.Contains( x ) && x.Inputs.Any( x => x.ConnectedOutput == output ) );
-		//			if ( correspondingNode is null ) continue;
-		//			var inputName = $"{output.Identifier}_{output.Node.Identifier}";
-		//			resultNode.FunctionOutputs.Add( new FunctionOutput
-		//			{
-		//				Name = inputName,
-		//				TypeName = output.Type.FullName
-		//			} );
-		//			resultNode.CreateInputs();
-		//
-		//			var input = resultNode.Inputs.FirstOrDefault( x => x is BasePlugIn plugIn && plugIn.Info.Name == inputName );
-		//			input.ConnectedOutput = output;
-		//			break;
-		//		}
-		//	}
-		//	nodesToAdd.Add( resultNode );
-		//}
-		//
-		//// Add all the newly created nodes
-		//foreach ( var node in nodesToAdd )
-		//{
-		//	subgraph.AddNode( node );
-		//}
-		//
-		//// Save the newly created sub-graph
-		//System.IO.File.WriteAllText( filePath, subgraph.Serialize() );
-		//var asset = AssetSystem.RegisterFile( filePath );
-		//MainAssetBrowser.Instance?.Local.UpdateAssetList();
-		//
-		//PushUndo( "Create Subgraph from Selection" );
-		//
-		//// Create the new subgraph node centered on the selected nodes
-		//Vector2 centerPos = Vector2.Zero;
-		//foreach ( var node in selectedNodes )
-		//{
-		//	centerPos += node.Position;
-		//}
-		//centerPos /= selectedNodes.Count();
-		//var subgraphNode = CreateNewNode( new SubgraphNodeType( asset.RelativePath, EditorTypeLibrary.GetType<SubgraphNode>() ) ).Node as SubgraphNode;
-		//subgraphNode.Position = centerPos;
-		//
-		//// Get all the collected inputs/outputs and connect them to the new subgraph node
-		//foreach ( var node in Graph.Nodes )
-		//{
-		//	if ( node == subgraphNode ) continue;
-		//
-		//	if ( selectedNodes.Any( x => x.Node == node ) )
-		//	{
-		//		foreach ( var input in node.Inputs )
-		//		{
-		//			var correspondingOutput = oldConnections[input];
-		//			if ( correspondingOutput is not null && !selectedNodes.Any( x => x.Node == correspondingOutput.Node ) )
-		//			{
-		//				var inputName = $"{input.Identifier}_{correspondingOutput.Node.Identifier}";
-		//				var newInput = subgraphNode.Inputs.FirstOrDefault( x => x.Identifier == inputName );
-		//				if ( previousOutputs.TryGetValue( inputName, out var previousOutput ) )
-		//				{
-		//					newInput.ConnectedOutput = previousOutput;
-		//				}
-		//			}
-		//		}
-		//	}
-		//	else
-		//	{
-		//		foreach ( var input in node.Inputs )
-		//		{
-		//			var correspondingOutput = input.ConnectedOutput;
-		//			if ( correspondingOutput is not null && selectedNodes.Any( x => x.Node == correspondingOutput.Node ) )
-		//			{
-		//				var inputName = $"{correspondingOutput.Identifier}_{correspondingOutput.Node.Identifier}";
-		//				var newOutput = subgraphNode.Outputs.FirstOrDefault( x => x.Identifier == inputName );
-		//				if ( newOutput is not null )
-		//				{
-		//					input.ConnectedOutput = newOutput;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
-		//
-		//PushRedo();
-		//DeleteSelection();
-		//
-		// Delete all previously selected nodes
-		//UpdateConnections( Graph.Nodes );
+		var frNode = FindNodeType( typeof( FunctionResult ) ).CreateNode( subgraph );
+		if ( frNode is FunctionResult resultNode )
+		{
+			resultNode.Position = rightmostPos + new Vector2( 240, 0 );
+			resultNode.FunctionOutputs = new();
+			foreach ( var node in subgraph.Nodes )
+			{
+				foreach ( var output in node.Outputs )
+				{
+					var correspondingNode = Graph.Nodes.FirstOrDefault( x => !subgraph.Nodes.Contains( x ) && x.Inputs.Any( x => x.ConnectedOutput == output ) );
+					if ( correspondingNode is null ) continue;
+					var inputName = $"{output.Identifier}_{output.Node.Identifier}";
+					resultNode.FunctionOutputs.Add( new FunctionOutput
+					{
+						Name = inputName,
+						TypeName = output.Type.FullName
+					} );
+					resultNode.CreateInputs();
+		
+					var input = resultNode.Inputs.FirstOrDefault( x => x is BasePlugIn plugIn && plugIn.Info.Name == inputName );
+					input.ConnectedOutput = output;
+					break;
+				}
+			}
+			nodesToAdd.Add( resultNode );
+		}
+		
+		// Add all the newly created nodes
+		foreach ( var node in nodesToAdd )
+		{
+			subgraph.AddNode( node );
+		}
+		
+		// Save the newly created sub-graph
+		System.IO.File.WriteAllText( filePath, subgraph.Serialize() );
+		var asset = AssetSystem.RegisterFile( filePath );
+		MainAssetBrowser.Instance?.Local.UpdateAssetList();
+		
+		PushUndo( "Create Subgraph from Selection" );
+		
+		// Create the new subgraph node centered on the selected nodes
+		Vector2 centerPos = Vector2.Zero;
+		foreach ( var node in selectedNodes )
+		{
+			centerPos += node.Position;
+		}
+		centerPos /= selectedNodes.Count();
+		var subgraphNode = CreateNewNode( new SubgraphNodeType( asset.RelativePath, EditorTypeLibrary.GetType<SubgraphNode>() ) ).Node as SubgraphNode;
+		subgraphNode.Position = centerPos;
+		
+		// Get all the collected inputs/outputs and connect them to the new subgraph node
+		foreach ( var node in Graph.Nodes )
+		{
+			if ( node == subgraphNode ) continue;
+		
+			if ( selectedNodes.Any( x => x.Node == node ) )
+			{
+				foreach ( var input in node.Inputs )
+				{
+					var correspondingOutput = oldConnections[input];
+					if ( correspondingOutput is not null && !selectedNodes.Any( x => x.Node == correspondingOutput.Node ) )
+					{
+						var inputName = $"{input.Identifier}_{correspondingOutput.Node.Identifier}";
+						var newInput = subgraphNode.Inputs.FirstOrDefault( x => x.Identifier == inputName );
+						if ( previousOutputs.TryGetValue( inputName, out var previousOutput ) )
+						{
+							newInput.ConnectedOutput = previousOutput;
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach ( var input in node.Inputs )
+				{
+					var correspondingOutput = input.ConnectedOutput;
+					if ( correspondingOutput is not null && selectedNodes.Any( x => x.Node == correspondingOutput.Node ) )
+					{
+						var inputName = $"{correspondingOutput.Identifier}_{correspondingOutput.Node.Identifier}";
+						var newOutput = subgraphNode.Outputs.FirstOrDefault( x => x.Identifier == inputName );
+						if ( newOutput is not null )
+						{
+							input.ConnectedOutput = newOutput;
+						}
+					}
+				}
+			}
+		}
+		
+		PushRedo();
+		DeleteSelection();
+		
+		 Delete all previously selected nodes
+		UpdateConnections( Graph.Nodes );
 	}
+	*/
 
 	private void SelectionChanged()
 	{

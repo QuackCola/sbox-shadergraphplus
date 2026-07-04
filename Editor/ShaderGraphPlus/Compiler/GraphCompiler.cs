@@ -1062,10 +1062,34 @@ public sealed partial class GraphCompiler
 		var isAttribute = false;
 		IParameterUI parameterUI = default;
 
+		var priority = Graph.GetParameterIndex( parameter as BlackboardParameter );
+
 		if ( parameter is IBlackboardMaterialParameter materialParameter )
 		{
 			isAttribute = materialParameter.IsAttribute;
-			parameterUI = materialParameter.GetParameterUI();
+
+			// Getting the Priority from the OrderedDictionary now :3
+			var newUI = materialParameter.UI;
+			newUI.Priority = priority;
+			parameterUI = newUI;
+		}
+
+		if ( parameter is IGroupableBlackboardParameter groupableParameter )
+		{
+			if ( groupableParameter.IsGrouped )
+			{
+				if ( Graph.TryFindCategoryData( groupableParameter.GroupReference, out var category ) )
+				{
+					parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
+					parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
+					{
+						Name = category.Name,
+						Priority = category.Priority
+					};
+
+					//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
+				}
+			}
 		}
 
 		if ( parameter is IRangedBlackboardMaterialParameter rangedParameter )

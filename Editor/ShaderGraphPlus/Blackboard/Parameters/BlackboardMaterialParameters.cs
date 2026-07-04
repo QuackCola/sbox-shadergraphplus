@@ -281,14 +281,25 @@ public sealed class TextureCubeParameter : BlackboardTextureMaterialParameter
 /// SamplerState material parameter
 /// </summary>
 [Title( "Sampler State" ), Icon( "colorize" ), Order( 8 )]
-public sealed class SamplerStateParameter : BlackboardParameter
+public sealed class SamplerStateParameter : BlackboardParameter, IGroupableBlackboardParameter
 {
 	[InlineEditor( Label = false ), Group( "Value" )]
 	public Sampler Value { get; set; }
 
+	[Hide]
+	public Guid GroupReference { get; set; } = Guid.Empty;
+
+	[Hide]
+	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
+
 	public SamplerStateParameter() : base()
 	{
 		Value = new Sampler();
+	}
+
+	public override int GetHashCode()
+	{
+		return HashCode.Combine( Name, GroupReference );
 	}
 
 	public override object GetValue()
@@ -319,7 +330,7 @@ public sealed class SamplerStateParameter : BlackboardParameter
 ///
 /// </summary>
 [Title( "Shader Feature Boolean" ), Icon( "tune" ), Order( 9 )]
-public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackboardShaderFeatureParameter
+public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackboardShaderFeatureParameter, IGroupableBlackboardParameter
 {
 	[Hide, JsonIgnore, Browsable( false )]
 	public override bool IsValid => !string.IsNullOrWhiteSpace( Name );
@@ -344,8 +355,19 @@ public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackb
 	[Title( "Preview" )]
 	public bool Preview { get; set; } = false;
 
+	[Hide]
+	public Guid GroupReference { get; set; } = Guid.Empty;
+
+	[Hide]
+	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
+
 	public ShaderFeatureBooleanParameter() : base()
 	{
+	}
+
+	public override int GetHashCode()
+	{
+		return HashCode.Combine( Name, GroupReference );
 	}
 
 	public override object GetValue()
@@ -371,7 +393,7 @@ public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackb
 ///
 /// </summary>
 [Title( "Shader Feature Enum" ), Icon( "tune" ), Order( 10 )]
-public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboardShaderFeatureParameter
+public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboardShaderFeatureParameter, IGroupableBlackboardParameter
 {
 	[Hide, JsonIgnore, Browsable( false )]
 	public override bool IsValid => !string.IsNullOrWhiteSpace( Name ) && Options.All( x => !string.IsNullOrWhiteSpace( x.Name ) );
@@ -402,9 +424,30 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 	[Title( "Preview" )]
 	public int PreviewIndex { get; set; } = 0;
 
+	[Hide]
+	public Guid GroupReference { get; set; } = Guid.Empty;
+
+	[Hide]
+	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
+
 	public ShaderFeatureEnumParameter() : base()
 	{
 		Options = new List<ShaderFeatureEnumOption>();
+	}
+
+	public override int GetHashCode()
+	{
+		HashCode hc = new HashCode();
+		hc.Add( Name );
+		hc.Add( Description );
+		hc.Add( HeaderName );
+
+		foreach ( var option in Options )
+		{
+			hc.Add( option );
+		}
+
+		return hc.ToHashCode();
 	}
 
 	public override object GetValue()

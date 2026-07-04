@@ -10,6 +10,10 @@ internal static class ConCommands
 
 	public static bool NodeDebugInfo { get; internal set; } = false;
 
+	public static bool BlackboardParameterIndexDebug { get; internal set; } = false;
+
+	public static bool BlackboardTreeReOrderDebugPrinting { get; internal set; } = false;
+
 	private static IEnumerable<MainWindow> GetAllShaderGraphPlusWindows()
 	{
 		return Editor.Window.All.OfType<MainWindow>();
@@ -37,5 +41,17 @@ internal static class ConCommands
 	public static void CC_DebugNodeInfo( bool value )
 	{
 		NodeDebugInfo = value;
+	}
+
+	[ConCmd( "sgp_debug_blackboardtree_parameter_index" )]
+	public static void CC_BlackboardParameterIndexDebug( bool value )
+	{
+		BlackboardParameterIndexDebug = value;
+	}
+
+	[ConCmd( "sgp_debug_blackboardtree_reorder" )]
+	public static void CC_BlackboardTreeReOrderDebug( bool value )
+	{
+		BlackboardTreeReOrderDebugPrinting = value;
 	}
 }

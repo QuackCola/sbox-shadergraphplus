@@ -378,7 +378,7 @@ public sealed class SamplerStateParameterNode : ParameterNode<Sampler, SamplerSt
 /// </summary>
 [Title( "Texture 2D" ), Category( "Parameters" ), Icon( "image" ), Order( 7 )]
 [Hide]
-public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode, IBlackboardNode
+public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>, IParameterNode//, IBlackboardNode
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -391,21 +391,8 @@ public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode, IBl
 	[Hide]
 	public string Name => UI.Name;
 
-	[Hide]
-	public Guid ParameterIdentifier { get; set; }
-
 	[JsonIgnore, Hide]
 	public TextureInput UI => GetParameter().Value;
-
-	private Texture2DParameter GetParameter()
-	{
-		if ( Graph is ShaderGraphPlus graph )
-		{
-			return graph.FindParameter<Texture2DParameter>( ParameterIdentifier );
-		}
-
-		return null;
-	}
 
 	public Texture2DParameterNode()
 	{
@@ -418,6 +405,24 @@ public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode, IBl
 		var input = UI;
 		input.Type = TextureType.Tex2D;
 
+		if ( Graph is ShaderGraphPlus graph )
+		{
+			var parameter = GetParameter();
+			var parameterOrder = graph.GetParameterIndex( parameter );
+
+			if ( parameter.IsGrouped )
+			{
+				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
+
+				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
+				input.PrimaryGroup = input.PrimaryGroup with
+				{
+					Name = targetGroup.Name,
+					Priority = targetGroup.Priority
+				};
+			}
+		}
+
 		var textureGlobal = compiler.ResultTexture( input, null, true );
 
 		return new NodeResult( ResultType.Texture2D, textureGlobal, true );
@@ -429,7 +434,7 @@ public sealed class Texture2DParameterNode : ShaderNodePlus, IParameterNode, IBl
 /// </summary>
 [Title( "Texture Cube" ), Category( "Parameters" ), Icon( "image" ), Order( 8 )]
 [Hide]
-public sealed class TextureCubeParameterNode : ShaderNodePlus, IParameterNode, IBlackboardNode
+public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParameter>, IParameterNode
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -442,21 +447,8 @@ public sealed class TextureCubeParameterNode : ShaderNodePlus, IParameterNode, I
 	[Hide]
 	public string Name => UI.Name;
 
-	[Hide]
-	public Guid ParameterIdentifier { get; set; }
-
 	[JsonIgnore, Hide]
 	public TextureInput UI => GetParameter().Value;
-
-	private TextureCubeParameter GetParameter()
-	{
-		if ( Graph is ShaderGraphPlus graph )
-		{
-			return graph.FindParameter<TextureCubeParameter>( ParameterIdentifier );
-		}
-
-		return null;
-	}
 
 	public TextureCubeParameterNode()
 	{
@@ -468,6 +460,24 @@ public sealed class TextureCubeParameterNode : ShaderNodePlus, IParameterNode, I
 	{
 		var input = UI;
 		input.Type = TextureType.TexCube;
+
+		if ( Graph is ShaderGraphPlus graph )
+		{
+			var parameter = GetParameter();
+			var parameterOrder = graph.GetParameterIndex( parameter );
+
+			if ( parameter.IsGrouped )
+			{
+				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
+
+				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
+				input.PrimaryGroup = input.PrimaryGroup with
+				{
+					Name = targetGroup.Name,
+					Priority = targetGroup.Priority
+				};
+			}
+		}
 
 		var textureGlobal = compiler.ResultTexture( input, null, true );
 
