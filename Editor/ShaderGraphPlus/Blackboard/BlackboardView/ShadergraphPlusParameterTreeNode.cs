@@ -43,6 +43,32 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 		return sb.ToString();
 	}
 
+	protected override void OnPaintItemDropping( VirtualWidget item, Rect dropRect )
+	{
+		var dragEvent = TreeView.CurrentItemDragEvent;
+		var sourceNode = dragEvent.Data.Object as BlackboardTreeNode;
+		var targetNode = this;
+
+		Paint.ClearPen();
+		Paint.SetBrush( Theme.Blue );
+
+		if ( IsGrouped )
+		{
+			dropRect = dropRect.Shrink( 24, 0, 0, 0 );
+		}
+
+		if ( dragEvent.DropEdge.HasFlag( ItemEdge.Top ) )
+		{
+			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+			Paint.DrawLine( dropRect.TopLeft, dropRect.TopRight );
+		}
+		else if ( dragEvent.DropEdge.HasFlag( ItemEdge.Bottom ) || dragEvent.DropEdge.HasFlag( ItemEdge.None ) )
+		{
+			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+			Paint.DrawLine( dropRect.BottomLeft, dropRect.BottomRight );
+		}
+	}
+
 	protected override void PaintSpecial( Rect item )
 	{
 		var targetValue = Value;

@@ -93,6 +93,43 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 		return Value.IsDescendant( obj as IGroupableBlackboardParameter );
 	}
 
+	protected override void OnPaintItemDropping( VirtualWidget item, Rect dropRect )
+	{
+		var dragEvent = TreeView.CurrentItemDragEvent;
+		var sourceNode = dragEvent.Data.Object as BlackboardTreeNode;
+		var targetNode = this;
+
+		Paint.ClearPen();
+		Paint.SetBrush( Theme.Blue );
+
+		if ( dragEvent.DropEdge.HasFlag( ItemEdge.Top ) )
+		{
+			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+			Paint.DrawLine( dropRect.TopLeft, dropRect.TopRight );
+		}
+		else if ( dragEvent.DropEdge.HasFlag( ItemEdge.Bottom )  )
+		{
+			Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+			Paint.DrawLine( dropRect.BottomLeft, dropRect.BottomRight );
+		}
+		else if ( sourceNode is not BlackboardGroupTreeNode && targetNode is BlackboardGroupTreeNode )
+		{
+			Paint.SetBrushAndPen( Theme.Blue.WithAlpha( 0.2f ), Theme.Blue );
+			Paint.PenSize = 2;
+			Paint.DrawRect( item.Rect, 4 );
+		}
+		else if ( sourceNode is BlackboardGroupTreeNode && targetNode is BlackboardGroupTreeNode )
+		{
+			var groupRect = item.Rect;
+			groupRect.Left = 0;
+			groupRect.Right = TreeView.Width;
+
+			Paint.SetBrushAndPen( Theme.Blue.WithAlpha( 0.2f ), Theme.Blue );
+			Paint.PenSize = 2;
+			Paint.DrawRect( groupRect, 4 );
+		}
+	}
+
 	protected override void PaintSpecial( Rect item )
 	{
 		float opacity = 0.9f;
