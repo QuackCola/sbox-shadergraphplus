@@ -120,8 +120,6 @@ public abstract class BlackboardTreeNode : TreeNode
 
 			if ( e.IsDrop )
 			{
-				using var undoScope = TreeView?.UndoScope( "Change Parameter Order" );
-
 				InsertNodeAtEdge( sourceNode, e.DropEdge );
 			}
 

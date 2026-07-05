@@ -198,6 +198,8 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 				if ( source.IsGrouped && sourceGroupable.GroupReference != targetGroupable.GroupReference )
 				{
+					using var undoScope = TreeView?.UndoScope( "Move Parameter To Group" );
+
 					RemoveFromGroup( sourceGroupable );
 
 					AddToGroup( sourceGroupable, targetGroupable, before );
@@ -206,26 +208,29 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 				{
 					graph.TryFindCategoryData( targetGroupable.GroupReference, out var categoryData );
 
+					var sourceIndex = categoryData.ParameterReferences.IndexOf( sourceParameter.Identifier );
 					var targetIndex = categoryData.ParameterReferences.IndexOf( targetValue.Identifier );
 
 					if ( !before ) targetIndex++;
 
-					categoryData.ReOrderParameter( sourceParameter, targetIndex );
-					graph.UpdateCategoryData( categoryData );
+					if ( sourceIndex != targetIndex )
+					{
+						using var undoScope = TreeView?.UndoScope( "Change Parameter Order In Group" );
+
+						categoryData.ReOrderParameter( sourceParameter, targetIndex );
+						graph.UpdateCategoryData( categoryData );
+					}
 				}
 				else if ( !source.IsGrouped )
 				{
+					using var undoScope = TreeView?.UndoScope( "Move Parameter To Group" );
+
 					AddToGroup( sourceGroupable, targetGroupable, before );
 				}
 			}
 			else if ( source is not BlackboardGroupTreeNode )
 			{
 				var sourceParameter = source.Value as BlackboardParameter;
-
-				if ( source.IsGrouped )
-				{
-					RemoveFromGroup( source.Value as IGroupableBlackboardParameter );
-				}
 
 				var sourceTreeNodeIndex = graph.GetParameterIndex( sourceParameter );
 				var targetTreeNodeIndex = graph.GetParameterIndex( targetValue );
@@ -243,18 +248,32 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					}
 				}
 
-				if ( source.Value is BlackboardParameter )
+				if ( sourceTreeNodeIndex != targetTreeNodeIndex )
 				{
-					//Log.Info( $"Moving Parameter from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
-				}
-				else if ( source.Value is CategoryData categoryData )
-				{
-					categoryData.Priority = targetTreeNodeIndex;
-					//Log.Info( $"Moving Group from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
-				}
+					if ( source.IsGrouped )
+					{
+						using var undoScope = TreeView?.UndoScope( "Remove Parameter From Group" );
 
-				graph.RemoveParameter( sourceParameter );
-				graph.AddParameter( sourceParameter, targetTreeNodeIndex );
+						RemoveFromGroup( source.Value as IGroupableBlackboardParameter );
+					}
+					else
+					{
+						using var undoScope = TreeView?.UndoScope( "Change Parameter Order" );
+					}
+
+					if ( source.Value is BlackboardParameter )
+					{
+						//Log.Info( $"Moving Parameter from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
+					}
+					else if ( source.Value is CategoryData categoryData )
+					{
+						categoryData.Priority = targetTreeNodeIndex;
+						//Log.Info( $"Moving Group from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
+					}
+
+					graph.RemoveParameter( sourceParameter );
+					graph.AddParameter( sourceParameter, targetTreeNodeIndex );
+				}
 			}
 			else if ( source is BlackboardGroupTreeNode )
 			{
@@ -276,7 +295,12 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					}
 				}
 
-				TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetTreeNodeIndex );
+				if ( sourceTreeNodeIndex != targetTreeNodeIndex )
+				{
+					using var undoScope = TreeView?.UndoScope( "Change Group Order" );
+
+					TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetTreeNodeIndex );
+				}
 			}
 		}
 

@@ -155,7 +155,7 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 
 		if ( source.Value is IGroupableBlackboardParameter parameter && edge == ItemEdge.None )
 		{
-			//using var undoScope = TreeView?.UndoScope( "Move Parameter To Group" );
+			using var undoScope = TreeView?.UndoScope( "Move Parameter To Group" );
 
 			if ( parameter.IsGrouped )
 			{
@@ -182,7 +182,12 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 				targetPriority = TreeView.TreeNodes.Count() - 1;
 			}
 
-			TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetPriority );
+			if ( sourcePriority != targetPriority )
+			{
+				using var undoScope = TreeView?.UndoScope( "Change Group Order" );
+
+				TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetPriority );
+			}
 		}
 	}
 
