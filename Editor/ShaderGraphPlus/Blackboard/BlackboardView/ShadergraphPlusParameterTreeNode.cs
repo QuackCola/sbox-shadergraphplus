@@ -376,6 +376,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 		var parameter = groupableParameter as BlackboardParameter;
 
 		var newGroup = new CategoryData();
+		newGroup.Priority = TreeView.Graph.GetParameterIndex( parameter );
 		newGroup.Graph = TreeView?.Graph;
 		newGroup.NewName();
 		newGroup.ParameterReferences = new()
