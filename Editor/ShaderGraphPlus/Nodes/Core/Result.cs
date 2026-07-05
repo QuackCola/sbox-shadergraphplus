@@ -50,6 +50,7 @@ public sealed class Result : BaseResult
 	public NodeInput Opacity { get; set; }
 
 	[Hide]
+	[Title( "Normal (Tangent)" )]
 	[Input( typeof( Vector3 ) )]
 	[ShowIf( nameof( this.IsLit ), true )]
 	public NodeInput Normal { get; set; }
