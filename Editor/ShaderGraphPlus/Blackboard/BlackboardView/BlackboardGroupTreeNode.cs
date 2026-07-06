@@ -195,12 +195,13 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 
 			TreeView.TreeNodes.Remove( source );
 		}
-		else if ( source.Value is CategoryData sourceCategory && edge == ItemEdge.None )
+		else if ( source.Value is CategoryData && edge != ItemEdge.Bottom )
 		{
+			var sourceCategory = source.Value as CategoryData;
 			var sourcePriority = sourceCategory.Priority;
 			var targetPriority = Value.Priority;
 
-			if ( sourcePriority > targetPriority )
+			if ( edge == ItemEdge.None && sourcePriority > targetPriority )
 			{
 				targetPriority++;
 			}
