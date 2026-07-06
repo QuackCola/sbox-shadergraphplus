@@ -93,6 +93,31 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 		return Value.IsDescendant( obj as IGroupableBlackboardParameter );
 	}
 
+	public override void OnRename( VirtualWidget item, string text, List<TreeNode> selection = null )
+	{
+		using var undoScope = TreeView?.UndoScope( "Rename Group" );
+
+		var categories = selection.Select( x => x.Value ).OfType<CategoryData>().ToArray();
+
+		foreach ( var category in categories )
+		{
+			var id = 0;
+			var newName = text;
+
+			if ( TreeView.Graph.HasCategoryDataWithName( text ) )
+			{
+				while ( TreeView.Graph.HasCategoryDataWithName( $"{text}{id}" ) )
+				{
+					id++;
+				}
+
+				newName = $"{text}{id}";
+			}
+
+			category.Name = newName;
+		}
+	}
+
 	protected override void OnPaintItemDropping( VirtualWidget item, Rect dropRect )
 	{
 		var dragEvent = TreeView.CurrentItemDragEvent;
