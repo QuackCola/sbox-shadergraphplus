@@ -126,10 +126,12 @@ public sealed class ShaderGraphPlusBlackboardTree : BlackboardTree
 
 				if ( category.Priority > nodes.Count() - 1 )
 				{
-					priority = nodes.Count() - 1;
+					nodes.Add( new BlackboardGroupTreeNode( category ) );
 				}
-
-				nodes.Insert( priority, new BlackboardGroupTreeNode( category ) );
+				else
+				{
+					nodes.Insert( priority, new BlackboardGroupTreeNode( category ) );
+				}
 			}
 		}
 	}
