@@ -331,6 +331,9 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 	public override void OnRename( VirtualWidget item, string text, List<TreeNode> selection = null )
 	{
+		if ( Name == text )
+			return;
+
 		using var undoScope = TreeView?.UndoScope( "Rename Parameter" );
 
 		var parameters = selection.Select( x => x.Value ).OfType<BlackboardParameter>().ToArray();

@@ -95,6 +95,9 @@ public class BlackboardGroupTreeNode : BlackboardTreeNode
 
 	public override void OnRename( VirtualWidget item, string text, List<TreeNode> selection = null )
 	{
+		if ( Name == text )
+			return;
+
 		using var undoScope = TreeView?.UndoScope( "Rename Group" );
 
 		var categories = selection.Select( x => x.Value ).OfType<CategoryData>().ToArray();
