@@ -148,6 +148,7 @@ public class ShaderGraphPlusBlackboardView : BlackboardView
 		using var undoScope = UndoScope( "Add Group" );
 
 		var category = new CategoryData();
+		category.Priority = _treeView.TreeNodes.Count();
 		category.Graph = Graph;
 
 		category.NewName();
