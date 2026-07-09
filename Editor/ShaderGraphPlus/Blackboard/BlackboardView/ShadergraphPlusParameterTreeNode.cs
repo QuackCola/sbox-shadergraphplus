@@ -232,23 +232,23 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 			{
 				var sourceParameter = source.Value as BlackboardParameter;
 
-				var sourceTreeNodeIndex = graph.GetParameterIndex( sourceParameter );
-				var targetTreeNodeIndex = graph.GetParameterIndex( targetValue );
+				var sourceIndex = graph.GetParameterIndex( sourceParameter );
+				var targetIndex = graph.GetParameterIndex( targetValue );
 
 				if ( !before )
 				{
-					if ( sourceTreeNodeIndex > targetTreeNodeIndex )
+					if ( sourceIndex > targetIndex )
 					{
-						targetTreeNodeIndex++;
+						targetIndex++;
 					}
 
-					if ( targetTreeNodeIndex > graph.Parameters.Count() - 1 )
+					if ( targetIndex > graph.Parameters.Count() - 1 )
 					{
-						targetTreeNodeIndex = graph.Parameters.Count() - 1;
+						targetIndex = graph.Parameters.Count() - 1;
 					}
 				}
 
-				if ( sourceTreeNodeIndex != targetTreeNodeIndex )
+				if ( sourceIndex != targetIndex )
 				{
 					using var undoScope = TreeView?.UndoScope( !source.IsGrouped ? "Change Parameter Order" : "Remove Parameter From Group" );
 
@@ -263,38 +263,38 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					}
 					else if ( source.Value is CategoryData categoryData )
 					{
-						categoryData.Priority = targetTreeNodeIndex;
+						categoryData.Priority = targetIndex;
 						//Log.Info( $"Moving Group from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
 					}
 
-					graph.ReOrderParameter( sourceParameter, targetTreeNodeIndex );
+					graph.ReOrderParameter( sourceParameter, targetIndex );
 				}
 			}
 			else if ( source is BlackboardGroupTreeNode )
 			{
 				var sourceCategory = source.Value as CategoryData;
 
-				var sourceTreeNodeIndex = sourceCategory.Priority;
-				var targetTreeNodeIndex = TreeView.TreeNodes.IndexOf( this );
+				var sourceIndex = sourceCategory.Priority;
+				var targetIndex = TreeView.TreeNodes.IndexOf( this );
 
 				if ( !before )
 				{
-					if ( sourceTreeNodeIndex > targetTreeNodeIndex )
+					if ( sourceIndex > targetIndex )
 					{
-						targetTreeNodeIndex++;
+						targetIndex++;
 					}
 
-					if ( targetTreeNodeIndex > TreeView.TreeNodes.Count() - 1 )
+					if ( targetIndex > TreeView.TreeNodes.Count() - 1 )
 					{
-						targetTreeNodeIndex = TreeView.TreeNodes.Count() - 1;
+						targetIndex = TreeView.TreeNodes.Count() - 1;
 					}
 				}
 
-				if ( sourceTreeNodeIndex != targetTreeNodeIndex )
+				if ( sourceIndex != targetIndex )
 				{
 					using var undoScope = TreeView?.UndoScope( "Change Group Order" );
 
-					TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetTreeNodeIndex );
+					TreeView?.Graph?.UpdateCategoryPriority( sourceCategory, targetIndex );
 				}
 			}
 		}
