@@ -200,7 +200,7 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 
 	[Hide, JsonIgnore]
 	IParameterUI IBlackboardMaterialParameter.UI
-	{ 
+	{
 		get => UI;
 		set
 		{
