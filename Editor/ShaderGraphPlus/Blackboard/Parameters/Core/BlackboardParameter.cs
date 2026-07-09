@@ -159,10 +159,17 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 			{
 				var attrib = classParameterType.Type.GetAttribute<ParameterAvailableInAttribute>( true );
 
-				// Only show material parameters when not in a subgraph
-				if ( isSubgraph && attrib.Availability == ParameterAvailableIn.Material ) return false;
-				// Only show subgraph input and output parameters when in a subgraph
-				if ( !isSubgraph && attrib.Availability == ParameterAvailableIn.Subgraph ) return false;
+				if ( attrib != null )
+				{
+					// Only show material parameters when not in a subgraph
+					if ( isSubgraph && attrib.Availability == ParameterAvailableIn.Material ) return false;
+					// Only show subgraph input and output parameters when in a subgraph
+					if ( !isSubgraph && attrib.Availability == ParameterAvailableIn.Subgraph ) return false;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			return true;
