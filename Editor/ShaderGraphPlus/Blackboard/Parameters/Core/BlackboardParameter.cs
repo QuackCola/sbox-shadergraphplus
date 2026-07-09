@@ -199,7 +199,19 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 	public T Value { get; set; }
 
 	[Hide, JsonIgnore]
-	IParameterUI IBlackboardMaterialParameter.UI { get => this.UI; set => this.UI = (Y)value; }
+	IParameterUI IBlackboardMaterialParameter.UI
+	{ 
+		get => UI;
+		set
+		{
+			if ( value.GetType() != typeof( Y ) )
+			{
+				throw new Exception( $"Value '{value.GetType()}' is not the correct type '{typeof( Y )}'" );
+			}
+
+			UI = (Y)value;
+		}
+	}
 
 	[InlineEditor( Label = false ), Group( "UI" )]
 	public Y UI { get; set; }
