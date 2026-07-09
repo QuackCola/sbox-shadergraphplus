@@ -4,7 +4,6 @@
 /// Bool subgraph input parameter
 /// </summary>
 [Title( "Bool" ), Icon( "check_box" ), Category( "Input" ), Order( 0 )]
-[SubgraphOnly]
 public sealed class BoolSubgraphInputParameter : BlackboardSubgraphInputParameter<bool>
 {
 	[Hide, JsonIgnore]
@@ -20,7 +19,6 @@ public sealed class BoolSubgraphInputParameter : BlackboardSubgraphInputParamete
 /// Bool subgraph output parameter
 /// </summary>
 [Title( "Bool" ), Icon( "check_box" ), Category( "Output" ), Order( 0 )]
-[SubgraphOnly]
 public sealed class BoolSubgraphOutputParameter : BlackboardSubgraphOutputParameter<bool>
 {
 	[Hide, JsonIgnore]
@@ -35,7 +33,6 @@ public sealed class BoolSubgraphOutputParameter : BlackboardSubgraphOutputParame
 /// Int subgraph input parameter
 /// </summary>
 [Title( "Int" ), Icon( "looks_one" ), Category( "Input" ), Order( 1 )]
-[SubgraphOnly]
 public sealed class IntSubgraphInputParameter : BlackboardSubgraphInputParameter<int>
 {
 	[Hide, JsonIgnore]
@@ -56,7 +53,6 @@ public sealed class IntSubgraphInputParameter : BlackboardSubgraphInputParameter
 /// Int subgraph output parameter
 /// </summary>
 [Title( "Int" ), Icon( "looks_one" ), Category( "Output" ), Order( 1 )]
-[SubgraphOnly]
 public sealed class IntSubgraphOutputParameter : BlackboardSubgraphOutputParameter<int>
 {
 	[Hide, JsonIgnore]
@@ -71,7 +67,6 @@ public sealed class IntSubgraphOutputParameter : BlackboardSubgraphOutputParamet
 /// Float subgraph input parameter
 /// </summary>
 [Title( "Float" ), Icon( "looks_one" ), Category( "Input" ), Order( 2 )]
-[SubgraphOnly]
 public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParameter<float>
 {
 	[Hide, JsonIgnore]
@@ -97,7 +92,6 @@ public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParamet
 /// Float subgraph output parameter
 /// </summary>
 [Title( "Float" ), Icon( "looks_one" ), Category( "Output" ), Order( 2 )]
-[SubgraphOnly]
 public sealed class FloatSubgraphOutputParameter : BlackboardSubgraphOutputParameter<float>
 {
 	[Hide, JsonIgnore]
@@ -112,7 +106,6 @@ public sealed class FloatSubgraphOutputParameter : BlackboardSubgraphOutputParam
 /// Float2 subgraph input parameter
 /// </summary>
 [Title( "Float2" ), Icon( "looks_two" ), Category( "Input" ), Order( 3 )]
-[SubgraphOnly]
 public sealed class Float2SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector2>
 {
 	[Hide, JsonIgnore]
@@ -133,7 +126,6 @@ public sealed class Float2SubgraphInputParameter : BlackboardSubgraphInputParame
 /// Float2 subgraph output parameter
 /// </summary>
 [Title( "Float2" ), Icon( "looks_two" ), Category( "Output" ), Order( 3 )]
-[SubgraphOnly]
 public sealed class Float2SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector2>
 {
 	[Hide, JsonIgnore]
@@ -148,7 +140,6 @@ public sealed class Float2SubgraphOutputParameter : BlackboardSubgraphOutputPara
 /// Float3 subgraph input parameter
 /// </summary>
 [Title( "Float3" ), Icon( "looks_3" ), Category( "Input" ), Order( 4 )]
-[SubgraphOnly]
 public sealed class Float3SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector3>
 {
 	[Hide, JsonIgnore]
@@ -169,7 +160,6 @@ public sealed class Float3SubgraphInputParameter : BlackboardSubgraphInputParame
 /// Float3 subgraph output parameter
 /// </summary>
 [Title( "Float3" ), Icon( "looks_3" ), Category( "Output" ), Order( 4 )]
-[SubgraphOnly]
 public sealed class Float3SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector3>
 {
 	[Hide, JsonIgnore]
@@ -184,7 +174,6 @@ public sealed class Float3SubgraphOutputParameter : BlackboardSubgraphOutputPara
 /// Float4 subgraph input parameter
 /// </summary>
 [Title( "Float4" ), Icon( "looks_4" ), Category( "Input" ), Order( 5 )]
-[SubgraphOnly]
 public sealed class Float4SubgraphInputParameter : BlackboardSubgraphInputParameter<Vector4>
 {
 	[Hide, JsonIgnore]
@@ -205,7 +194,6 @@ public sealed class Float4SubgraphInputParameter : BlackboardSubgraphInputParame
 /// Float4 subgraph output parameter
 /// </summary>
 [Title( "Float4" ), Icon( "looks_4" ), Category( "Output" ), Order( 5 )]
-[SubgraphOnly]
 public sealed class Float4SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Vector4>
 {
 	[Hide, JsonIgnore]
@@ -220,7 +208,6 @@ public sealed class Float4SubgraphOutputParameter : BlackboardSubgraphOutputPara
 /// Color subgraph input parameter
 /// </summary>
 [Title( "Color" ), Icon( "palette" ), Category( "Input" ), Order( 6 )]
-[SubgraphOnly]
 public sealed class ColorSubgraphInputParameter : BlackboardSubgraphInputParameter<Color>
 {
 	[Hide, JsonIgnore]
@@ -236,7 +223,6 @@ public sealed class ColorSubgraphInputParameter : BlackboardSubgraphInputParamet
 /// Color subgraph output parameter
 /// </summary>
 [Title( "Color" ), Icon( "palette" ), Category( "Output" ), Order( 6 )]
-[SubgraphOnly]
 public sealed class ColorSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Color>
 {
 	[Hide, JsonIgnore]
@@ -251,7 +237,6 @@ public sealed class ColorSubgraphOutputParameter : BlackboardSubgraphOutputParam
 /// Float2x2 subgraph input parameter
 /// </summary>
 [Title( "Float2x2" ), Icon( "apps" ), Category( "Input" ), Order( 7 )]
-[SubgraphOnly]
 public sealed class Float2x2SubgraphInputParameter : BlackboardSubgraphInputParameter<Float2x2>
 {
 	[Hide, JsonIgnore]
@@ -267,7 +252,6 @@ public sealed class Float2x2SubgraphInputParameter : BlackboardSubgraphInputPara
 /// Float2x2 subgraph output parameter
 /// </summary>
 [Title( "Float2x2" ), Icon( "apps" ), Category( "Output" ), Order( 7 )]
-[SubgraphOnly]
 public sealed class Float2x2SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float2x2>
 {
 	[Hide, JsonIgnore]
@@ -282,7 +266,6 @@ public sealed class Float2x2SubgraphOutputParameter : BlackboardSubgraphOutputPa
 /// Float3x3 subgraph input parameter
 /// </summary>
 [Title( "Float3x3" ), Icon( "apps" ), Order( 8 )]
-[SubgraphOnly]
 public sealed class Float3x3SubgraphInputParameter : BlackboardSubgraphInputParameter<Float3x3>
 {
 	[Hide, JsonIgnore]
@@ -298,7 +281,6 @@ public sealed class Float3x3SubgraphInputParameter : BlackboardSubgraphInputPara
 /// Float3x3 subgraph output parameter
 /// </summary>
 [Title( "Float3x3" ), Icon( "apps" ), Order( 8 )]
-[SubgraphOnly]
 public sealed class Float3x3SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float3x3>
 {
 	[Hide, JsonIgnore]
@@ -313,7 +295,6 @@ public sealed class Float3x3SubgraphOutputParameter : BlackboardSubgraphOutputPa
 /// Float4x4 subgraph input parameter
 /// </summary>
 [Title( "Float4x4" ), Icon( "apps" ), Order( 9 )]
-[SubgraphOnly]
 public sealed class Float4x4SubgraphInputParameter : BlackboardSubgraphInputParameter<Float4x4>
 {
 	[Hide, JsonIgnore]
@@ -329,7 +310,6 @@ public sealed class Float4x4SubgraphInputParameter : BlackboardSubgraphInputPara
 /// Float4x4 subgraph output parameter
 /// </summary>
 [Title( "Float4x4" ), Icon( "apps" ), Order( 9 )]
-[SubgraphOnly]
 public sealed class Float4x4SubgraphOutputParameter : BlackboardSubgraphOutputParameter<Float4x4>
 {
 	[Hide, JsonIgnore]
@@ -344,7 +324,6 @@ public sealed class Float4x4SubgraphOutputParameter : BlackboardSubgraphOutputPa
 /// Gradient subgraph input parameter 
 /// </summary>
 [Title( "Gradient" ), Icon( "gradient" ), Order( 10 )]
-[SubgraphOnly]
 public sealed class GradientSubgraphInputParameter : BlackboardSubgraphInputParameter<Gradient>
 {
 	[Hide, JsonIgnore]
@@ -361,7 +340,6 @@ public sealed class GradientSubgraphInputParameter : BlackboardSubgraphInputPara
 /// Gradient subgraph output parameter 
 /// </summary>
 [Title( "Gradient" ), Icon( "gradient" ), Order( 10 )]
-[SubgraphOnly]
 public sealed class GradientSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Gradient>
 {
 	[Hide, JsonIgnore]
@@ -402,7 +380,6 @@ public sealed class Texture2DSubgraphInputParameter : BlackboardSubgraphInputPar
 /// Texture2D subgraph output parameter
 /// </summary>
 [Title( "Texture2D" ), Icon( "image" ), Order( 11 )]
-[SubgraphOnly]
 public sealed class Texture2DSubgraphOutputParameter : BlackboardSubgraphOutputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
@@ -442,7 +419,6 @@ public sealed class TextureCubeSubgraphInputParameter : BlackboardSubgraphInputP
 /// TextureCube subgraph output parameter
 /// </summary>
 [Title( "TextureCube" ), Icon( "image" ), Order( 12 )]
-[SubgraphOnly]
 public sealed class TextureCubeSubgraphOutputParameter : BlackboardSubgraphOutputParameter<TextureInput>
 {
 	[Hide, JsonIgnore]
@@ -457,7 +433,6 @@ public sealed class TextureCubeSubgraphOutputParameter : BlackboardSubgraphOutpu
 /// SamplerState subgraph input parameter
 /// </summary>
 [Title( "Sampler State" ), Icon( "colorize" ), Order( 13 )]
-[SubgraphOnly]
 public sealed class SamplerStateSubgraphInputParameter : BlackboardSubgraphInputParameter<Sampler>
 {
 	[Hide, JsonIgnore]
@@ -473,7 +448,6 @@ public sealed class SamplerStateSubgraphInputParameter : BlackboardSubgraphInput
 /// SamplerState subgraph output parameter
 /// </summary>
 [Title( "Sampler State" ), Icon( "colorize" ), Order( 13 )]
-[SubgraphOnly]
 public sealed class SamplerStateSubgraphOutputParameter : BlackboardSubgraphOutputParameter<Sampler>
 {
 	[Hide, JsonIgnore]

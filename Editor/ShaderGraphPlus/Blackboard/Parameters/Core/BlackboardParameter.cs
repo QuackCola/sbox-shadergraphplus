@@ -2,6 +2,24 @@
 
 namespace ShaderGraphPlus;
 
+public enum ParameterAvailableIn
+{
+	Material,
+	Subgraph
+}
+
+[AttributeUsage( AttributeTargets.Class )]
+internal sealed class ParameterAvailableInAttribute : Attribute
+{
+
+	public ParameterAvailableIn Availability { get; private set; }
+
+	public ParameterAvailableInAttribute( ParameterAvailableIn availability )
+	{
+		Availability = availability;
+	}
+}
+
 public interface IGroupableBlackboardParameter : IBlackboardParameter
 {
 	Guid GroupReference { get; set; }
@@ -139,53 +157,12 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 		{
 			if ( x is ClassBlackboardParameterType classParameterType )
 			{
-				var targetType = classParameterType.Type.TargetType;
+				var attrib = classParameterType.Type.GetAttribute<ParameterAvailableInAttribute>( true );
 
 				// Only show material parameters when not in a subgraph
-				if ( isSubgraph && targetType == typeof( BoolParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( IntParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( FloatParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( Float2Parameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( Float3Parameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( Float4Parameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( ColorParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( Texture2DParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( TextureCubeParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( ShaderFeatureBooleanParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( ShaderFeatureEnumParameter ) ) return false;
-				if ( isSubgraph && targetType == typeof( SamplerStateParameter ) ) return false;
-
-				// Only show subgraph input parameters when in a subgraph
-				if ( !isSubgraph && targetType == typeof( BoolSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( IntSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( FloatSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float2SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float3SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float4SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( ColorSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Texture2DSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( TextureCubeSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float2x2SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float3x3SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float4x4SubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( GradientSubgraphInputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( SamplerStateSubgraphInputParameter ) ) return false;
-
-				// Only show subgraph output parameters when in a subgraph
-				if ( !isSubgraph && targetType == typeof( BoolSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( IntSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( FloatSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float2SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float3SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float4SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( ColorSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Texture2DSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( TextureCubeSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float2x2SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float3x3SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( Float4x4SubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( GradientSubgraphOutputParameter ) ) return false;
-				if ( !isSubgraph && targetType == typeof( SamplerStateSubgraphOutputParameter ) ) return false;
+				if ( isSubgraph && attrib.Availability == ParameterAvailableIn.Material ) return false;
+				// Only show subgraph input and output parameters when in a subgraph
+				if ( !isSubgraph && attrib.Availability == ParameterAvailableIn.Subgraph ) return false;
 			}
 
 			return true;
@@ -193,6 +170,7 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 	}
 }
 
+[ParameterAvailableIn( ParameterAvailableIn.Material )]
 public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, IBlackboardMaterialParameter where Y : IParameterUI
 {
 	[InlineEditor( Label = false ), Group( "Value" )]
@@ -255,6 +233,7 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 	}
 }
 
+[ParameterAvailableIn( ParameterAvailableIn.Subgraph )]
 public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter, IBlackboardSubgraphInputParameter
 {
 	[Title( "Input Name" )]
@@ -324,6 +303,7 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 	}
 }
 
+[ParameterAvailableIn( ParameterAvailableIn.Subgraph )]
 public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter, IBlackboardSubgraphOutputParameter
 {
 	[Title( "Output Name" )]
@@ -399,6 +379,7 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 	}
 }
 
+[ParameterAvailableIn( ParameterAvailableIn.Material )]
 public abstract class BlackboardTextureMaterialParameter : BlackboardParameter, IGroupableBlackboardParameter
 {
 	[Hide]

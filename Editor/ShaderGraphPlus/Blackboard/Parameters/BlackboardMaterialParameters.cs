@@ -280,7 +280,7 @@ public sealed class TextureCubeParameter : BlackboardTextureMaterialParameter
 /// <summary>
 /// SamplerState material parameter
 /// </summary>
-[Title( "Sampler State" ), Icon( "colorize" ), Order( 8 )]
+[Title( "Sampler State" ), Icon( "colorize" ), Order( 8 ), ParameterAvailableIn( ParameterAvailableIn.Material )]
 public sealed class SamplerStateParameter : BlackboardParameter, IGroupableBlackboardParameter
 {
 	[InlineEditor( Label = false ), Group( "Value" )]
@@ -329,7 +329,7 @@ public sealed class SamplerStateParameter : BlackboardParameter, IGroupableBlack
 /// <summary>
 ///
 /// </summary>
-[Title( "Shader Feature Boolean" ), Icon( "tune" ), Order( 9 )]
+[Title( "Shader Feature Boolean" ), Icon( "tune" ), Order( 9 ), ParameterAvailableIn( ParameterAvailableIn.Material )]
 public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackboardShaderFeatureParameter, IGroupableBlackboardParameter
 {
 	[Hide, JsonIgnore, Browsable( false )]
@@ -392,7 +392,7 @@ public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackb
 /// <summary>
 ///
 /// </summary>
-[Title( "Shader Feature Enum" ), Icon( "tune" ), Order( 10 )]
+[Title( "Shader Feature Enum" ), Icon( "tune" ), Order( 10 ), ParameterAvailableIn( ParameterAvailableIn.Material )]
 public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboardShaderFeatureParameter, IGroupableBlackboardParameter
 {
 	[Hide, JsonIgnore, Browsable( false )]
