@@ -250,15 +250,11 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 				if ( sourceTreeNodeIndex != targetTreeNodeIndex )
 				{
+					using var undoScope = TreeView?.UndoScope( !source.IsGrouped ? "Change Parameter Order" : "Remove Parameter From Group" );
+
 					if ( source.IsGrouped )
 					{
-						using var undoScope = TreeView?.UndoScope( "Remove Parameter From Group" );
-
 						RemoveFromGroup( source.Value as IGroupableBlackboardParameter );
-					}
-					else
-					{
-						using var undoScope = TreeView?.UndoScope( "Change Parameter Order" );
 					}
 
 					if ( source.Value is BlackboardParameter )
@@ -271,8 +267,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 						//Log.Info( $"Moving Group from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
 					}
 
-					graph.RemoveParameter( sourceParameter );
-					graph.AddParameter( sourceParameter, targetTreeNodeIndex );
+					graph.ReOrderParameter( sourceParameter, targetTreeNodeIndex );
 				}
 			}
 			else if ( source is BlackboardGroupTreeNode )
