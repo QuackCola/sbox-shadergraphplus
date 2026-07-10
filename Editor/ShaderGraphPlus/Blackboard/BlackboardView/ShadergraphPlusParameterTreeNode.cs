@@ -205,8 +205,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 			if ( source is not BlackboardGroupTreeNode && IsGrouped )
 			{
-				var sourceParameter = source.Value as BlackboardParameter;
-				var sourceGroupable = sourceParameter as IGroupableBlackboardParameter;
+				var sourceGroupable = source.Value as IGroupableBlackboardParameter;
 				var targetGroupable = Value as IGroupableBlackboardParameter;
 
 				if ( source.IsGrouped && sourceGroupable.GroupReference != targetGroupable.GroupReference )
@@ -221,7 +220,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 				{
 					graph.TryFindCategoryData( targetGroupable.GroupReference, out var categoryData );
 
-					var sourceIndex = categoryData.ParameterReferences.IndexOf( sourceParameter.Identifier );
+					var sourceIndex = categoryData.ParameterReferences.IndexOf( sourceGroupable.Identifier );
 					var targetIndex = categoryData.ParameterReferences.IndexOf( targetValue.Identifier );
 
 					if ( !before )
@@ -233,7 +232,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					{
 						using var undoScope = TreeView?.UndoScope( "Change Parameter Order In Group" );
 
-						categoryData.ReOrderParameter( sourceParameter, targetIndex );
+						categoryData.ReOrderParameter( sourceGroupable, targetIndex );
 						graph.UpdateCategoryData( categoryData );
 					}
 				}
