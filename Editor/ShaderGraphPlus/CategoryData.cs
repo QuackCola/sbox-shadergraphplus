@@ -60,7 +60,7 @@ public class CategoryData
 		}
 	}
 
-	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
+	public bool ReOrderParameter( IBlackboardParameter parameter, int newIndex )
 	{
 		if ( newIndex <= -1 )
 		{
