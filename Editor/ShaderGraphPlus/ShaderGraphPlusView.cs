@@ -500,7 +500,7 @@ public class ShaderGraphPlusView : GraphView
 			if ( item is null )
 				return;
 
-			if ( item.Node is BaseNodePlus baseNode && baseNode is IConstantNode constantNode )
+			if ( item.Node is BaseNodePlus baseNode && baseNode is not IConstantMatrixNode && baseNode is IConstantNode constantNode )
 			{
 				var optionName = $"Convert Constant to {(Graph.IsSubgraph ? "Subgraph Input" : "Material Parameter")}";
 
