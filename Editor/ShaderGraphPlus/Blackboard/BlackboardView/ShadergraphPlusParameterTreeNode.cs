@@ -186,6 +186,19 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 			categoryData.ParameterReferences.Insert( targetIndex, source.Identifier );
 		}
 
+		void TryIncrementTargetIndex( int sourceIndex, ref int targetIndex, int indexCount )
+		{
+			if ( sourceIndex > targetIndex )
+			{
+				targetIndex++;
+			}
+
+			if ( targetIndex > ( indexCount - 1 ) )
+			{
+				targetIndex = indexCount - 1;
+			}
+		}
+
 		void ReOrder( BlackboardTreeNode source, bool before = false )
 		{
 			var targetValue = Value;
@@ -211,7 +224,10 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					var sourceIndex = categoryData.ParameterReferences.IndexOf( sourceParameter.Identifier );
 					var targetIndex = categoryData.ParameterReferences.IndexOf( targetValue.Identifier );
 
-					if ( !before ) targetIndex++;
+					if ( !before )
+					{
+						TryIncrementTargetIndex( sourceIndex, ref targetIndex, categoryData.ParameterReferences.Count() );
+					}
 
 					if ( sourceIndex != targetIndex )
 					{
@@ -237,15 +253,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 				if ( !before )
 				{
-					if ( sourceIndex > targetIndex )
-					{
-						targetIndex++;
-					}
-
-					if ( targetIndex > graph.Parameters.Count() - 1 )
-					{
-						targetIndex = graph.Parameters.Count() - 1;
-					}
+					TryIncrementTargetIndex( sourceIndex, ref targetIndex, graph.Parameters.Count() );
 				}
 
 				if ( sourceIndex != targetIndex )
@@ -279,15 +287,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 				if ( !before )
 				{
-					if ( sourceIndex > targetIndex )
-					{
-						targetIndex++;
-					}
-
-					if ( targetIndex > TreeView.TreeNodes.Count() - 1 )
-					{
-						targetIndex = TreeView.TreeNodes.Count() - 1;
-					}
+					TryIncrementTargetIndex( sourceIndex, ref targetIndex, TreeView.TreeNodes.Count() );
 				}
 
 				if ( sourceIndex != targetIndex )
