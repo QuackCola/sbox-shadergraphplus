@@ -54,7 +54,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 
 		if ( IsGrouped )
 		{
-			dropRect = dropRect.Shrink( 24, 0, 0, 0 );
+			dropRect = dropRect.Shrink( 37, 0, 0, 0 );
 		}
 
 		if ( dragEvent.DropEdge.HasFlag( ItemEdge.Top ) )
