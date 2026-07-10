@@ -233,7 +233,6 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 						using var undoScope = TreeView?.UndoScope( "Change Parameter Order In Group" );
 
 						categoryData.ReOrderParameter( sourceGroupable, targetIndex );
-						graph.UpdateCategoryData( categoryData );
 					}
 				}
 				else if ( !source.IsGrouped )
