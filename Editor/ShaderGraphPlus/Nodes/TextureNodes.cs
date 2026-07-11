@@ -460,7 +460,7 @@ public sealed class SampleTexture2DTriplanarNode : Texture2DSamplerBase
 		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
 	}
 
-	[Hide]
+	[JsonIgnore, Hide]
 	protected override TextureInput PreviewUI => new TextureInput
 	{
 		Type = TextureType.Tex2D,
@@ -595,6 +595,7 @@ public sealed class SampleTexture2DNormalMapTriplanarNode : Texture2DSamplerBase
 	[InputDefault( nameof( BlendFactorInput ) )]
 	public float DefaultBlendFactor { get; set; } = 4.0f;
 
+	[JsonIgnore, Hide]
 	protected override TextureInput PreviewUI => new TextureInput
 	{
 		Type = TextureType.Tex2D,
