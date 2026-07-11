@@ -254,7 +254,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					TryIncrementTargetIndex( sourceIndex, ref targetIndex, graph.Parameters.Count() );
 				}
 
-				if ( sourceIndex != targetIndex )
+				if ( sourceIndex != targetIndex || source.IsGrouped )
 				{
 					using var undoScope = TreeView?.UndoScope( !source.IsGrouped ? "Change Parameter Order" : "Remove Parameter From Group" );
 
