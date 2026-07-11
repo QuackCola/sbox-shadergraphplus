@@ -50,6 +50,7 @@ public sealed class Result : BaseResult
 	public NodeInput Opacity { get; set; }
 
 	[Hide]
+	[Title( "Normal (Tangent)" )]
 	[Input( typeof( Vector3 ) )]
 	[ShowIf( nameof( this.IsLit ), true )]
 	public NodeInput Normal { get; set; }
@@ -145,7 +146,9 @@ public sealed class Result : BaseResult
 				displayInfo.Name = property.DisplayName;
 				info.DisplayInfo = displayInfo;
 				var plug = new BasePlugIn( this, info, info.Type );
-				var oldPlug = Inputs.FirstOrDefault( x => x is BasePlugIn plugIn && plugIn.Info.DisplayInfo.Name == property.Name ) as BasePlugIn;
+				// Match by Info.Name (the C# property name) - matching by DisplayInfo.Name breaks
+				// inputs whose display name differs from the property name (e.g. [Title])
+				var oldPlug = Inputs.FirstOrDefault( x => x is BasePlugIn plugIn && plugIn.Info.Name == property.Name ) as BasePlugIn;
 				if ( oldPlug is not null )
 				{
 					oldPlug.Info.Name = info.Name;
@@ -155,7 +158,7 @@ public sealed class Result : BaseResult
 					if ( nodeInput.IsValid && plug is IPlugIn plugIn )
 					{
 						var connectedNode = Graph.Nodes.FirstOrDefault( x => x is BaseNodePlus node && node.Identifier == nodeInput.Identifier ) as BaseNodePlus;
-						plugIn.ConnectedOutput = connectedNode.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
+						plugIn.ConnectedOutput = connectedNode?.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
 					}
 					plugs.Add( oldPlug );
 				}
@@ -165,7 +168,7 @@ public sealed class Result : BaseResult
 					if ( nodeInput.IsValid && plug is IPlugIn plugIn )
 					{
 						var connectedNode = Graph.Nodes.FirstOrDefault( x => x is BaseNodePlus node && node.Identifier == nodeInput.Identifier ) as BaseNodePlus;
-						plugIn.ConnectedOutput = connectedNode.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
+						plugIn.ConnectedOutput = connectedNode?.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
 					}
 					plugs.Add( plug );
 				}
