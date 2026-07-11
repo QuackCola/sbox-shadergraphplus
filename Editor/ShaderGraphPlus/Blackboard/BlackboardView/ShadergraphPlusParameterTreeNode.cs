@@ -263,10 +263,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 						RemoveFromGroup( source.Value as IGroupableBlackboardParameter );
 					}
 
-					if ( source.Value is BlackboardParameter )
-					{
-						//Log.Info( $"Moving Parameter from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
-					}
+					//Log.Info( $"Moving Parameter from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
 
 					graph.ReOrderParameter( sourceParameter, targetIndex );
 				}
