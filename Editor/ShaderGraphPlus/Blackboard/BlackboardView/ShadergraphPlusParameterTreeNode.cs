@@ -267,11 +267,6 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 					{
 						//Log.Info( $"Moving Parameter from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
 					}
-					else if ( source.Value is CategoryData categoryData )
-					{
-						categoryData.Priority = targetIndex;
-						//Log.Info( $"Moving Group from index '{sourceTreeNodeIndex}' to index '{targetTreeNodeIndex}'" );
-					}
 
 					graph.ReOrderParameter( sourceParameter, targetIndex );
 				}
