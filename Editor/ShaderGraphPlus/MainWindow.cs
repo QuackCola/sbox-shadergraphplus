@@ -99,8 +99,6 @@ public class MainWindow : DockWindow
 	private List<string> _fileHistory = new();
 	private int _fileHistoryPosition = 0;
 
-	private string _defaultDockState;
-
 	public bool CanOpenMultipleAssets => true;
 	public bool EnableNodePreview => _preview.Preview.EnableNodePreview;
 
@@ -130,6 +128,7 @@ public class MainWindow : DockWindow
 
 		CreateUI();
 		Show();
+		StateCookie = "ShaderGraphPlus";
 		CreateNew();
 
 		EditorEvent.Run( "shadergraphplus.created" );
@@ -1178,7 +1177,7 @@ public class MainWindow : DockWindow
 	private void OnViewMenu( Menu view )
 	{
 		view.Clear();
-		view.AddOption( "Restore To Default", "settings_backup_restore", RestoreDefaultDockLayout );
+		view.AddOption( "Restore To Default", "settings_backup_restore", ResetLayout );
 		view.AddSeparator();
 
 		foreach ( var dock in DockManager.DockTypes )
@@ -1606,16 +1605,6 @@ public class MainWindow : DockWindow
 	{
 		BuildMenuBar();
 
-		DockManager.RegisterDockType( "Graph", "account_tree", null, false );
-		DockManager.RegisterDockType( "Preview", "photo", null, false );
-		DockManager.RegisterDockType( "Properties", "edit", null, false );
-		DockManager.RegisterDockType( "Blackboard", "edit", null, false );
-		DockManager.RegisterDockType( "Output", "notes", null, false );
-		DockManager.RegisterDockType( "Console", "text_snippet", null, false );
-		DockManager.RegisterDockType( "Undo History", "history", null, false );
-		DockManager.RegisterDockType( "Palette", "palette", null, false );
-		DockManager.RegisterDockType( "Generated Code", "", null, false );
-
 		_graphCanvas = new Widget( this ) { WindowTitle = $"{(_asset != null ? _asset.Name : "untitled")}{(_dirty ? "*" : "")}" };
 		_graphCanvas.Name = "Graph";
 		_graphCanvas.SetWindowIcon( "account_tree" );
@@ -1774,32 +1763,21 @@ public class MainWindow : DockWindow
 		_palette = new PaletteWidget( this, IsSubgraph );
 		_generatedCodeTextView = new TextView( this, "Generated Code", "" );
 
-		DockManager.AddDock( null, _preview, DockArea.Inside, DockManager.DockProperty.HideOnClose );
-		DockManager.AddDock( null, _graphCanvas, DockArea.Right, DockManager.DockProperty.HideCloseButton | DockManager.DockProperty.HideOnClose, 0.7f );
-		DockManager.AddDock( _graphCanvas, _output, DockArea.Bottom, DockManager.DockProperty.HideOnClose, 0.25f );
-		DockManager.AddDock( _preview, _properties, DockArea.Bottom, DockManager.DockProperty.HideOnClose, 0.5f );
+		var graph = DockManager.AddDock( "Graph", "account_tree", _graphCanvas, DockArea.Center );
+		var preview = DockManager.AddDock( "Preview", "photo", _preview, DockArea.Left );
+		DockManager.AddDock( "Properties", "edit", _properties, DockArea.Bottom, relativeTo: preview );
+		var output = DockManager.AddDock( "Output", "notes", _output, DockArea.Bottom, relativeTo: graph );
 
-		// Yuck, console is internal but i want it, what is the correct way?
-		var console = EditorTypeLibrary.Create( "ConsoleWidget", typeof( Widget ), new[] { this } ) as Widget;
-		DockManager.AddDock( _output, console, DockArea.Inside, DockManager.DockProperty.HideOnClose );
-		DockManager.AddDock( _output, _blackboardCanvas, DockArea.Right, DockManager.DockProperty.HideOnClose, -0.5f );
-		DockManager.AddDock( _output, _undoHistory, DockArea.Inside, DockManager.DockProperty.HideOnClose );
-		DockManager.AddDock( _output, _palette, DockArea.Inside, DockManager.DockProperty.HideOnClose );
-		DockManager.AddDock( _output, _generatedCodeTextView, DockArea.Inside, DockManager.DockProperty.HideOnClose );
+		if ( EditorTypeLibrary.Create( "ConsoleWidget", typeof( Widget ), new[] { this } ) is Widget console )
+			DockManager.AddDock( "Console", "text_snippet", console, DockArea.Center, relativeTo: output );
+
+		DockManager.AddDock( "Blackboard", "", _blackboardCanvas, DockArea.Right, relativeTo: output );
+
+		DockManager.AddDock( "Undo History", "history", _undoHistory, DockArea.Center, relativeTo: output );
+		DockManager.AddDock( "Palette", "palette", _palette, DockArea.Center, relativeTo: output );
+		DockManager.AddDock( "Generated Code", "",  _generatedCodeTextView, DockArea.Center, relativeTo: output );
 
 		DockManager.RaiseDock( "Output" );
-		DockManager.Update();
-
-		_defaultDockState = DockManager.State;
-
-		if ( StateCookie != "ShaderGraphPlus" )
-		{
-			StateCookie = "ShaderGraphPlus";
-		}
-		else
-		{
-			RestoreFromStateCookie();
-		}
 
 		Compile();
 	}
@@ -1815,6 +1793,30 @@ public class MainWindow : DockWindow
 				BlackboardIssues.Add( new() { Node = null, Message = issue, IsWarning = false } );
 			}
 		}
+	}
+
+	protected override void BuildDefaultLayout()
+	{
+		var graph = DockManager.OpenDock( "Graph", DockArea.Center );
+
+		DockManager.SetSplitterProportions( graph, 0.28f, 0.72f );
+
+		var preview = DockManager.OpenDock( "Preview", DockArea.Left );
+
+		DockManager.SetSplitterProportions( preview, 0.28f, 0.72f );
+
+		var properties = DockManager.OpenDock( "Properties", DockArea.Bottom, preview );
+		var output = DockManager.OpenDock( "Output", DockArea.Bottom, graph );
+		
+		DockManager.OpenDock( "Blackboard", DockArea.Right, output );
+		DockManager.OpenDock( "Console", DockArea.Center, output );
+		DockManager.OpenDock( "Undo History", DockArea.Center, output );
+		DockManager.OpenDock( "Palette", DockArea.Center, output );
+		DockManager.OpenDock( "Generated Code", DockArea.Center, output );
+		
+		DockManager.SetSplitterProportions( properties, 0.68f, 0.32f );
+		DockManager.SetSplitterProportions( output, 0.75f, 0.25f );
+		DockManager.RaiseDock( "Output" );
 	}
 
 	private void OnPropertyUpdated( SerializedProperty serializedProperty )
@@ -1834,13 +1836,6 @@ public class MainWindow : DockWindow
 
 		var shouldEvaluate = _properties.Target is not CommentNode;
 		SetDirty( shouldEvaluate );
-	}
-
-	protected override void RestoreDefaultDockLayout()
-	{
-		DockManager.State = _defaultDockState;
-
-		SaveToStateCookie();
 	}
 
 	protected override bool OnClose()
