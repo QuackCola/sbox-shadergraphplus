@@ -1800,9 +1800,6 @@ public class MainWindow : DockWindow
 	protected override void BuildDefaultLayout()
 	{
 		var graph = DockManager.OpenDock( "Graph", DockArea.Center );
-
-		//DockManager.SetSplitterProportions( graph, 0.28f, 0.72f );
-
 		var preview = DockManager.OpenDock( "Preview", DockArea.Left );
 
 		DockManager.SetSplitterProportions( preview, 0.28f, 0.72f );
@@ -1817,7 +1814,7 @@ public class MainWindow : DockWindow
 		DockManager.OpenDock( "Generated Code", DockArea.Center, output );
 		
 		DockManager.SetSplitterProportions( properties, 0.68f, 0.32f );
-		DockManager.SetSplitterProportions( output, 0.75f, 0.25f );
+		DockManager.SetSplitterProportions( output, 0.68f, 0.32f );
 		DockManager.RaiseDock( "Output" );
 	}
 
