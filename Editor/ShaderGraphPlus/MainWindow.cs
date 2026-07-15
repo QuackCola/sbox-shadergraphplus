@@ -1765,13 +1765,15 @@ public class MainWindow : DockWindow
 
 		var graph = DockManager.AddDock( "Graph", "account_tree", _graphCanvas, DockArea.Center );
 		var preview = DockManager.AddDock( "Preview", "photo", _preview, DockArea.Left );
+		
 		DockManager.AddDock( "Properties", "edit", _properties, DockArea.Bottom, relativeTo: preview );
+		
 		var output = DockManager.AddDock( "Output", "notes", _output, DockArea.Bottom, relativeTo: graph );
+
+		DockManager.AddDock( "Blackboard", "format_list_bulleted", _blackboardCanvas, DockArea.Right, relativeTo: output );
 
 		if ( EditorTypeLibrary.Create( "ConsoleWidget", typeof( Widget ), new[] { this } ) is Widget console )
 			DockManager.AddDock( "Console", "text_snippet", console, DockArea.Center, relativeTo: output );
-
-		DockManager.AddDock( "Blackboard", "format_list_bulleted", _blackboardCanvas, DockArea.Right, relativeTo: output );
 
 		DockManager.AddDock( "Undo History", "history", _undoHistory, DockArea.Center, relativeTo: output );
 		DockManager.AddDock( "Palette", "palette", _palette, DockArea.Center, relativeTo: output );
