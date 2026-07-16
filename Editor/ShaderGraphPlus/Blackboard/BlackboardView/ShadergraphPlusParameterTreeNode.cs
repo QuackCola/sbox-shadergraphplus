@@ -193,7 +193,7 @@ public class ShaderGraphPlusParameterTreeNode : BlackboardTreeNode<BlackboardPar
 				targetIndex++;
 			}
 
-			if ( targetIndex > ( indexCount - 1 ) )
+			if ( targetIndex > (indexCount - 1) )
 			{
 				targetIndex = indexCount - 1;
 			}

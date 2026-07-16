@@ -1765,9 +1765,9 @@ public class MainWindow : DockWindow
 
 		var graph = DockManager.AddDock( "Graph", "account_tree", _graphCanvas, DockArea.Center );
 		var preview = DockManager.AddDock( "Preview", "photo", _preview, DockArea.Left );
-		
+
 		DockManager.AddDock( "Properties", "edit", _properties, DockArea.Bottom, relativeTo: preview );
-		
+
 		var output = DockManager.AddDock( "Output", "notes", _output, DockArea.Bottom, relativeTo: graph );
 
 		DockManager.AddDock( "Blackboard", "format_list_bulleted", _blackboardCanvas, DockArea.Right, relativeTo: output );
@@ -1777,7 +1777,7 @@ public class MainWindow : DockWindow
 
 		DockManager.AddDock( "Undo History", "history", _undoHistory, DockArea.Center, relativeTo: output );
 		DockManager.AddDock( "Palette", "palette", _palette, DockArea.Center, relativeTo: output );
-		DockManager.AddDock( "Generated Code", "text_snippet",  _generatedCodeTextView, DockArea.Center, relativeTo: output );
+		DockManager.AddDock( "Generated Code", "text_snippet", _generatedCodeTextView, DockArea.Center, relativeTo: output );
 
 		DockManager.RaiseDock( "Output" );
 
@@ -1806,13 +1806,13 @@ public class MainWindow : DockWindow
 
 		var properties = DockManager.OpenDock( "Properties", DockArea.Bottom, preview );
 		var output = DockManager.OpenDock( "Output", DockArea.Bottom, graph );
-		
+
 		DockManager.OpenDock( "Blackboard", DockArea.Right, output );
 		DockManager.OpenDock( "Console", DockArea.Center, output );
 		DockManager.OpenDock( "Undo History", DockArea.Center, output );
 		DockManager.OpenDock( "Palette", DockArea.Center, output );
 		DockManager.OpenDock( "Generated Code", DockArea.Center, output );
-		
+
 		DockManager.SetSplitterProportions( properties, 0.68f, 0.32f );
 		DockManager.SetSplitterProportions( output, 0.68f, 0.32f );
 		DockManager.RaiseDock( "Output" );
