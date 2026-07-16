@@ -2,6 +2,17 @@
 
 namespace ShaderGraphPlus;
 
+[AttributeUsage( AttributeTargets.Property )]
+internal sealed class TabPageAttribute : Attribute
+{
+	public string Name { get; set; }
+
+	public TabPageAttribute( string name )
+	{
+		Name = name;
+	}
+}
+
 [EditorForAssetType( "shdrtpl" )]
 [EditorApp( "Shader Template Editor", "gradient", "edit shader templates" )]
 public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
@@ -10,7 +21,8 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	private Asset _asset;
 	private bool _dirty = false;
 
-	private Properties _properties;
+	private Widget _primaryDockCanvas;
+	private TabWidget _tabWidget;
 
 	public bool CanOpenMultipleAssets => false;
 
@@ -22,7 +34,9 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		CreateUI();
 		Show();
+
 		StateCookie = "ShaderTemplateEditor";
+
 		CreateNew();
 	}
 
@@ -43,17 +57,53 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	{
 		BuildMenuBar();
 
-		_properties = new Properties( this );
-		_properties.Target = _template;
-		_properties.PropertyUpdated += OnPropertyUpdated;
+		_primaryDockCanvas = new Widget( null );
+		_primaryDockCanvas.Layout = Layout.Column();
+		_primaryDockCanvas.VerticalSizeMode = SizeMode.CanGrow;
+		_primaryDockCanvas.HorizontalSizeMode = SizeMode.Flexible;
 
-		DockManager.SetCentralWidget( _properties );
+		DockManager.SetCentralWidget( _primaryDockCanvas );
+	}
+
+	private void Rebuild()
+	{
+		_primaryDockCanvas.Layout.Clear( true );
+
+		var so = _template.GetSerialized();
+		so.OnPropertyChanged += OnPropertyUpdated;
+
+		_tabWidget = new TabWidget( null );
+
+		_tabWidget.AddPage( "Supported Material Inputs", "input", CreateTab( so, "Supported Material Inputs" ) );
+		_tabWidget.AddPage( "Supported Shading Models", "tonality", CreateTab( so, "Supported Shading Models" ) );
+		_tabWidget.AddPage( "Supported Blend Modes", "tonality", CreateTab( so, "Supported Blend Modes" ) );
+		_tabWidget.AddPage( "General", "settings", CreateTab( so, "General" ) );
+
+		_primaryDockCanvas.Layout.Add( _tabWidget );
+	}
+
+	private Widget CreateTab( SerializedObject serialized, string tabName )
+	{
+		var container = new Widget( null );
+		container.Layout = Layout.Column();
+		container.VerticalSizeMode = SizeMode.CanGrow;
+
+		var sheet = new ControlSheet();
+
+		sheet.AddObject( serialized, ( x ) =>
+		{
+			return x.TryGetAttribute<TabPageAttribute>( out var attrib ) && attrib.Name == tabName;
+		} );
+
+		container.Layout.Add( sheet );
+		container.Layout.AddStretchCell();
+
+		return container;
 	}
 
 	protected override void BuildDefaultLayout()
 	{
-		DockManager.OpenDock( "Properties", DockArea.Center );
-		DockManager.RaiseDock( "Properties" );
+
 	}
 
 	private void PromptSave( Action action )
@@ -88,9 +138,9 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_template = new();
 		_dirty = false;
 
-		_properties.Target = _template;
-
 		WindowTitle = "untitled";
+
+		Rebuild();
 	}
 
 	private void BuildMenuBar()
@@ -171,9 +221,11 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_asset = asset;
 		_template = template;
 		_dirty = false;
-		_properties.Target = _template;
+		//_properties.Target = _template;
 
 		WindowTitle = _asset?.Name;
+
+		Rebuild();
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]
@@ -246,6 +298,14 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_dirty = true;
 		WindowTitle = $"{_asset?.Name ?? "untitled"}*";
 	}
+
+	/*
+	[EditorEvent.Frame]
+	protected void Frame()
+	{
+	
+	}
+	*/
 
 	private void OnPropertyUpdated( SerializedProperty serializedProperty )
 	{
