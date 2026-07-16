@@ -32,8 +32,6 @@ public interface IBlackboardMaterialParameter : IGroupableBlackboardParameter
 	bool IsAttribute { get; set; }
 
 	public IParameterUI UI { get; set; }
-
-	public IParameterUI GetParameterUI();
 }
 
 public interface IRangedBlackboardMaterialParameter : IBlackboardParameter
@@ -223,11 +221,6 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 	public override object GetValue()
 	{
 		return Value;
-	}
-
-	public IParameterUI GetParameterUI()
-	{
-		return UI;
 	}
 
 	public override void SetValue( object value )
