@@ -46,7 +46,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_properties = new Properties( this );
 		_properties.Target = _template;
 		_properties.PropertyUpdated += OnPropertyUpdated;
-		
+
 		DockManager.SetCentralWidget( _properties );
 	}
 
@@ -167,7 +167,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		}
 
 		var template = JsonSerializer.Deserialize<ShaderTemplateResource>( System.IO.File.ReadAllText( path ), ShaderGraphPlus.SerializerOptions() );
-	
+
 		_asset = asset;
 		_template = template;
 		_dirty = false;

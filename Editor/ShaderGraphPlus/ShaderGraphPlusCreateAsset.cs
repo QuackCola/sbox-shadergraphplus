@@ -26,10 +26,10 @@ internal static class ShaderGraphPlusCreateAsset
 		var newTemplate = new ShaderTemplateResource();
 		var options = ShaderGraphPlus.SerializerOptions( true );
 
-		var serializedAsset = JsonSerializer.Serialize( newTemplate , options );
-		
+		var serializedAsset = JsonSerializer.Serialize( newTemplate, options );
+
 		System.IO.File.WriteAllText( targetPath, serializedAsset );
-		
+
 		var asset = AssetSystem.RegisterFile( targetPath );
 
 		MainAssetBrowser.Instance?.Local.UpdateAssetList();
