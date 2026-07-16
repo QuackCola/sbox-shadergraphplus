@@ -1,5 +1,4 @@
 ﻿using Editor;
-using static Sandbox.PhysicsGroupDescription.BodyPart;
 
 namespace ShaderGraphPlus.AssetBrowser;
 
@@ -22,6 +21,20 @@ internal static class ShaderGraphPlusCreateAsset
 		MainAssetBrowser.Instance?.Local.UpdateAssetList();
 	}
 
+	static void CreateShaderTemplateAsset( string targetPath )
+	{
+		var newTemplate = new ShaderTemplateResource();
+		var options = ShaderGraphPlus.SerializerOptions( true );
+
+		var serializedAsset = JsonSerializer.Serialize( newTemplate , options );
+		
+		System.IO.File.WriteAllText( targetPath, serializedAsset );
+		
+		var asset = AssetSystem.RegisterFile( targetPath );
+
+		MainAssetBrowser.Instance?.Local.UpdateAssetList();
+	}
+
 	[Event( "folder.contextmenu", Priority = 100 )]
 	internal static void OnShaderGraphPlusAssetFolderContext( FolderContextMenu e )
 	{
@@ -29,6 +42,7 @@ internal static class ShaderGraphPlusCreateAsset
 		var otherMenu = e.Menu.FindOrCreateMenu( "New" ).FindOrCreateMenu( "Other" );
 		otherMenu.RemoveOption( ShaderGraphPlusGlobals.AssetTypeName );
 		otherMenu.RemoveOption( ShaderGraphPlusGlobals.SubgraphAssetTypeName );
+		otherMenu.RemoveOption( "Shader Template" );
 
 		if ( e.Target != null )
 		{
@@ -55,6 +69,23 @@ internal static class ShaderGraphPlusCreateAsset
 					return;
 
 				CreateSubgraphAsset( fd.SelectedFile );
+			} );
+			menu.AddOption( "New Shader Template", "account_tree", () =>
+			{
+				var fd = new FileDialog( null );
+
+				fd.Title = $"Create Shader Template";
+				fd.Directory = e.Target.FullName;
+				fd.DefaultSuffix = $".shdrtpl";
+				fd.SelectFile( $"untitled.shdrtpl" );
+				fd.SetFindFile();
+				fd.SetModeSave();
+				fd.SetNameFilter( $"Shader Template (*.shdrtpl)" );
+
+				if ( !fd.Execute() )
+					return;
+
+				CreateShaderTemplateAsset( fd.SelectedFile );
 			} );
 		}
 	}

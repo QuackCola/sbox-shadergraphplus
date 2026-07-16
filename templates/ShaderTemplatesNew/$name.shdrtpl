@@ -1,0 +1,20 @@
+{
+  "Features": {
+    "SupportsAlbedo": true,
+    "SupportsEmission": true,
+    "SupportsOpacity": true,
+    "SupportsNormal": true,
+    "SupportsRoughness": true,
+    "SupportsMetalness": true,
+    "SupportsAmbientOcclusion": true,
+    "SupportsPositionOffset": true,
+    "SupportsPixelDepthOffset": true,
+    "SupportsLitShadingModel": true,
+    "SupportsUnlitShadingModel": true,
+    "SupportsCustomShadingModel": true,
+    "SupportsOpaqueBlendMode": true,
+    "SupportsMaskedBlendMode": true,
+    "SupportsTranslucentBlendMode": true,
+    "SupportsDynamicBlendMode": true
+  }
+}
