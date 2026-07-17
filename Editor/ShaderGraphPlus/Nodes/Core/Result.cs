@@ -141,10 +141,12 @@ public sealed class Result : BaseResult
 				}
 				var propertyInfo = typeof( Result ).GetProperty( property.Name );
 				if ( propertyInfo is null ) continue;
+
 				var info = new PlugInfo( propertyInfo );
 				var displayInfo = info.DisplayInfo;
 				displayInfo.Name = property.DisplayName;
 				info.DisplayInfo = displayInfo;
+
 				var plug = new BasePlugIn( this, info, info.Type );
 				// Match by Info.Name (the C# property name) - matching by DisplayInfo.Name breaks
 				// inputs whose display name differs from the property name (e.g. [Title])
@@ -170,6 +172,14 @@ public sealed class Result : BaseResult
 						var connectedNode = Graph.Nodes.FirstOrDefault( x => x is BaseNodePlus node && node.Identifier == nodeInput.Identifier ) as BaseNodePlus;
 						plugIn.ConnectedOutput = connectedNode?.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
 					}
+
+					// Ensure the plug type so that the color of the plug
+					// is correct when switching from Unlit to Lit ShadingModel.
+					if ( plug is IPlug iplug && inputAttr.Type != null )
+					{
+						iplug.Type = inputAttr.Type;
+					}
+
 					plugs.Add( plug );
 				}
 			}
