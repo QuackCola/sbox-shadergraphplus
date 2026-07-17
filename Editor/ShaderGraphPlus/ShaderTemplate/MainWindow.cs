@@ -77,7 +77,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_tabWidget.AddPage( "Supported Material Inputs", "input", CreateTab( so, "Supported Material Inputs" ) );
 		_tabWidget.AddPage( "Supported Shading Models", "tonality", CreateTab( so, "Supported Shading Models" ) );
 		_tabWidget.AddPage( "Supported Blend Modes", "tonality", CreateTab( so, "Supported Blend Modes" ) );
-		_tabWidget.AddPage( "General", "settings", CreateTab( so, "General" ) );
+		_tabWidget.AddPage( "General", "settings", CreateGeneralTab( so, "General" ) );
 
 		_primaryDockCanvas.Layout.Add( _tabWidget );
 	}
@@ -96,6 +96,26 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		} );
 
 		container.Layout.Add( sheet );
+		container.Layout.AddStretchCell();
+
+		return container;
+	}
+
+	private Widget CreateGeneralTab( SerializedObject serialized, string tabName )
+	{
+		var container = new Widget( null );
+		container.Layout = Layout.Column();
+		container.VerticalSizeMode = SizeMode.CanGrow;
+
+		var textArea = new TextEditAreaWidget( container );
+		textArea.Value = _template.Code;
+		textArea.ValueChanged = ( x ) =>
+		{
+			_template.Code = x;
+			SetDirty();
+		};
+
+		container.Layout.Add( textArea );
 		container.Layout.AddStretchCell();
 
 		return container;
