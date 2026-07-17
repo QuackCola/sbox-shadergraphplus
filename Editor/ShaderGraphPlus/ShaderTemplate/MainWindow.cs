@@ -265,7 +265,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 			return false;
 
 		// Write serialized file to asset file
-		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize<ShaderTemplateResource>( _template, ShaderGraphPlus.SerializerOptions() ) );
+		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize<ShaderTemplateResource>( _template, ShaderGraphPlus.SerializerOptions( true ) ) );
 
 		if ( saveAs )
 		{
