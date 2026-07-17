@@ -54,6 +54,6 @@ public sealed class ShaderTemplateResource
 	[TabPage( "Supported Blend Modes" )]
 	public bool DynamicBlend { get; set; } = true;
 
-	[TabPage( "General" ), TextArea]
+	[TabPage( "Code" ), TextArea]
 	public string Code { get; set; } = "";
 }
