@@ -304,9 +304,9 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		}
 
 		MainAssetBrowser.Instance?.Local.UpdateAssetList();
-		
+
 		Update();
-		
+
 		_dirty = false;
 		WindowTitle = _asset?.Name;
 
