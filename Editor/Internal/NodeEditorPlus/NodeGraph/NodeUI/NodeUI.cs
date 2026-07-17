@@ -160,19 +160,24 @@ public partial class NodeUI : GraphicsItem
 
 		for ( var i = Inputs.Count - 1; i >= 0; --i )
 		{
-			var plugIn = Inputs[i];
-			var input = Node.Inputs.FirstOrDefault( x => x == plugIn.Inner );
-
-			if ( input is null )
+			if ( Inputs.ElementAtOrDefault( i ) != null )
 			{
-				Inputs.RemoveAt( i );
 
-				var connection = plugIn.Connection;
-				connection?.Disconnect();
-				connection?.Destroy();
+				var plugIn = Inputs[i];
+				var input = Node.Inputs.FirstOrDefault( x => x == plugIn.Inner );
 
-				plugIn.Destroy();
+				if ( input is null )
+				{
+					Inputs.RemoveAt( i );
+
+					var connection = plugIn.Connection;
+					connection?.Disconnect();
+					connection?.Destroy();
+
+					plugIn.Destroy();
+				}
 			}
+
 		}
 
 		for ( var i = Outputs.Count - 1; i >= 0; --i )
