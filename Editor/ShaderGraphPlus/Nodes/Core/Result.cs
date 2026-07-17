@@ -173,7 +173,7 @@ public sealed class Result : BaseResult
 						plugIn.ConnectedOutput = connectedNode?.Outputs.FirstOrDefault( x => x.Identifier == nodeInput.Output );
 					}
 
-					// Ensure the plug type so that the color of the plug
+					// Ensure the plug type so that the TypeColor of the plug
 					// is correct when switching from Unlit to Lit ShadingModel.
 					if ( plug is IPlug iplug && inputAttr.Type != null )
 					{
