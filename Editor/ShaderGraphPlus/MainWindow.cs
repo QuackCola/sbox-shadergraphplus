@@ -1779,6 +1779,12 @@ public class MainWindow : DockWindow
 		DockManager.AddDock( "Palette", "palette", _palette, DockArea.Center, relativeTo: output );
 		DockManager.AddDock( "Generated Code", "text_snippet", _generatedCodeTextView, DockArea.Center, relativeTo: output );
 
+		foreach ( var info in DockManager.DockTypes )
+		{
+			if ( DockManager.FindDockWidget( info.Title ) is { } dock )
+				dock.MinimumSizeFromContent = true;
+		}
+
 		DockManager.RaiseDock( "Output" );
 
 		Compile();
