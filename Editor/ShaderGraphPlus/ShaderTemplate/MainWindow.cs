@@ -107,15 +107,15 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		container.Layout = Layout.Column();
 		container.VerticalSizeMode = SizeMode.CanGrow;
 
-		var textArea = new TextEditAreaWidget( container );
-		textArea.Value = _template.Code;
-		textArea.ValueChanged = ( x ) =>
+		var textEditArea = new TextEditAreaWidget( container );
+		textEditArea.Value = _template.Code;
+		textEditArea.ValueChanged = ( x ) =>
 		{
 			_template.Code = x;
 			SetDirty();
 		};
 
-		container.Layout.Add( textArea );
+		container.Layout.Add( textEditArea );
 		container.Layout.AddStretchCell();
 
 		return container;
