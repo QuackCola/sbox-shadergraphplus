@@ -77,7 +77,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_tabWidget.AddPage( "Supported Material Inputs", "input", CreateTab( so, "Supported Material Inputs" ) );
 		_tabWidget.AddPage( "Supported Shading Models", "tonality", CreateTab( so, "Supported Shading Models" ) );
 		_tabWidget.AddPage( "Supported Blend Modes", "tonality", CreateTab( so, "Supported Blend Modes" ) );
-		_tabWidget.AddPage( "Code", "settings", CreateGeneralTab( so ) );
+		_tabWidget.AddPage( "Code", "settings", CreateCodeTab( so ) );
 
 		_primaryDockCanvas.Layout.Add( _tabWidget );
 	}
@@ -101,7 +101,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		return container;
 	}
 
-	private Widget CreateGeneralTab( SerializedObject serialized )
+	private Widget CreateCodeTab( SerializedObject serialized )
 	{
 		var container = new Widget( null );
 		container.Layout = Layout.Column();
