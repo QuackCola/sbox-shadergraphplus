@@ -7,7 +7,7 @@ namespace ShaderGraphPlus;
 public sealed partial class ShaderTemplateResource
 {
 	/// <summary>
-	/// Gets the version of the provided JsonElement. Returns 0 on failure.
+	/// Gets the version of the provided JsonElement. Returns -1 on failure.
 	/// </summary>
 	private static int GetVersion( JsonElement element )
 	{
@@ -16,9 +16,7 @@ public sealed partial class ShaderTemplateResource
 			return versionElement.GetInt32();
 		}
 
-		SGPLogger.Warning( $"JsonElement has no property named \"__version\" or \"Version\". Defaulting to 0...." );
-
-		return 0;
+		return -1;
 	}
 
 	public string Serialize()
