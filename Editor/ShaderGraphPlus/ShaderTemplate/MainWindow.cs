@@ -116,7 +116,6 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		};
 
 		container.Layout.Add( textEditArea );
-		container.Layout.AddStretchCell();
 
 		return container;
 	}
