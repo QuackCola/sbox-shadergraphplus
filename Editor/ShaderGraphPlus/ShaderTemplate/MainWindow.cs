@@ -235,7 +235,8 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 			return;
 		}
 
-		var template = JsonSerializer.Deserialize<ShaderTemplateResource>( System.IO.File.ReadAllText( path ), ShaderGraphPlus.SerializerOptions() );
+		var template = new ShaderTemplateResource();
+		template.Deserialize( System.IO.File.ReadAllText( path ), Path.GetFileName( path ) );
 
 		_asset = asset;
 		_template = template;
@@ -284,7 +285,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 			return false;
 
 		// Write serialized file to asset file
-		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize( _template, ShaderGraphPlus.SerializerOptions( true ) ) );
+		System.IO.File.WriteAllText( savePath, _template.Serialize() );
 
 		if ( saveAs )
 		{
