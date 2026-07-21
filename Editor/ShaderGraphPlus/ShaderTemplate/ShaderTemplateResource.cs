@@ -3,11 +3,8 @@
 namespace ShaderGraphPlus;
 
 [AssetType( Name = "Shader Template", Extension = "shdrtpl" )]
-public sealed class ShaderTemplateResource
+public sealed partial class ShaderTemplateResource
 {
-	[Hide]
-	public int Version => 1;
-
 	[TabPage( "Supported Material Inputs" )]
 	public bool Albedo { get; set; } = true;
 
