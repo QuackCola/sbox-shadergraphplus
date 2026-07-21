@@ -1,6 +1,4 @@
 ﻿using Editor;
-using Editor.Inspectors;
-using static Editor.Inspectors.AssetInspector;
 
 namespace ShaderGraphPlus;
 
