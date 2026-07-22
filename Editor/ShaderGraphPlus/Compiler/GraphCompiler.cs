@@ -15,31 +15,6 @@ public sealed partial class GraphCompiler
 		public bool IsWarning;
 	}
 
-	private static Dictionary<string, string> TemplateTagMap => new()
-	{
-		{ "{sgp_shader_description}", "{0}" },
-		{ "{sgp_shader_feature_defines}", "{1}" },
-		{ "{sgp_shader_common}", "{2}" },
-		{ "{sgp_vertex_input_data}", "{3}" },
-		{ "{sgp_pixel_input_data}", "{4}" },
-
-		{ "{sgp_vertex_globals}", "{9}" },
-		{ "{sgp_pixel_globals}", "{5}" },
-
-		{ "{sgp_vertex_combo_rules}", "{10}" },
-		{ "{sgp_pixel_combo_rules}", "{11}" },
-
-		{ "{sgp_pixel_functions}", "{12}" },
-		{ "{sgp_vertex_functions}", "{13}" },
-
-		{ "{sgp_vertex_code}", "{8}" },
-
-		{ "{sgp_pixel_init}", "{14}" },
-		{ "{sgp_pixel_locals}", "{6}" },
-		{ "{sgp_pixel_material}", "{7}" },
-		{ "{sgp_pixel_output}", "{15}" },
-	};
-
 	/// <summary>
 	/// Current graph we're compiling
 	/// </summary>
