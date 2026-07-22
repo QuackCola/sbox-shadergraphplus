@@ -175,6 +175,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public ShaderDomain Domain { get; set; }
 
+	[ShaderTemplatePath, ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	public string ShaderTemplate { get; set; }
+
 	[Hide]
 	public PreviewSettings PreviewSettings { get; set; } = new();
 
