@@ -161,4 +161,20 @@ PS
 
 		return true;
 	}
+
+	/// <summary>
+	/// Convert the user defined template code to a formatable string that can be used by <seealso cref="string.Format(string, ReadOnlySpan{object?})"/>
+	/// </summary>
+	/// <returns>A formatable string</returns>
+	public string ToFormatableString()
+	{
+		var formatableString = Code;
+
+		foreach ( var tag in TemplateTagMap )
+		{
+			formatableString = formatableString.Replace( tag.Key, tag.Value );
+		}
+
+		return formatableString;
+	}
 }

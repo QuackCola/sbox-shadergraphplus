@@ -20,6 +20,8 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public ShaderGraphPlus Graph { get; private set; }
 
+	public ShaderTemplateResource UserShaderTemplate { get; private set; }
+
 	/// <summary>
 	/// Current SubGraph
 	/// </summary>
@@ -150,6 +152,15 @@ public sealed partial class GraphCompiler
 		Subgraphs = new();
 		AddSubgraphs( Graph );
 		ShaderFeatures = shaderFeatures;
+
+		if ( !string.IsNullOrWhiteSpace( Graph.ShaderTemplate ) )
+		{
+			UserShaderTemplate = new ShaderTemplateResource();
+
+			var asset = AssetSystem.FindByPath( Graph.ShaderTemplate );
+			
+			UserShaderTemplate.Deserialize( System.IO.File.ReadAllText( asset.AbsolutePath ), System.IO.Path.GetFileName( asset.AbsolutePath ) );
+		}
 
 		// Set the Initial Vertex and Pixel stage inputs from ShaderTemplate.
 		VertexInputs = ShaderTemplate.VertexInputs;
@@ -1396,16 +1407,16 @@ public sealed partial class GraphCompiler
 		var material = GenerateMaterial();
 		var pixelOutput = GeneratePixelOutput();
 
+		var shaderTemplate = ShaderTemplate.Code;
+
+		if ( UserShaderTemplate != null )
+		{
+			shaderTemplate = UserShaderTemplate.ToFormatableString();
+		}
+
 		// If we have any errors after evaluating, no point going further
 		if ( Errors.Any() )
 			return null;
-
-		var shaderTemplate = ShaderTemplate.Code;
-
-		if ( Graph.Domain is ShaderDomain.BlendingSurface )
-		{
-			shaderTemplate = ShaderTemplateBlending.Code;
-		}
 
 		return string.Format( shaderTemplate,
 			Graph.Description, // {0}
