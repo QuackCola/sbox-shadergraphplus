@@ -153,12 +153,15 @@ public sealed partial class GraphCompiler
 		AddSubgraphs( Graph );
 		ShaderFeatures = shaderFeatures;
 
-		var templateAsset = AssetSystem.FindByPath( Graph.ShaderTemplate );
-
-		if ( templateAsset != null )
+		if ( UserShaderTemplate == null )
 		{
-			UserShaderTemplate = new ShaderTemplateResource();
-			UserShaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
+			var templateAsset = AssetSystem.FindByPath( Graph.ShaderTemplate );
+
+			if ( templateAsset != null )
+			{
+				UserShaderTemplate = new ShaderTemplateResource();
+				UserShaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
+			}
 		}
 
 		// Set the Initial Vertex and Pixel stage inputs from ShaderTemplate.
