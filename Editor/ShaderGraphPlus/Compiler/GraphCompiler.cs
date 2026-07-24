@@ -144,7 +144,7 @@ public sealed partial class GraphCompiler
 	public IEnumerable<GraphIssue> Warnings => NodeWarnings
 		.Select( x => new GraphIssue { Node = x.Key, Message = x.Value.FirstOrDefault(), IsWarning = true } );
 
-	public GraphCompiler( ShaderGraphPlus graph, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview )
+	public GraphCompiler( ShaderGraphPlus graph, ShaderTemplateResource userShaderTemplate, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview )
 	{
 		Graph = graph;
 		IsPreview = preview;
@@ -153,29 +153,14 @@ public sealed partial class GraphCompiler
 		AddSubgraphs( Graph );
 		ShaderFeatures = shaderFeatures;
 
-		if ( UserShaderTemplate == null )
+		if ( userShaderTemplate != null )
 		{
-			var templateAsset = AssetSystem.FindByPath( Graph.ShaderTemplate );
-
-			if ( templateAsset != null )
-			{
-				UserShaderTemplate = new ShaderTemplateResource();
-				UserShaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
-			}
+			UserShaderTemplate = userShaderTemplate;
 		}
 
 		// Set the Initial Vertex and Pixel stage inputs from ShaderTemplate.
 		VertexInputs = ShaderTemplate.VertexInputs;
 		PixelInputs = ShaderTemplate.PixelInputs;
-	}
-
-	public GraphCompiler( ShaderGraphPlus graph, ShaderTemplateResource userShaderTemplate, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview ) :
-		this( graph, shaderFeatures, preview )
-	{
-		if ( userShaderTemplate != null )
-		{
-			UserShaderTemplate = userShaderTemplate;
-		}
 	}
 
 	public bool TryGetPreviewImage( string name, out string imagePath )

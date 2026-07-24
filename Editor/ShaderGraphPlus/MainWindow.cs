@@ -44,6 +44,8 @@ public class MainWindow : DockWindow
 	private ShaderGraphPlusBlackboardView _blackboardView;
 	private Asset _asset;
 
+	private ShaderTemplateResource _shaderTemplate;
+
 	public string AssetPath => _asset?.Path;
 
 	private Widget _graphCanvas;
@@ -593,15 +595,10 @@ public class MainWindow : DockWindow
 			return null;
 		}
 
-		var templateAsset = AssetSystem.FindByPath( _graph.ShaderTemplate );
-
-		if ( templateAsset != null )
+		if ( _shaderTemplate != null )
 		{
-			var template = new ShaderTemplateResource();
-			template.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
-
 			// Validate the template
-			if ( !template.Validate( _graph.ShaderTemplate, out var tagErrors ) )
+			if ( !_shaderTemplate.Validate( _graph.ShaderTemplate, out var tagErrors ) )
 			{
 				var graphIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } );
 
@@ -639,7 +636,7 @@ public class MainWindow : DockWindow
 		}
 
 		var resultNode = _graph.Nodes.OfType<BaseResult>().FirstOrDefault();
-		var compiler = new GraphCompiler( _graph, ShaderFeatures, true );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, true );
 		var nodeErrors = new List<GraphCompiler.GraphIssue>();
 		var nodeWarnings = new List<GraphCompiler.GraphIssue>();
 		var evaluatedCustomFunctions = new List<string>();
@@ -906,7 +903,7 @@ public class MainWindow : DockWindow
 		// Go ahead preregister anything before iterating over all the nodes in the graph.
 		RegisterShaderFeatures( out _ );
 
-		var compiler = new GraphCompiler( _graph, ShaderFeatures, false );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, false );
 		return compiler.Generate();
 	}
 
@@ -1390,6 +1387,9 @@ public class MainWindow : DockWindow
 		_graph = graph;
 		_dirty = false;
 		_graphView.Graph = _graph;
+
+		LoadShaderTemplate();
+
 		_blackboardView.Graph = _graph;
 		_graphCanvas.WindowTitle = _asset.Name;
 		_undoStack.Clear();
@@ -1438,6 +1438,19 @@ public class MainWindow : DockWindow
 			DockManager.RaiseDock( "Output" );
 		}
 
+	}
+
+	private void LoadShaderTemplate()
+	{
+		if ( _graph is null ) return;
+
+		if ( !string.IsNullOrWhiteSpace( _graph.ShaderTemplate ) )
+		{
+			var templateAsset = AssetSystem.FindByPath( _graph.ShaderTemplate );
+
+			_shaderTemplate = new ShaderTemplateResource();
+			_shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
+		}
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]
@@ -1860,6 +1873,12 @@ public class MainWindow : DockWindow
 		if ( _properties.Target is BaseNodePlus node )
 		{
 			_graphView.UpdateNode( node );
+		}
+
+		// Reload shader template
+		if ( serializedProperty.Name == nameof( ShaderGraphPlus.ShaderTemplate ) )
+		{
+			LoadShaderTemplate();
 		}
 
 		var shouldEvaluate = _properties.Target is not CommentNode;
