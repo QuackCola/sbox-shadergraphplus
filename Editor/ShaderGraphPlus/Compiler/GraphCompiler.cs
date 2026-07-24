@@ -158,7 +158,7 @@ public sealed partial class GraphCompiler
 			UserShaderTemplate = new ShaderTemplateResource();
 
 			var asset = AssetSystem.FindByPath( Graph.ShaderTemplate );
-			
+
 			UserShaderTemplate.Deserialize( System.IO.File.ReadAllText( asset.AbsolutePath ), System.IO.Path.GetFileName( asset.AbsolutePath ) );
 		}
 

@@ -599,18 +599,18 @@ public class MainWindow : DockWindow
 		{
 			var template = new ShaderTemplateResource();
 			template.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
-			
+
 			// Validate the template
 			if ( !template.Validate( _graph.ShaderTemplate, out var tagErrors ) )
 			{
 				var graphIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } );
-			
+
 				_output.GraphIssues = graphIssues.ToList();
 				DockManager.RaiseDock( "Output" );
-			
+
 				_generatedCode = null;
 				_generatedCodeTextView.SetTextContents( "" );
-			
+
 				RestoreShader();
 				return null;
 			}
