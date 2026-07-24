@@ -166,6 +166,15 @@ public sealed partial class GraphCompiler
 		PixelInputs = ShaderTemplate.PixelInputs;
 	}
 
+	public GraphCompiler( ShaderGraphPlus graph, ShaderTemplateResource userShaderTemplate, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview ) :
+		this( graph, shaderFeatures, preview )
+	{
+		if ( userShaderTemplate != null )
+		{
+			UserShaderTemplate = userShaderTemplate;
+		}
+	}
+
 	public bool TryGetPreviewImage( string name, out string imagePath )
 	{
 		return PreviewImages.TryGetValue( name, out imagePath );
