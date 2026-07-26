@@ -72,12 +72,10 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		var so = _template.GetSerialized();
 		so.OnPropertyChanged += OnPropertyUpdated;
 
-		_tabWidget = new TabWidget( null );
+		_tabWidget = new TabWidget( this );
 
-		_tabWidget.AddPage( "Supported Material Inputs", "input", CreateTab( so, "Supported Material Inputs" ) );
-		_tabWidget.AddPage( "Supported Shading Models", "tonality", CreateTab( so, "Supported Shading Models" ) );
-		_tabWidget.AddPage( "Supported Blend Modes", "tonality", CreateTab( so, "Supported Blend Modes" ) );
-		_tabWidget.AddPage( "Code", "settings", CreateCodeTab( so ) );
+		_tabWidget.AddPage( "General", "settings", CreateTab( so, "General" ) );
+		_tabWidget.AddPage( "Code", "code", CreateCodeTab( so ) );
 
 		_primaryDockCanvas.Layout.Add( _tabWidget );
 	}
