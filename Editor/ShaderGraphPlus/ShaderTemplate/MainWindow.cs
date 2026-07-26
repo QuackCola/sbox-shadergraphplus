@@ -57,10 +57,8 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	{
 		BuildMenuBar();
 
-		_primaryDockCanvas = new Widget( null );
+		_primaryDockCanvas = new Widget( this );
 		_primaryDockCanvas.Layout = Layout.Column();
-		_primaryDockCanvas.VerticalSizeMode = SizeMode.CanGrow;
-		_primaryDockCanvas.HorizontalSizeMode = SizeMode.Flexible;
 
 		DockManager.SetCentralWidget( _primaryDockCanvas );
 	}
