@@ -32,9 +32,6 @@ public enum ShaderDomain
 {
 	[Icon( "view_in_ar" )]
 	Surface,
-	[Icon( "brush" )]
-	[Hide]
-	BlendingSurface, // TODO : Hidden for now since its broken.
 	[Icon( "desktop_windows" )]
 	PostProcess,
 }

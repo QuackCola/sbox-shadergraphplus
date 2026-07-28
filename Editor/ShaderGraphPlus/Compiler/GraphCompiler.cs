@@ -157,10 +157,6 @@ public sealed partial class GraphCompiler
 		{
 			UserShaderTemplate = userShaderTemplate;
 		}
-
-		// Set the Initial Vertex and Pixel stage inputs from ShaderTemplate.
-		VertexInputs = ShaderTemplate.VertexInputs;
-		PixelInputs = ShaderTemplate.PixelInputs;
 	}
 
 	public bool TryGetPreviewImage( string name, out string imagePath )
@@ -192,7 +188,7 @@ public sealed partial class GraphCompiler
 		if ( string.IsNullOrWhiteSpace( textureInput.DefaultTexture ) )
 			return "";
 
-		var resourceText = string.Format( ShaderTemplate.TextureDefinition,
+		var resourceText = string.Format( TextureDefinitionTemplate.TextureDefinition,
 			textureInput.DefaultTexture,
 			textureInput.ColorSpace,
 			textureInput.ImageFormat,
@@ -238,13 +234,6 @@ public sealed partial class GraphCompiler
 	{
 		name = CleanName( name );
 
-		if ( ShaderTemplate.InternalVertexInputs.ContainsKey( name ) )
-		{
-			SGPLogger.Error( $"VetexInput \"{name}\" is reserved by the GraphCompiler" );
-
-			return;
-		}
-
 		var vertexInput = $"{type} {name} : {semantic};";
 
 		if ( !VertexInputs.TryAdd( name, vertexInput ) )
@@ -256,13 +245,6 @@ public sealed partial class GraphCompiler
 	public void RegisterPixelInput( string type, string name, string semantic )
 	{
 		name = CleanName( name );
-
-		if ( ShaderTemplate.InternalPixelInputs.ContainsKey( name ) )
-		{
-			SGPLogger.Error( $"PixelInput \"{name}\" is reserved by the GraphCompiler" );
-
-			return;
-		}
 
 		var pixelInput = $"{type} {name} : {semantic};";
 
@@ -1403,7 +1385,12 @@ public sealed partial class GraphCompiler
 		var material = GenerateMaterial();
 		var pixelOutput = GeneratePixelOutput();
 
-		var shaderTemplate = ShaderTemplate.Code;
+		var shaderTemplate = Graph.Domain switch
+		{
+			ShaderDomain.Surface => ShaderTemplateSurface.Code,
+			ShaderDomain.PostProcess => ShaderTemplatePostProcess.Code,
+			_ => throw new NotImplementedException(),
+		};
 
 		if ( UserShaderTemplate != null )
 		{
@@ -1546,47 +1533,7 @@ public sealed partial class GraphCompiler
 		var positionOffsetInput = resultNode.GetPositionOffset();
 
 		var sb = new StringBuilder();
-		var sb2 = new StringBuilder();
-
-		foreach ( var vertexInput in VertexInputs )
-		{
-			sb2.AppendLine( $"i.{vertexInput.Key} = v.{vertexInput.Key};" );
-		}
-
-		switch ( Graph.Domain )
-		{
-			case ShaderDomain.Surface:
-				sb.AppendLine( $@"
-PixelInput i = ProcessVertex( v );
-i.vPositionOs = v.vPositionOs.xyz;
-
-{sb2.ToString()}
-ExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( v.nInstanceTransformID );
-i.vTintColor = extraShaderData.vTint;
-
-VS_DecodeObjectSpaceNormalAndTangent( v, i.vNormalOs, i.vTangentUOs_flTangentVSign );
-		" );
-				break;
-			case ShaderDomain.BlendingSurface:
-				sb.AppendLine( $@"
-PixelInput i = ProcessVertex( v );
-
-{sb2.ToString()}
-i.vBlendValues = v.vColorBlendValues;
-i.vPaintValues = v.vColorPaintValues;
-" );
-				break;
-			case ShaderDomain.PostProcess:
-				sb.AppendLine( $@"
-PixelInput i;
-
-{sb2.ToString()}
-i.vPositionPs = float4( v.vPositionOs.xy, 0.0f, 1.0f );
-i.vPositionWs = float3( v.vTexCoord, 0.0f );
-" );
-				break;
-		}
-
+	
 		NodeResult result;
 
 		if ( positionOffsetInput is NodeInput connection && connection.IsValid() )
@@ -1604,18 +1551,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 			}
 		}
 
-		switch ( Graph.Domain )
-		{
-			case ShaderDomain.Surface:
-				sb.AppendLine( "return FinalizeVertex( i );" );
-				break;
-			case ShaderDomain.BlendingSurface:
-				sb.AppendLine( "return FinalizeVertex( i );" );
-				break;
-			case ShaderDomain.PostProcess:
-				sb.AppendLine( "return i;" );
-				break;
-		}
 		return sb.ToString();
 	}
 
@@ -1650,7 +1585,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 		}
 		else if ( Graph.ShadingModel == ShadingModel.Lit )
 		{
-			return ShaderTemplate.Material_output;
+			return ShaderTemplateSurface.Material_output;
 		}
 
 		return null;
@@ -1665,11 +1600,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 		// Register any Graph level Shader Features...
 		//RegisterShaderFeatures( Graph.shaderFeatureNodeResults );
-
-		if ( Graph.Domain is ShaderDomain.BlendingSurface )
-		{
-			sb.AppendLine( "Feature( F_MULTIBLEND, 0..3 ( 0=\"1 Layers\", 1=\"2 Layers\", 2=\"3 Layers\", 3=\"4 Layers\", 4=\"5 Layers\" ), \"Number Of Blendable Layers\" );" );
-		}
 
 		foreach ( var feature in ShaderFeatures )
 		{
@@ -1771,10 +1701,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 			foreach ( var vertexInput in VertexInputs )
 			{
-				if ( !ShaderTemplate.InternalVertexInputs.ContainsValue( vertexInput.Value ) )
-				{
-					sb.AppendLine( vertexInput.Value );
-				}
+				sb.AppendLine( vertexInput.Value );
 			}
 		}
 		else
@@ -1783,10 +1710,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 			foreach ( var pixelInput in PixelInputs )
 			{
-				if ( !ShaderTemplate.InternalPixelInputs.ContainsValue( pixelInput.Value ) )
-				{
-					sb.AppendLine( pixelInput.Value );
-				}
+				sb.AppendLine( pixelInput.Value );
 			}
 		}
 
@@ -1799,11 +1723,11 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 		var includes = IsVs ? VertexIncludes : PixelIncludes;
 
-		if ( IsPs && Graph.Domain == ShaderDomain.PostProcess )
-		{
-			sb.AppendLine( "#include \"postprocess/functions.hlsl\"" );
-			sb.AppendLine( "#include \"postprocess/common.hlsl\"" );
-		}
+		//if ( IsPs && Graph.Domain == ShaderDomain.PostProcess )
+		//{
+		//	sb.AppendLine( "#include \"postprocess/functions.hlsl\"" );
+		//	sb.AppendLine( "#include \"postprocess/common.hlsl\"" );
+		//}
 
 		foreach ( var include in includes )
 		{
@@ -1835,10 +1759,10 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 		}
 
 		// Support for color buffer in post-process shaders
-		if ( IsPs && Graph.Domain is ShaderDomain.PostProcess )
-		{
-			sb.AppendLine( "Texture2D g_tColorBuffer < Attribute( \"ColorBuffer\" ); SrgbRead ( true ); >;" );
-		}
+		//if ( IsPs && Graph.Domain is ShaderDomain.PostProcess )
+		//{
+		//	sb.AppendLine( "Texture2D g_tColorBuffer < Attribute( \"ColorBuffer\" ); SrgbRead ( true ); >;" );
+		//}
 
 		if ( IsPreview )
 		{
@@ -2115,7 +2039,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 	{
 		Stage = ShaderStage.Pixel;
 		if ( Graph.ShadingModel == ShadingModel.Lit && Graph.Domain != ShaderDomain.PostProcess )
-			return ShaderTemplate.Material_init;
+			return ShaderTemplateSurface.Material_init;
 		return "";
 	}
 
