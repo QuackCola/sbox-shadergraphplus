@@ -5,40 +5,17 @@ namespace ShaderGraphPlus;
 [AssetType( Name = "Shader Template", Extension = "shdrtpl" )]
 public sealed partial class ShaderTemplateResource
 {
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	public bool Albedo { get; set; } = true;
+	/// <summary>
+	/// What shading model this shader template supports
+	/// </summary>
+	[TabPage( "General" )]
+	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
 
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	[ShowIf( nameof( LitShading ), true )]
-	public bool Emission { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
+	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
 	public bool Opacity { get; set; } = true;
 
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	[ShowIf( nameof( LitShading ), true )]
-	public bool Normal { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	[ShowIf( nameof( LitShading ), true )]
-	public bool Roughness { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	[ShowIf( nameof( LitShading ), true )]
-	public bool Metalness { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
-	[ShowIf( nameof( LitShading ), true )]
-	public bool AmbientOcclusion { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Material Inputs" )]
+	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
 	public bool PositionOffset { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Shading Models" )]
-	public bool LitShading { get; set; } = true;
-
-	[TabPage( "General" ), Group( "Supported Shading Models" )]
-	public bool UnlitShading { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
 	public bool OpaqueBlend { get; set; } = true;
