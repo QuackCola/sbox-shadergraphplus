@@ -26,8 +26,6 @@ public enum ShadingModel
 	/// </summary>
 	[Icon( "brightness_3" )]
 	Unlit,
-	//[Icon( "build" )] // TODO
-	//Custom,
 }
 
 public enum ShaderDomain
