@@ -42,7 +42,7 @@ public sealed class Result : BaseResult
 
 	[Hide]
 	[Input( typeof( Vector3 ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Emission { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultOpacity ) )]
@@ -52,22 +52,22 @@ public sealed class Result : BaseResult
 	[Hide]
 	[Title( "Normal (Tangent)" )]
 	[Input( typeof( Vector3 ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Normal { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultRoughness ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Roughness { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultMetalness ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Metalness { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultAmbientOcclusion ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput AmbientOcclusion { get; set; }
 
 	[InputDefault( nameof( Opacity ) )]
