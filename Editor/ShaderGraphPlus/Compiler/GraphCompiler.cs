@@ -2010,27 +2010,31 @@ public sealed partial class GraphCompiler
 	{
 		var sb = new StringBuilder();
 
-		if ( !IsNotPreview )
+		var combo = "";
+
+		if ( IsPreview )
 		{
 			sb.AppendLine();
 			sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
-			if ( Graph.RenderFace == RenderFace.Front )
-				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : BACK );" );
-			else if ( Graph.RenderFace == RenderFace.Back )
-				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : FRONT );" );
-			else
-				sb.AppendLine( "RenderState( CullMode, NONE );" );
+
+			combo = "D_RENDER_BACKFACES";
 		}
 		else
 		{
-			sb.AppendLine();
-			if ( Graph.RenderFace == RenderFace.Front )
-				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : BACK );" );
-			else if ( Graph.RenderFace == RenderFace.Back )
-				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : FRONT );" );
-			else
-				sb.AppendLine( "RenderState( CullMode, NONE );" );
+			combo = "F_RENDER_BACKFACES";
 		}
+
+		sb.AppendLine();
+
+		var renderFace = Graph.RenderFace switch
+		{
+			RenderFace.Front => $"{combo} ? NONE : BACK",
+			RenderFace.Back => $"{combo} ? NONE : FRONT",
+			RenderFace.Both => "NONE",
+			_ => "NONE",
+		};
+
+		sb.Append( $"RenderState( CullMode, {renderFace} );" );
 
 		return sb.ToString();
 	}
