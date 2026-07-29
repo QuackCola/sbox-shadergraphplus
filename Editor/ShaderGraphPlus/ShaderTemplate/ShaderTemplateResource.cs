@@ -2,11 +2,24 @@
 
 namespace ShaderGraphPlus;
 
-public sealed record TemplateInfo( bool ShowOpacityInput, bool ShowPositionOffset )
+public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool SupportsUnlitShading, bool SupportsOpaqueBlend, bool SupportsMaskedBlend, bool SupportsTranslucentBlend, bool SupportsDynamicBlend, bool ShowOpacityInput, bool ShowPositionOffset )
 {
-	public static implicit operator TemplateInfo( ShaderTemplateResource template )
+	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true )
 	{
-		return new TemplateInfo( template.Opacity, template.PositionOffset );
+	}
+
+	public static implicit operator UserShaderTemplateInfo( ShaderTemplateResource template )
+	{
+		return new UserShaderTemplateInfo(
+			template.ShadingModel == ShadingModel.Lit,
+			template.ShadingModel == ShadingModel.Unlit,
+			template.OpaqueBlend,
+			template.MaskedBlend,
+			template.TranslucentBlend,
+			template.DynamicBlend, 
+			template.Opacity, 
+			template.PositionOffset 
+		);
 	}
 }
 

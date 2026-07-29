@@ -12,6 +12,8 @@ public enum BlendMode
 	Masked,
 	[Icon( "blur_on" )]
 	Translucent,
+	[Icon( "tune" )]
+	Dynamic,
 }
 
 public enum ShadingModel
@@ -177,10 +179,50 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public PreviewSettings PreviewSettings { get; set; } = new();
 
 	[Hide, JsonIgnore]
-	public TemplateInfo UserTemplateInfo { get; set; } = new( true , true );
+	public UserShaderTemplateInfo UserTemplateInfo { get; set; } = new();
 
 	public ShaderGraphPlus()
 	{
+	}
+
+	/// <summary>
+	/// Validates and auto-corrects BlendMode and ShadingModel if current values are not supported
+	/// </summary>
+	public void ValidateTemplateSettings()
+	{
+		// Auto-correct BlendMode if current is not supported
+		bool currentBlendModeSupported = BlendMode switch
+		{
+			BlendMode.Opaque => UserTemplateInfo.SupportsOpaqueBlend,
+			BlendMode.Masked => UserTemplateInfo.SupportsMaskedBlend,
+			BlendMode.Translucent => UserTemplateInfo.SupportsTranslucentBlend,
+			BlendMode.Dynamic => UserTemplateInfo.SupportsDynamicBlend,
+			_ => false
+		};
+
+		if ( !currentBlendModeSupported )
+		{
+			// Find the first supported blend mode
+			if ( UserTemplateInfo.SupportsOpaqueBlend ) BlendMode = BlendMode.Opaque;
+			else if ( UserTemplateInfo.SupportsMaskedBlend ) BlendMode = BlendMode.Masked;
+			else if ( UserTemplateInfo.SupportsTranslucentBlend ) BlendMode = BlendMode.Translucent;
+			else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
+		}
+
+		// Auto-correct ShadingModel if current is not supported
+		bool currentShadingModelSupported = ShadingModel switch
+		{
+			ShadingModel.Lit => UserTemplateInfo.SupportsLitShading,
+			ShadingModel.Unlit => UserTemplateInfo.SupportsUnlitShading,
+			_ => false
+		};
+
+		if ( !currentShadingModelSupported )
+		{
+			// Find the first supported shading model
+			if ( UserTemplateInfo.SupportsLitShading ) ShadingModel = ShadingModel.Lit;
+			else if ( UserTemplateInfo.SupportsUnlitShading ) ShadingModel = ShadingModel.Unlit;
+		}
 	}
 
 	public bool ContainsNode( string id )

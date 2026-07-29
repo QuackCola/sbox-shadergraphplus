@@ -1598,6 +1598,14 @@ public sealed partial class GraphCompiler
 
 		sb.AppendLine( "#include \"common/features.hlsl\"" );
 
+		if ( Graph.BlendMode == BlendMode.Dynamic )
+		{
+			sb.AppendLine( "Feature( F_ALPHA_TEST, 0..1, \"Blending\" );" );
+			sb.AppendLine( "Feature( F_TRANSLUCENT, 0..1, \"Blending\" );" );
+			sb.AppendLine( "FeatureRule( Allow1( F_TRANSLUCENT, F_ALPHA_TEST ), \"Alpha Test and Translucent are not compatible\" );" );
+			sb.AppendLine( "FeatureRule( Requires1( F_ADDITIVE_BLEND, F_TRANSLUCENT ), \"Requires translucency\" );" );
+		}
+
 		// Register any Graph level Shader Features...
 		//RegisterShaderFeatures( Graph.shaderFeatureNodeResults );
 
@@ -1653,17 +1661,26 @@ public sealed partial class GraphCompiler
 			sb.AppendLine();
 		}
 
-		var blendMode = Graph.BlendMode;
-		var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;
-		var translucent = blendMode == BlendMode.Translucent ? 1 : 0;
+		if ( Graph.BlendMode == BlendMode.Dynamic )
+		{
+			// Dynamic blend mode: Use StaticCombos linked to Features
+			sb.AppendLine( "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );" );
+			sb.AppendLine( "StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );" );
+		}
+		else
+		{
+			var blendMode = Graph.BlendMode;
+			var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;
+			var translucent = blendMode == BlendMode.Translucent ? 1 : 0;
 
-		sb.AppendLine( $"#ifndef S_ALPHA_TEST" );
-		sb.AppendLine( IndentString( $"#define S_ALPHA_TEST {alphaTest}", 1 ) );
-		sb.AppendLine( $"#endif" );
+			sb.AppendLine( $"#ifndef S_ALPHA_TEST" );
+			sb.AppendLine( IndentString( $"#define S_ALPHA_TEST {alphaTest}", 1 ) );
+			sb.AppendLine( $"#endif" );
 
-		sb.AppendLine( $"#ifndef S_TRANSLUCENT" );
-		sb.AppendLine( IndentString( $"#define S_TRANSLUCENT {translucent}", 1 ) );
-		sb.AppendLine( $"#endif" );
+			sb.AppendLine( $"#ifndef S_TRANSLUCENT" );
+			sb.AppendLine( IndentString( $"#define S_TRANSLUCENT {translucent}", 1 ) );
+			sb.AppendLine( $"#endif" );
+		}
 
 		sb.AppendLine();
 
