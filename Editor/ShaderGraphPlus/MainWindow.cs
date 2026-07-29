@@ -1454,6 +1454,8 @@ public class MainWindow : DockWindow
 
 			_shaderTemplate = new ShaderTemplateResource();
 			_shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
+
+			_graph.UserTemplateInfo = _shaderTemplate;
 		}
 	}
 

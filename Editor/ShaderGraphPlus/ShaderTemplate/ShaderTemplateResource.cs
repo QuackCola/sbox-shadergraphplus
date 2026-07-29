@@ -2,6 +2,14 @@
 
 namespace ShaderGraphPlus;
 
+public sealed record TemplateInfo( bool ShowOpacityInput, bool ShowPositionOffset )
+{
+	public static implicit operator TemplateInfo( ShaderTemplateResource template )
+	{
+		return new TemplateInfo( template.Opacity, template.PositionOffset );
+	}
+}
+
 [AssetType( Name = "Shader Template", Extension = "shdrtpl" )]
 public sealed partial class ShaderTemplateResource
 {

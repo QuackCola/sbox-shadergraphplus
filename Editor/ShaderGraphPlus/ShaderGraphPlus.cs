@@ -176,6 +176,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide]
 	public PreviewSettings PreviewSettings { get; set; } = new();
 
+	[Hide, JsonIgnore]
+	public TemplateInfo UserTemplateInfo { get; set; } = new( true , true );
+
 	public ShaderGraphPlus()
 	{
 	}
