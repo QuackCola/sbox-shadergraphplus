@@ -2036,6 +2036,8 @@ public sealed partial class GraphCompiler
 
 		sb.Append( $"RenderState( CullMode, {renderFace} );" );
 
+		sb.AppendLine();
+
 		return sb.ToString();
 	}
 
