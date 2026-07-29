@@ -1533,7 +1533,7 @@ public sealed partial class GraphCompiler
 		var positionOffsetInput = resultNode.GetPositionOffset();
 
 		var sb = new StringBuilder();
-	
+
 		NodeResult result;
 
 		if ( positionOffsetInput is NodeInput connection && connection.IsValid() )

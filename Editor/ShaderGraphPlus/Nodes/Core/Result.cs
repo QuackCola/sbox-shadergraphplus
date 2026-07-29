@@ -87,11 +87,11 @@ public sealed class Result : BaseResult
 	[InputDefault( nameof( Roughness ) )]
 	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultRoughness { get; set; } = 1.0f;
-	
+
 	[InputDefault( nameof( Metalness ) )]
 	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultMetalness { get; set; } = 0.0f;
-	
+
 	[InputDefault( nameof( AmbientOcclusion ) )]
 	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultAmbientOcclusion { get; set; } = 1.0f;
@@ -102,7 +102,7 @@ public sealed class Result : BaseResult
 	public override void OnFrame()
 	{
 		var hashCode = new HashCode();
-		
+
 		if ( Graph is ShaderGraphPlus shaderGraph )
 		{
 			hashCode.Add( shaderGraph.ShadingModel );
@@ -111,7 +111,7 @@ public sealed class Result : BaseResult
 		}
 
 		var hc = hashCode.ToHashCode();
-		
+
 		if ( hc != _lastHashCode )
 		{
 			_lastHashCode = hc;

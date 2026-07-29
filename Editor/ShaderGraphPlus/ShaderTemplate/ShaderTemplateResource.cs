@@ -16,9 +16,9 @@ public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool Suppo
 			template.OpaqueBlend,
 			template.MaskedBlend,
 			template.TranslucentBlend,
-			template.DynamicBlend, 
-			template.Opacity, 
-			template.PositionOffset 
+			template.DynamicBlend,
+			template.Opacity,
+			template.PositionOffset
 		);
 	}
 }
