@@ -18,6 +18,14 @@ public sealed class Camera : ShaderNodePlus
 	[Hide]
 	public static NodeResult.Func Direction => ( GraphCompiler compiler ) => new( ResultType.Vector3, "g_vCameraDirWs" );
 
+	[Output( typeof( Vector3 ) )]
+	[Hide]
+	public static NodeResult.Func DirectionUp => ( GraphCompiler compiler ) => new( ResultType.Vector3, "g_vCameraUpDirWs" );
+
+	[Output( typeof( float ) )]
+	[Hide]
+	public static NodeResult.Func FOV => ( GraphCompiler compiler ) => new( ResultType.Float, "g_flCameraFOV" );
+
 	[Output( typeof( float ) )]
 	[Hide]
 	public static NodeResult.Func NearPlane => ( GraphCompiler compiler ) => new( ResultType.Float, "g_flNearPlane" );
