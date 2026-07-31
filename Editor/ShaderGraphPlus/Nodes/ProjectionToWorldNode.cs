@@ -1,6 +1,9 @@
 ﻿
 namespace ShaderGraphPlus.Nodes;
 
+/// <summary>
+/// Projection-space coordinates converted to world-space.
+/// </summary>
 [Title( "Projection To World" ), Category( "Variables/Matrix" ), Icon( "apps" )]
 public sealed class ProjectionToWorldNode : ShaderNodePlus
 {
@@ -12,8 +15,5 @@ public sealed class ProjectionToWorldNode : ShaderNodePlus
 
 	[Output( typeof( Float4x4 ) ), Title( "Matrix" )]
 	[Hide]
-	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
-	{
-		return new NodeResult( ResultType.Float4x4, "g_matProjectionToWorld", true );
-	};
+	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matProjectionToWorld" );
 }
