@@ -1,6 +1,9 @@
 ﻿
 namespace ShaderGraphPlus.Nodes;
 
+/// <summary>
+/// World-space coordinates converted to view space.
+/// </summary>
 [Title( "World To View" ), Category( "Variables/Matrix" ), Icon( "apps" )]
 public sealed class WorldToViewNode : ShaderNodePlus
 {
