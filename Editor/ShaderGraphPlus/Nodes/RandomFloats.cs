@@ -1,7 +1,7 @@
 ﻿namespace ShaderGraphPlus.Nodes;
 
 /// <summary>
-/// Random floats in each component, values change every frame
+/// Random floats in each component, values change every frame.
 /// </summary>
 [Title( "Random Floats" ), Category( "Variables" ), Icon( "casino" )]
 public sealed class RandomFloats : ShaderNodePlus
