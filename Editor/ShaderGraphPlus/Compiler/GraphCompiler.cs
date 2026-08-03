@@ -1417,7 +1417,7 @@ public sealed partial class GraphCompiler
 			IndentString( GenerateFunctions( PixelResult ), 1 ),  // {12}
 			IndentString( GenerateFunctions( VertexResult ), 1 ),  // {13}
 			IndentString( GeneratePixelInit(), 2 ), // {14}
-			IndentString( pixelOutput, 2 ) // {15}
+			pixelOutput // {15}
 		);
 	}
 
@@ -1479,6 +1479,10 @@ public sealed partial class GraphCompiler
 
 			sb.AppendLine( $"m.{property.Name} = {result.Cast( componentCount )};" );
 		}
+
+		sb.AppendLine();
+
+		sb.AppendLine( ShaderTemplateSurface.Material_finalize );
 
 		if ( Graph.IsSubgraph )
 		{
@@ -1581,7 +1585,7 @@ public sealed partial class GraphCompiler
 				opacity = opacityResult.Cast( 1 ) ?? "1.0f";
 			}
 
-			return $"return float4( {albedo}, {opacity} );";
+			return $"float4( {albedo}, {opacity} )";
 		}
 		else if ( Graph.ShadingModel == ShadingModel.Lit )
 		{

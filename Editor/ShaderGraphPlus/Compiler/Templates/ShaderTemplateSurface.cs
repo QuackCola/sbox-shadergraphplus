@@ -74,7 +74,7 @@ PS
 {14}
 {6}
 {7}
-{15}
+		return {15};
 	}}
 }}
 ";
@@ -91,7 +91,7 @@ m.Opacity = 1;
 m.Emission = float3( 0, 0, 0 );
 m.Transmission = 0;";
 
-	public static string Material_output => @"
+	public static string Material_finalize => @"
 m.AmbientOcclusion = saturate( m.AmbientOcclusion );
 m.Roughness = saturate( m.Roughness );
 m.Metalness = saturate( m.Metalness );
@@ -103,7 +103,7 @@ m.Normal = TransformNormal( m.Normal, i.vNormalWs, i.vTangentUWs, i.vTangentVWs 
 // for some toolvis shit
 m.WorldTangentU = i.vTangentUWs;
 m.WorldTangentV = i.vTangentVWs;
-m.TextureCoords = i.vTextureCoords.xy;
-		
-return ShadingModelStandard::Shade( m );";
+m.TextureCoords = i.vTextureCoords.xy;";
+
+	public static string Material_output => "ShadingModelStandard::Shade( m )";
 }

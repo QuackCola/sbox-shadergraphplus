@@ -132,9 +132,7 @@ PS
 
 		{ "{sgp_vertex_code}", "{8}" },
 
-		{ "{sgp_pixel_init}", "{14}" },
-		{ "{sgp_pixel_locals}", "{6}" },
-		{ "{sgp_pixel_material}", "{7}" },
+		{ "{sgp_pixel_code}", "{14}\n{6}\n{7}" },
 		{ "{sgp_pixel_output}", "{15}" },
 	};
 
