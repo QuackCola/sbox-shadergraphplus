@@ -2,9 +2,9 @@
 
 namespace ShaderGraphPlus;
 
-public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool SupportsUnlitShading, bool SupportsOpaqueBlend, bool SupportsMaskedBlend, bool SupportsTranslucentBlend, bool SupportsDynamicBlend, bool ShowOpacityInput, bool ShowPositionOffset )
+public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool SupportsUnlitShading, bool SupportsSurfaceDomain, bool SupportsOpaqueBlend, bool SupportsMaskedBlend, bool SupportsTranslucentBlend, bool SupportsDynamicBlend, bool ShowOpacityInput, bool ShowPositionOffset )
 {
-	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true )
+	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true )
 	{
 	}
 
@@ -13,6 +13,7 @@ public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool Suppo
 		return new UserShaderTemplateInfo(
 			template.ShadingModel == ShadingModel.Lit,
 			template.ShadingModel == ShadingModel.Unlit,
+			template.ShaderDomain == ShaderDomain.Surface,
 			template.OpaqueBlend,
 			template.MaskedBlend,
 			template.TranslucentBlend,
@@ -30,12 +31,21 @@ public sealed partial class ShaderTemplateResource
 	/// What shading model this shader template supports
 	/// </summary>
 	[TabPage( "General" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
 
+	[TabPage( "General" )]
+	public ShaderDomain ShaderDomain { get; set; } = ShaderDomain.Surface;
+
+	[Hide, JsonIgnore]
+	public bool IsPostProcess => ShaderDomain == ShaderDomain.PostProcess;
+
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool Opacity { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool PositionOffset { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]

@@ -172,7 +172,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public ShaderDomain Domain { get; set; }
 
-	[Group( "Advanced" ), ShaderTemplatePath, ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	[Group( "Advanced" ), ShaderTemplatePath]
 	public string ShaderTemplate { get; set; }
 
 	[Hide]
@@ -222,6 +222,12 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			// Find the first supported shading model
 			if ( UserTemplateInfo.SupportsLitShading ) ShadingModel = ShadingModel.Lit;
 			else if ( UserTemplateInfo.SupportsUnlitShading ) ShadingModel = ShadingModel.Unlit;
+		}
+
+		// Ensure template ShaderDomain
+		if ( !string.IsNullOrWhiteSpace( ShaderTemplate ) )
+		{
+			Domain = UserTemplateInfo.SupportsSurfaceDomain ? ShaderDomain.Surface : ShaderDomain.PostProcess;
 		}
 	}
 
