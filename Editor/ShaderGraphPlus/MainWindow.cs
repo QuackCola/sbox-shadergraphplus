@@ -1132,7 +1132,7 @@ public class MainWindow : DockWindow
 
 		file.AddSeparator();
 
-		file.AddOption( "Reload ShaderTemplate", "common/reload.png", LoadShaderTemplate );
+		file.AddOption( "Reload Shader Template", "common/reload.png", LoadShaderTemplate );
 
 		file.AddSeparator();
 
