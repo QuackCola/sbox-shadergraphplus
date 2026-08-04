@@ -1886,11 +1886,6 @@ public sealed partial class GraphCompiler
 			}
 		}
 
-		if ( sb.Length > 0 )
-		{
-			sb.Insert( 0, "\n" );
-		}
-
 		return sb.ToString();
 	}
 
@@ -2056,8 +2051,6 @@ public sealed partial class GraphCompiler
 		};
 
 		sb.Append( $"RenderState( CullMode, {renderFace} );" );
-
-		sb.AppendLine();
 
 		return sb.ToString();
 	}

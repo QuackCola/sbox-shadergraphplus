@@ -49,7 +49,11 @@ struct PixelInput
 VS
 {{
 	#include ""common/vertex.hlsl""
-{9}{10}{13}
+
+{9}
+{10}
+{13}
+
 	PixelInput MainVs( VertexInput v )
 	{{
 		PixelInput i;
@@ -66,15 +70,18 @@ PS
 	#include ""postprocess/functions.hlsl""
 	#include ""postprocess/common.hlsl""
 
-{5}{11}{12}
-
 	Texture2D g_tColorBuffer < Attribute( ""ColorBuffer"" ); SrgbRead ( true ); >;
+
+{5}
+{11}
+{12}
 
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{{
 {14}
 {6}
 {7}
+
 		return {15};
 	}}
 }}

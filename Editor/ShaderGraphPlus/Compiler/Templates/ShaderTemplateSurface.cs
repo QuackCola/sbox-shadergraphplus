@@ -49,7 +49,11 @@ struct PixelInput
 VS
 {{
 	#include ""common/vertex.hlsl""
-{9}{10}{13}
+
+{9}
+{10}
+{13}
+
 	PixelInput MainVs( VertexInput v )
 	{{
 		PixelInput i = ProcessVertex( v );
@@ -68,19 +72,23 @@ VS
 PS
 {{
 	#include ""common/pixel.hlsl""
-{5}{11}{12}
+
+{5}
+{11}
+{12}
+
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{{
 {14}
 {6}
 {7}
+
 		return {15};
 	}}
 }}
 ";
 
-	public static string Material_init => @"
-Material m = Material::Init( i );
+	public static string Material_init => @"Material m = Material::Init( i );
 m.Albedo = float3( 1, 1, 1 );
 m.Normal = float3( 0, 0, 1 );
 m.Roughness = 1;
@@ -89,10 +97,10 @@ m.AmbientOcclusion = 1;
 m.TintMask = 1;
 m.Opacity = 1;
 m.Emission = float3( 0, 0, 0 );
-m.Transmission = 0;";
+m.Transmission = 0;
+";
 
-	public static string Material_finalize => @"
-m.AmbientOcclusion = saturate( m.AmbientOcclusion );
+	public static string Material_finalize => @"m.AmbientOcclusion = saturate( m.AmbientOcclusion );
 m.Roughness = saturate( m.Roughness );
 m.Metalness = saturate( m.Metalness );
 m.Opacity = saturate( m.Opacity );
@@ -103,7 +111,8 @@ m.Normal = TransformNormal( m.Normal, i.vNormalWs, i.vTangentUWs, i.vTangentVWs 
 // for some toolvis shit
 m.WorldTangentU = i.vTangentUWs;
 m.WorldTangentV = i.vTangentVWs;
-m.TextureCoords = i.vTextureCoords.xy;";
+m.TextureCoords = i.vTextureCoords.xy;
+";
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
 }
