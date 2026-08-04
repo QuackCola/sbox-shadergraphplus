@@ -2,6 +2,6 @@
 
 public sealed partial class ShaderTemplateResource
 {
-	[Hide]
+	[Hide,JsonPropertyName( "__version" )]
 	public int ResourceVersion => 1;
 }
