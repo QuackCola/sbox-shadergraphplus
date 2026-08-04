@@ -49,15 +49,19 @@ public sealed partial class ShaderTemplateResource
 	public bool PositionOffset { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool OpaqueBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool MaskedBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool TranslucentBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
+	[HideIf( nameof( IsPostProcess ), true )]
 	public bool DynamicBlend { get; set; } = true;
 
 	[TabPage( "Code" ), TextArea]
