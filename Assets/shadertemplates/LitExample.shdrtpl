@@ -1,0 +1,11 @@
+{
+  "ResourceVersion": 1,
+  "ShadingModel": "Lit",
+  "Opacity": true,
+  "PositionOffset": true,
+  "OpaqueBlend": true,
+  "MaskedBlend": true,
+  "TranslucentBlend": true,
+  "DynamicBlend": true,
+  "Code": "\r\nHEADER\r\n{{\r\n\tDescription = \u0022{sgp_shader_description}\u0022;\r\n}}\t\r\n\r\nFEATURES\r\n{{\r\n{sgp_shader_feature_defines}\r\n}}\r\n\r\nMODES\r\n{{\r\n\tForward();\r\n\tDepth();\r\n\tToolsShadingComplexity( \u0022tools_shading_complexity.shader\u0022 );\r\n}}\r\n\r\nCOMMON\r\n{{\r\n{sgp_shader_common}\r\n}}\r\n\r\nstruct VertexInput\r\n{{\r\n\t#include \u0022common/vertexinput.hlsl\u0022\r\n\tfloat4 vColor : COLOR0 \u003C Semantic( Color ); \u003E;\r\n{sgp_vertex_input_data}\r\n}};\r\n\r\nstruct PixelInput\r\n{{\r\n\t#include \u0022common/pixelinput.hlsl\u0022\r\n\tfloat3 vPositionOs : TEXCOORD14;\r\n\tfloat3 vNormalOs : TEXCOORD15;\r\n\tfloat4 vTangentUOs_flTangentVSign : TANGENT\t\u003C Semantic( TangentU_SignV ); \u003E;\r\n\tfloat4 vColor : COLOR0;\r\n\tfloat4 vTintColor : COLOR1;\r\n\t#if ( PROGRAM == VFX_PROGRAM_PS )\r\n\t\tbool vFrontFacing : SV_IsFrontFace;\r\n\t#endif\r\n{sgp_pixel_input_data}\r\n}};\r\n\r\nVS\r\n{{\r\n\t#include \u0022common/vertex.hlsl\u0022\r\n\r\n{sgp_vertex_globals}\r\n{sgp_vertex_combo_rules}\r\n{sgp_vertex_functions}\r\n\r\n\tPixelInput MainVs( VertexInput v )\r\n\t{{\r\n\t\tPixelInput i = ProcessVertex( v );\r\n\t\ti.vPositionOs = v.vPositionOs.xyz;\r\n\t\ti.vColor = v.vColor;\r\n\r\n\t\tExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( v.nInstanceTransformID );\r\n\t\ti.vTintColor = extraShaderData.vTint;\r\n\r\n\t\tVS_DecodeObjectSpaceNormalAndTangent( v, i.vNormalOs, i.vTangentUOs_flTangentVSign );\r\n{sgp_vertex_code}\r\n\t\treturn FinalizeVertex( i );\r\n\t}}\r\n}}\r\n\r\nPS\r\n{{\r\n\t#include \u0022common/pixel.hlsl\u0022\r\n\r\n{sgp_pixel_globals}\r\n{sgp_pixel_combo_rules}\r\n{sgp_pixel_functions}\r\n\r\n\tfloat4 MainPs( PixelInput i ) : SV_Target0\r\n\t{{\r\n\r\n{sgp_pixel_code}\r\n\r\n\t\treturn {sgp_pixel_output};\r\n\t}}\r\n}}\r\n\t"
+}
