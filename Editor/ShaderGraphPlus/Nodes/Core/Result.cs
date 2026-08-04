@@ -40,7 +40,7 @@ public sealed class Result : BaseResult
 	private bool ShowPositionOffset => IsPostProcess == false && Graph.UserTemplateInfo.ShowPositionOffset;
 
 	[Hide]
-	private bool ShowOpacityInput => Graph.UserTemplateInfo.ShowOpacityInput;
+	private bool ShowOpacityInput => IsPostProcess == false && Graph.UserTemplateInfo.ShowOpacityInput;
 
 	[Hide, JsonIgnore]
 	public override bool CanPreview => false;
