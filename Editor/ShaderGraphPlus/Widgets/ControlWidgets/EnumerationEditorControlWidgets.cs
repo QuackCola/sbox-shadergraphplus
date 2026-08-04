@@ -7,7 +7,7 @@ namespace ShaderGraphPlus;
 /// Custom enum editor for BlendMode that filters options based on template/shading model features
 /// </summary>
 [CustomEditor( typeof( BlendMode ) )]
-internal class BlendModeControlWidget : ControlWidget
+internal sealed class BlendModeControlWidget : ControlWidget
 {
 	ShaderGraphPlus _graph;
 	EnumDescription _enumDesc;
@@ -208,7 +208,7 @@ file class BlendModeMenuOption : Widget
 /// Custom enum editor for ShadingModel that filters options based on template features
 /// </summary>
 [CustomEditor( typeof( ShadingModel ) )]
-internal class ShadingModelControlWidget : ControlWidget
+internal sealed class ShadingModelControlWidget : ControlWidget
 {
 	ShaderGraphPlus _graph;
 	EnumDescription _enumDesc;
