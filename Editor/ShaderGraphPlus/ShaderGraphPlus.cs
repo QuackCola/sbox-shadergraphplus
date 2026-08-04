@@ -168,8 +168,13 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( ShowShadingModel ), true )]
 	public RenderFace RenderFace { get; set; }
 
-	[Hide] private bool ShowShadingModel => Domain != ShaderDomain.PostProcess;
+	[Hide]
+	private bool ShowShadingModel => Domain != ShaderDomain.PostProcess;
 
+	[Hide]
+	private bool ShowDomain => string.IsNullOrWhiteSpace( ShaderTemplate );
+
+	[ShowIf( nameof( ShowDomain ), true )]
 	public ShaderDomain Domain { get; set; }
 
 	[Group( "Advanced" ), ShaderTemplatePath]
