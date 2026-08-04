@@ -93,6 +93,8 @@ internal class BlendModeControlWidget : ControlWidget
 
 	protected override void OnMouseClick( MouseEvent e )
 	{
+		if ( IsControlDisabled ) return;
+
 		if ( e.LeftMouseButton && !_menu.IsValid() && !IsNoneSupported() )
 		{
 			OpenMenu();
@@ -293,6 +295,8 @@ internal class ShadingModelControlWidget : ControlWidget
 
 	protected override void OnMouseClick( MouseEvent e )
 	{
+		if ( IsControlDisabled ) return;
+
 		if ( e.LeftMouseButton && !_menu.IsValid() && !HasSingleOption() )
 		{
 			OpenMenu();
