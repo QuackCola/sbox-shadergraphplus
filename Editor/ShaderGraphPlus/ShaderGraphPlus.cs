@@ -160,17 +160,14 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( IsSubgraph ), true )]
 	public bool AddToNodeLibrary { get; set; }
 
-	[ShowIf( nameof( ShowShadingModel ), true )]
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
 	public BlendMode BlendMode { get; set; }
 
-	[ShowIf( nameof( ShowShadingModel ), true )]
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
 	public ShadingModel ShadingModel { get; set; }
 
-	[ShowIf( nameof( ShowShadingModel ), true )]
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
 	public RenderFace RenderFace { get; set; }
-
-	[Hide]
-	private bool ShowShadingModel => Domain != ShaderDomain.PostProcess;
 
 	[Hide]
 	private bool HasNoTemplate => string.IsNullOrWhiteSpace( ShaderTemplate );
