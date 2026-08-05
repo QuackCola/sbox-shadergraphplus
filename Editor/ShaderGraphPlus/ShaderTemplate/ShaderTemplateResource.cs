@@ -70,6 +70,11 @@ public sealed partial class ShaderTemplateResource
 	[TabPage( "Code" ), TextArea]
 	public string Code { get; set; } = ShaderTemplateSurface.Code;
 
+	/// <summary>
+	/// Validate the template for any issues and output any errors
+	/// </summary>
+	/// <param name="path">Path to the ShaderTemplate resource</param>
+	/// <param name="errors">Issues found with this template</param>
 	public bool Validate( string path, out IEnumerable<string> errors )
 	{
 		if ( string.IsNullOrWhiteSpace( Code ) )
