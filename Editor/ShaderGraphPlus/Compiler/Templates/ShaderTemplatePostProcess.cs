@@ -6,8 +6,7 @@ namespace ShaderGraphPlus;
 
 public static class ShaderTemplatePostProcess
 {
-	public static string Code => @"
-HEADER
+	public static string Code => @"HEADER
 {{
 	Description = ""{sgp_shader_description}"";
 }}
