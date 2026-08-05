@@ -1374,6 +1374,10 @@ public sealed partial class GraphCompiler
 		var material = GenerateMaterial();
 		var pixelOutput = GeneratePixelOutput();
 
+		// If we have any errors after evaluating, no point going further
+		if ( Errors.Any() )
+			return null;
+
 		var shaderTemplate = "";
 
 		if ( UserShaderTemplate == null )
@@ -1389,10 +1393,6 @@ public sealed partial class GraphCompiler
 		{
 			shaderTemplate = ShaderTemplate.ToFormattableString( UserShaderTemplate.Code );
 		}
-
-		// If we have any errors after evaluating, no point going further
-		if ( Errors.Any() )
-			return null;
 
 		return string.Format( shaderTemplate,
 			Graph.Description, // {0}
