@@ -117,10 +117,4 @@ m.TextureCoords = i.vTextureCoords.xy;
 ";
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
-
-	// TODO : For later.
-	public static string Generate( [StringSyntax( "CompositeFormat" )] string format, params scoped ReadOnlySpan<object?> args )
-	{
-		return "";
-	}
 }

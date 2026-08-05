@@ -89,10 +89,4 @@ PS
 	}}
 }}
 ";
-
-	// TODO : For later.
-	public static string Generate( [StringSyntax( "CompositeFormat" )] string format, params scoped ReadOnlySpan<object?> args )
-	{
-		return "";
-	}
 }
