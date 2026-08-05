@@ -160,15 +160,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( IsSubgraph ), true )]
 	public bool AddToNodeLibrary { get; set; }
 
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
-	public BlendMode BlendMode { get; set; }
-
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
-	public ShadingModel ShadingModel { get; set; }
-
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
-	public RenderFace RenderFace { get; set; }
-
 	[Hide]
 	private bool HasNoTemplate => string.IsNullOrWhiteSpace( ShaderTemplate );
 
@@ -177,6 +168,15 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	/// </summary>
 	[ShowIf( nameof( HasNoTemplate ), true )]
 	public ShaderDomain Domain { get; set; }
+
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	public BlendMode BlendMode { get; set; }
+
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	public ShadingModel ShadingModel { get; set; }
+
+	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	public RenderFace RenderFace { get; set; }
 
 	[Group( "Advanced" ), ShaderTemplatePath]
 	public string ShaderTemplate { get; set; }
