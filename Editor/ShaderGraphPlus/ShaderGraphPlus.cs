@@ -163,6 +163,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide]
 	private bool HasNoTemplate => string.IsNullOrWhiteSpace( ShaderTemplate );
 
+	[Hide]
+	private bool ShowShadingModel => string.IsNullOrWhiteSpace( ShaderTemplate ) && Domain == ShaderDomain.Surface;
+
 	/// <summary>
 	/// What shader type this graph is
 	/// </summary>
@@ -172,7 +175,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
 	public BlendMode BlendMode { get; set; }
 
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	[ShowIf( nameof( ShowShadingModel ), true )]
 	public ShadingModel ShadingModel { get; set; }
 
 	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
