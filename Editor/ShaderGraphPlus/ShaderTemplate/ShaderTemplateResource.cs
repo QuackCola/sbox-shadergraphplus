@@ -2,6 +2,9 @@
 
 namespace ShaderGraphPlus;
 
+/// <summary>
+/// Readonly representation of <see cref="ShaderTemplateResource"/>
+/// </summary>
 public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool SupportsUnlitShading, bool SupportsSurfaceDomain, bool SupportsOpaqueBlend, bool SupportsMaskedBlend, bool SupportsTranslucentBlend, bool SupportsDynamicBlend, bool ShowOpacityInput, bool ShowPositionOffset )
 {
 	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true )
