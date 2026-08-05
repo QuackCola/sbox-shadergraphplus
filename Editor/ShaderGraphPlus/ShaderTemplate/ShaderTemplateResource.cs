@@ -180,7 +180,7 @@ PS
 	{
 		if ( string.IsNullOrWhiteSpace( Code ) )
 		{
-			errors = [ "Shader Template has no code!!!" ];
+			errors = ["Shader Template has no code!!!"];
 			return false;
 		}
 
