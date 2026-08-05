@@ -31,37 +31,34 @@ public sealed partial class ShaderTemplateResource
 	/// What shading model this shader template supports
 	/// </summary>
 	[TabPage( "General" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
 
 	[TabPage( "General" )]
 	public ShaderDomain ShaderDomain { get; set; } = ShaderDomain.Surface;
 
-	[Hide, JsonIgnore]
-	public bool IsPostProcessTemplate => ShaderDomain == ShaderDomain.PostProcess;
-
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool Opacity { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool PositionOffset { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool OpaqueBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool MaskedBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool TranslucentBlend { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[HideIf( nameof( IsPostProcessTemplate ), true )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public bool DynamicBlend { get; set; } = true;
 
 	[TabPage( "Code" ), TextArea]
