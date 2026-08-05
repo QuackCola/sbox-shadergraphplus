@@ -22,9 +22,11 @@ internal sealed class BlendModeControlWidget : ControlWidget
 		_graph = property.Parent?.Targets?.FirstOrDefault() as ShaderGraphPlus;
 
 		var propertyType = property.PropertyType;
+
 		Cursor = CursorShape.Finger;
 		Layout = Layout.Row();
 		Layout.Spacing = 2;
+
 		_enumDesc = EditorTypeLibrary.GetEnumDescription( propertyType );
 	}
 
