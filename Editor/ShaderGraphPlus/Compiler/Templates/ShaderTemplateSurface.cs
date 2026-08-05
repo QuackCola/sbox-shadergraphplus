@@ -1,16 +1,20 @@
-﻿namespace ShaderGraphPlus;
+﻿#nullable enable
+
+using System.Diagnostics.CodeAnalysis;
+
+namespace ShaderGraphPlus;
 
 public static class ShaderTemplateSurface
 {
-	public static string Code => @"
+	public static string Code { get; set; } = @"
 HEADER
 {{
-	Description = ""{0}"";
-}}
+	Description = ""{sgp_shader_description}"";
+}}	
 
 FEATURES
 {{
-{1}
+{sgp_shader_feature_defines}
 }}
 
 MODES
@@ -22,14 +26,14 @@ MODES
 
 COMMON
 {{
-{2}
+{sgp_shader_common}
 }}
 
 struct VertexInput
 {{
 	#include ""common/vertexinput.hlsl""
 	float4 vColor : COLOR0 < Semantic( Color ); >;
-{3}
+{sgp_vertex_input_data}
 }};
 
 struct PixelInput
@@ -43,16 +47,16 @@ struct PixelInput
 	#if ( PROGRAM == VFX_PROGRAM_PS )
 		bool vFrontFacing : SV_IsFrontFace;
 	#endif
-{4}
+{sgp_pixel_input_data}
 }};
 
 VS
 {{
 	#include ""common/vertex.hlsl""
 
-{9}
-{10}
-{13}
+{sgp_vertex_globals}
+{sgp_vertex_combo_rules}
+{sgp_vertex_functions}
 
 	PixelInput MainVs( VertexInput v )
 	{{
@@ -64,7 +68,7 @@ VS
 		i.vTintColor = extraShaderData.vTint;
 
 		VS_DecodeObjectSpaceNormalAndTangent( v, i.vNormalOs, i.vTangentUOs_flTangentVSign );
-{8}
+{sgp_vertex_code}
 		return FinalizeVertex( i );
 	}}
 }}
@@ -73,20 +77,18 @@ PS
 {{
 	#include ""common/pixel.hlsl""
 
-{5}
-{11}
-{12}
+{sgp_pixel_globals}
+{sgp_pixel_combo_rules}
+{sgp_pixel_functions}
 
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{{
-{14}
-{6}
-{7}
 
-		return {15};
+{sgp_pixel_code}
+
+		return {sgp_pixel_output};
 	}}
-}}
-";
+}}";
 
 	public static string Material_init => @"Material m = Material::Init( i );
 m.Albedo = float3( 1, 1, 1 );
@@ -115,4 +117,10 @@ m.TextureCoords = i.vTextureCoords.xy;
 ";
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
+
+	// TODO : For later.
+	public static string Generate( [StringSyntax( "CompositeFormat" )] string format, params scoped ReadOnlySpan<object?> args )
+	{
+		return "";
+	}
 }

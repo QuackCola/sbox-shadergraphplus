@@ -1374,16 +1374,20 @@ public sealed partial class GraphCompiler
 		var material = GenerateMaterial();
 		var pixelOutput = GeneratePixelOutput();
 
-		var shaderTemplate = Graph.Domain switch
-		{
-			ShaderDomain.Surface => ShaderTemplateSurface.Code,
-			ShaderDomain.PostProcess => ShaderTemplatePostProcess.Code,
-			_ => throw new NotImplementedException(),
-		};
+		var shaderTemplate = "";
 
-		if ( UserShaderTemplate != null )
+		if ( UserShaderTemplate == null )
 		{
-			shaderTemplate = UserShaderTemplate.ToFormatableString();
+			shaderTemplate = Graph.Domain switch
+			{
+				ShaderDomain.Surface => ShaderTemplate.ToFormattableString( ShaderTemplateSurface.Code ),
+				ShaderDomain.PostProcess => ShaderTemplate.ToFormattableString( ShaderTemplatePostProcess.Code ),
+				_ => throw new NotImplementedException(),
+			};
+		}
+		else
+		{
+			shaderTemplate = ShaderTemplate.ToFormattableString( UserShaderTemplate.Code );
 		}
 
 		// If we have any errors after evaluating, no point going further
