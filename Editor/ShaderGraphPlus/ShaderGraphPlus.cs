@@ -166,13 +166,23 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide]
 	private bool ShowShadingModel => string.IsNullOrWhiteSpace( ShaderTemplate ) && Domain == ShaderDomain.Surface;
 
+	[Hide]
+	private bool ShowBlendMode => SupportsBlendModes && Domain == ShaderDomain.Surface;
+
+	[Hide]
+	private bool SupportsBlendModes =>
+		UserTemplateInfo.SupportsOpaqueBlend && 
+		UserTemplateInfo.SupportsMaskedBlend && 
+		UserTemplateInfo.SupportsTranslucentBlend && 
+		UserTemplateInfo.SupportsDynamicBlend;
+
 	/// <summary>
 	/// What shader type this graph is
 	/// </summary>
 	[ShowIf( nameof( HasNoTemplate ), true )]
 	public ShaderDomain Domain { get; set; }
 
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	[ShowIf( nameof( ShowBlendMode ), true )]
 	public BlendMode BlendMode { get; set; }
 
 	[ShowIf( nameof( ShowShadingModel ), true )]
