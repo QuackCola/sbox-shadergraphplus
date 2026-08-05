@@ -666,9 +666,18 @@ public sealed class Preview : SceneRenderingWidget
 	public void UpdateMaterial()
 	{
 		var modelMaterial = _material;
-		if ( EnablePostProcessing )
+		if ( EnablePostProcessing || modelMaterial.Flags.IsSky )
 		{
 			modelMaterial = Material.Load( "materials/dev/reflectivity_50.vmat" );
+		}
+
+		if ( _material.Flags.IsSky )
+		{
+			_sky.SkyMaterial = _material;
+		}
+		else if ( _sky.SkyMaterial != _defaultSkyMaterial )
+		{
+			_sky.SkyMaterial = _defaultSkyMaterial;
 		}
 
 		if ( _sceneObject is SceneModel sceneModel )
@@ -714,6 +723,7 @@ public sealed class Preview : SceneRenderingWidget
 		set
 		{
 			_material = value;
+
 			UpdateMaterial();
 			UpdatePostProcessing();
 		}
@@ -863,52 +873,114 @@ public sealed class Preview : SceneRenderingWidget
 
 	public void SetAttribute( string id, SamplerState value )
 	{
-		//if ( _samplerStateAttributes.ContainsKey( id ) )
-		//	_samplerStateAttributes.Remove( id );
 		_samplerStateAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Texture value )
 	{
 		_textureAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Color value )
 	{
 		_float4Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Vector3 value )
 	{
 		_float3Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Vector2 value )
 	{
 		_float2Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, float value )
 	{
 		_floatAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, int value )
 	{
 		_intAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, in bool value )
 	{
 		_boolAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetFeature( string id, int value )
@@ -920,12 +992,18 @@ public sealed class Preview : SceneRenderingWidget
 
 	public void SetDynamicCombo( string id, int value )
 	{
-		//SGPLog.Info( $"Setting DynamicCombo `{id}` to `{value}`" );
-
 		if ( !_dynamicComboIntAttributes.ContainsKey( id ) )
 		{
 			_dynamicComboIntAttributes.Add( id, value );
-			_sceneObject.Attributes.SetCombo( id, value );
+
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( id, value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( id, value );
+			}
 		}
 	}
 
@@ -933,9 +1011,16 @@ public sealed class Preview : SceneRenderingWidget
 	{
 		_stageId = value;
 
-		if ( _sceneObject.IsValid() )
+		if ( _material.Flags.IsSky )
 		{
-			_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+			Scene.RenderAttributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+		}
+		else
+		{
+			if ( _sceneObject.IsValid() )
+			{
+				_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+			}
 		}
 	}
 
@@ -960,6 +1045,7 @@ public sealed class Preview : SceneRenderingWidget
 			_sceneObject.Attributes.Clear();
 		}
 
+		Scene.RenderAttributes.Clear();
 	}
 
 	public bool IsCompiling
@@ -975,6 +1061,8 @@ public sealed class Preview : SceneRenderingWidget
 
 	private readonly SceneObject _ground;
 	private readonly SkyBox2D _sky;
+
+	private readonly Material _defaultSkyMaterial;
 
 	private void SetViewmode( ViewMode viewmode )
 	{
@@ -1049,6 +1137,7 @@ public sealed class Preview : SceneRenderingWidget
 			}
 			{
 				_sky = new GameObject( true, "sky" ).GetOrAddComponent<SkyBox2D>();
+				_defaultSkyMaterial = _sky.SkyMaterial;
 			}
 		}
 
