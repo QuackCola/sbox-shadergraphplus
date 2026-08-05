@@ -171,9 +171,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	[Hide]
 	private bool SupportsBlendModes =>
-		UserTemplateInfo.SupportsOpaqueBlend && 
-		UserTemplateInfo.SupportsMaskedBlend && 
-		UserTemplateInfo.SupportsTranslucentBlend && 
+		UserTemplateInfo.SupportsOpaqueBlend &&
+		UserTemplateInfo.SupportsMaskedBlend &&
+		UserTemplateInfo.SupportsTranslucentBlend &&
 		UserTemplateInfo.SupportsDynamicBlend;
 
 	/// <summary>
