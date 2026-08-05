@@ -176,7 +176,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool HasNoTemplate => string.IsNullOrWhiteSpace( ShaderTemplate );
 
 	/// <summary>
-	/// What shader this template is
+	/// What shader type this graph is
 	/// </summary>
 	[ShowIf( nameof( HasNoTemplate ), true )]
 	public ShaderDomain Domain { get; set; }

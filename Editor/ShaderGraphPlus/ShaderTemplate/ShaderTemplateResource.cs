@@ -28,7 +28,7 @@ public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool Suppo
 public sealed partial class ShaderTemplateResource
 {
 	/// <summary>
-	/// What shader this template is
+	/// What shader type this shader template represents
 	/// </summary>
 	[TabPage( "General" )]
 	public ShaderDomain ShaderDomain { get; set; } = ShaderDomain.Surface;
