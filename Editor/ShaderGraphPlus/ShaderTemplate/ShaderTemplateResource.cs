@@ -178,15 +178,14 @@ PS
 
 	public bool Validate( string path, out IEnumerable<string> errors )
 	{
-		var templateErrors = new List<string>();
-
 		if ( string.IsNullOrWhiteSpace( Code ) )
 		{
-			templateErrors.Add( $"Template has no code!!!" );
-			errors = templateErrors;
+			errors = [ "Template has no code!!!" ];
 			return false;
 		}
-		
+
+		var templateErrors = new List<string>();
+
 		foreach ( var tag in TemplateTagMap )
 		{
 			if ( !Code.Contains( tag.Key ) )
