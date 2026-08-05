@@ -1461,6 +1461,8 @@ public class MainWindow : DockWindow
 		{
 			_graph.UserTemplateInfo = new UserShaderTemplateInfo();
 		}
+
+		_graph.ValidateTemplateSettings();
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]
