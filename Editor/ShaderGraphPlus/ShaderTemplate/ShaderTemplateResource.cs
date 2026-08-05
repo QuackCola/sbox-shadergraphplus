@@ -178,17 +178,24 @@ PS
 
 	public bool Validate( string path, out IEnumerable<string> errors )
 	{
-		var missingTagErrors = new List<string>();
+		var templateErrors = new List<string>();
 
+		if ( string.IsNullOrWhiteSpace( Code ) )
+		{
+			templateErrors.Add( $"Template has no code!!!" );
+			errors = templateErrors;
+			return false;
+		}
+		
 		foreach ( var tag in TemplateTagMap )
 		{
 			if ( !Code.Contains( tag.Key ) )
 			{
-				missingTagErrors.Add( $"\"{path}\" Missing tag '{tag.Key}'" );
+				templateErrors.Add( $"\"{path}\" Missing tag '{tag.Key}'" );
 			}
 		}
 
-		errors = missingTagErrors;
+		errors = templateErrors;
 
 		if ( errors.Any() )
 		{
@@ -204,6 +211,9 @@ PS
 	/// <returns>A formatable string</returns>
 	public string ToFormatableString()
 	{
+		if ( string.IsNullOrWhiteSpace( Code ) )
+			return "";
+
 		var formatableString = Code;
 
 		foreach ( var tag in TemplateTagMap )
