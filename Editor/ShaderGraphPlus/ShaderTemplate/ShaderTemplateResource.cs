@@ -27,15 +27,16 @@ public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool Suppo
 [AssetType( Name = "Shader Template", Extension = "shdrtpl" )]
 public sealed partial class ShaderTemplateResource
 {
+
+	[TabPage( "General" )]
+	public ShaderDomain ShaderDomain { get; set; } = ShaderDomain.Surface;
+
 	/// <summary>
 	/// What shading model this shader template supports
 	/// </summary>
 	[TabPage( "General" )]
 	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
-
-	[TabPage( "General" )]
-	public ShaderDomain ShaderDomain { get; set; } = ShaderDomain.Surface;
 
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
 	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
