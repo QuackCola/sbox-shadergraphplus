@@ -1,6 +1,7 @@
 {
   "ShaderDomain": "Surface",
   "ShadingModel": "Unlit",
+  "RenderFace": "Front",
   "Opacity": true,
   "PositionOffset": true,
   "OpaqueBlend": true,
