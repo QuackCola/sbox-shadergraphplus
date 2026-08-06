@@ -107,7 +107,7 @@ public class MainWindow : DockWindow
 	private ProjectCreator ProjectCreator { get; set; }
 
 	private Dictionary<string, ShaderFeatureBase> ShaderFeatures = new();
-	
+
 	private List<GraphCompiler.GraphIssue> BlackboardIssues { get; set; } = new();
 	private List<GraphCompiler.GraphIssue> TemplateIssues { get; set; } = new();
 
@@ -819,7 +819,7 @@ public class MainWindow : DockWindow
 			if ( nodeErrors.Any() )
 			{
 				nodeWarnings.AddRange( nodeErrors );
-		
+
 				OnError( nodeWarnings );
 
 				return null;
@@ -1450,7 +1450,7 @@ public class MainWindow : DockWindow
 			}
 			else
 			{
-				TemplateIssues = [ new GraphCompiler.GraphIssue() { Node = null, Message = $"Shader Template \"{templateAsset.Path}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." } ];
+				TemplateIssues = [new GraphCompiler.GraphIssue() { Node = null, Message = $"Shader Template \"{templateAsset.Path}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." }];
 			}
 		}
 		else

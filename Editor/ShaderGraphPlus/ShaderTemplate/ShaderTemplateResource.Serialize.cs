@@ -42,7 +42,7 @@ public sealed partial class ShaderTemplateResource
 			return false;
 
 		DeserializeObject( this, root, options );
-	
+
 		return true;
 	}
 
