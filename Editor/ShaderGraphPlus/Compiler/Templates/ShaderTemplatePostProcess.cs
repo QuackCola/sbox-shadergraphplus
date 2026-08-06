@@ -13,7 +13,7 @@ public static class ShaderTemplatePostProcess
 
 FEATURES
 {
-[sgp_shader_feature_defines}
+[sgp_shader_feature_defines]
 }
 
 MODES
