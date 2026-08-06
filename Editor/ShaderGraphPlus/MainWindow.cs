@@ -1455,6 +1455,7 @@ public class MainWindow : DockWindow
 		}
 		else
 		{
+			_shaderTemplate = null;
 			_graph.UserTemplateInfo = new UserShaderTemplateInfo();
 			_graph.ValidateTemplateSettings();
 		}
