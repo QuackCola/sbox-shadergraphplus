@@ -270,7 +270,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		*/
 
 		if ( HasTemplate )
-		{	
+		{
 			// Ensure template ShaderDomain
 			Domain = UserTemplateInfo.SupportsSurfaceDomain ? ShaderDomain.Surface : ShaderDomain.PostProcess;
 

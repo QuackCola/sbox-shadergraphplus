@@ -6,7 +6,7 @@ namespace ShaderGraphPlus;
 /// Readonly representation of <see cref="ShaderTemplateResource"/>
 /// </summary>
 public sealed record UserShaderTemplateInfo(
-	bool SupportsLitShading, 
+	bool SupportsLitShading,
 	bool SupportsUnlitShading,
 	bool SupportsSurfaceDomain,
 	bool SupportsRenderFaceFront,
