@@ -107,7 +107,9 @@ public class MainWindow : DockWindow
 	private ProjectCreator ProjectCreator { get; set; }
 
 	private Dictionary<string, ShaderFeatureBase> ShaderFeatures = new();
+	
 	private List<GraphCompiler.GraphIssue> BlackboardIssues { get; set; } = new();
+	private List<GraphCompiler.GraphIssue> TemplateIssues { get; set; } = new();
 
 	public SelectionSystem Selection { get; set; }
 
@@ -581,36 +583,34 @@ public class MainWindow : DockWindow
 		}
 	}
 
+	private void OnError( IEnumerable<GraphCompiler.GraphIssue> issues )
+	{
+		_output.GraphIssues = issues.ToList();
+		DockManager.RaiseDock( "Output" );
+
+		_generatedCode = null;
+		_generatedCodeTextView.SetTextContents( "" );
+
+		RestoreShader();
+	}
+
 	private string GeneratePreviewCode()
 	{
-		if ( BlackboardIssues.Any() )
-		{
-			_output.GraphIssues = BlackboardIssues;
-			DockManager.RaiseDock( "Output" );
-
-			_generatedCode = null;
-			_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
-			return null;
-		}
-
 		if ( _shaderTemplate != null )
 		{
-			// Validate the template
-			if ( !_shaderTemplate.Validate( _graph.ShaderTemplate, out var tagErrors ) )
+			if ( TemplateIssues.Any() )
 			{
-				var graphIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } );
+				OnError( TemplateIssues );
 
-				_output.GraphIssues = graphIssues.ToList();
-				DockManager.RaiseDock( "Output" );
-
-				_generatedCode = null;
-				_generatedCodeTextView.SetTextContents( "" );
-
-				RestoreShader();
 				return null;
 			}
+		}
+
+		if ( BlackboardIssues.Any() )
+		{
+			OnError( BlackboardIssues );
+
+			return null;
 		}
 
 		if ( _autoCompile )
@@ -625,12 +625,7 @@ public class MainWindow : DockWindow
 		{
 			_output.GraphIssues = registrationIssues;
 
-			DockManager.RaiseDock( "Output" );
-
-			_generatedCode = null;
-			_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
+			OnError( registrationIssues );
 
 			return null;
 		}
@@ -824,21 +819,14 @@ public class MainWindow : DockWindow
 			if ( nodeErrors.Any() )
 			{
 				nodeWarnings.AddRange( nodeErrors );
-				_output.GraphIssues = nodeWarnings;
-
-				DockManager.RaiseDock( "Output" );
-
-				_generatedCode = null;
-				_generatedCodeTextView.SetTextContents( "" );
-
-				RestoreShader();
+		
+				OnError( nodeWarnings );
 
 				return null;
 			}
 			else // No Errors to add :) not great not terrible...
 			{
 				_output.GraphIssues = nodeWarnings;
-
 				DockManager.RaiseDock( "Output" );
 			}
 		}
@@ -849,14 +837,7 @@ public class MainWindow : DockWindow
 
 		if ( nodeErrors.Any() )
 		{
-			_output.GraphIssues = nodeErrors;
-
-			DockManager.RaiseDock( "Output" );
-
-			_generatedCode = null;
-			//_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
+			OnError( nodeErrors );
 
 			return null;
 		}
@@ -1448,21 +1429,37 @@ public class MainWindow : DockWindow
 	{
 		if ( _graph is null ) return;
 
+		TemplateIssues.Clear();
+
 		if ( !string.IsNullOrWhiteSpace( _graph.ShaderTemplate ) )
 		{
 			var templateAsset = AssetSystem.FindByPath( _graph.ShaderTemplate );
 
 			_shaderTemplate = new ShaderTemplateResource();
-			_shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) );
 
-			_graph.UserTemplateInfo = _shaderTemplate;
+			if ( _shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) ) )
+			{
+				_graph.UserTemplateInfo = _shaderTemplate;
+				_graph.ValidateTemplateSettings();
+
+				// Validate the template
+				if ( !_shaderTemplate.Validate( _graph.ShaderTemplate, out var tagErrors ) )
+				{
+					TemplateIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } ).ToList();
+				}
+			}
+			else
+			{
+				TemplateIssues = [ new GraphCompiler.GraphIssue() { Node = null, Message = $"Shader Template \"{templateAsset.Path}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." } ];
+			}
 		}
 		else
 		{
 			_graph.UserTemplateInfo = new UserShaderTemplateInfo();
+			_graph.ValidateTemplateSettings();
 		}
 
-		_graph.ValidateTemplateSettings();
+		GeneratePreviewCode();
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]

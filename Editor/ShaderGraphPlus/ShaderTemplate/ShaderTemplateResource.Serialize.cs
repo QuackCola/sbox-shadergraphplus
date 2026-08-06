@@ -31,14 +31,19 @@ public sealed partial class ShaderTemplateResource
 		return doc.ToJsonString( options );
 	}
 
-	public void Deserialize( string json, string fileName = "" )
+	public bool Deserialize( string json, string fileName = "" )
 	{
 		using var doc = JsonDocument.Parse( json );
 		var root = doc.RootElement;
 		var options = SerializerOptions();
 		var fileVersion = GetVersion( root );
 
+		if ( fileVersion < ResourceVersion )
+			return false;
+
 		DeserializeObject( this, root, options );
+	
+		return true;
 	}
 
 	private static void SerializeObject( object obj, JsonObject doc, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
