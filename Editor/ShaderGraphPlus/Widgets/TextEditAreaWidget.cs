@@ -4,25 +4,25 @@ namespace ShaderGraphPlus;
 
 public class TextEditAreaWidget : Widget
 {
-	public Action<string> ValueChanged { get; set; }
+	private TextEdit _textEdit;
 
-	TextEdit textEdit;
+	public Action<string> ValueChanged { get; set; }
 
 	public string Value
 	{
-		get => textEdit.PlainText;
-		set => textEdit.PlainText = value;
+		get => _textEdit.PlainText;
+		set => _textEdit.PlainText = value;
 	}
 
 	public TextEditAreaWidget( Widget parent ) : base( parent )
 	{
-		textEdit = new TextEdit( this );
-		textEdit.TextChanged = x => ValueChanged?.Invoke( x );
-		textEdit.AcceptDrops = false;
+		_textEdit = new TextEdit( this );
+		_textEdit.TextChanged = x => ValueChanged?.Invoke( x );
+		_textEdit.AcceptDrops = false;
 
 		Layout = Layout.Row();
 		Layout.Spacing = 16;
-		Layout.Add( textEdit );
+		Layout.Add( _textEdit );
 	}
 
 	/*
