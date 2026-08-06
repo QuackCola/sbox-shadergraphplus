@@ -3,13 +3,9 @@ using Editor;
 
 namespace ShaderGraphPlus;
 
-/// <summary>
-/// Custom enum editor for BlendMode that filters options based on template/shading model features
-/// </summary>
-[CustomEditor( typeof( BlendMode ) )]
-internal sealed class BlendModeControlWidget : ControlWidget
+internal abstract class CustomEnumControlWidget : ControlWidget
 {
-	ShaderGraphPlus _graph;
+	protected ShaderGraphPlus _graph;
 	EnumDescription _enumDesc;
 	PopupWidget _menu;
 
@@ -17,7 +13,7 @@ internal sealed class BlendModeControlWidget : ControlWidget
 	public override bool IsControlButton => true;
 	public override bool IsControlHovered => base.IsControlHovered || _menu.IsValid();
 
-	public BlendModeControlWidget( SerializedProperty property ) : base( property )
+	public CustomEnumControlWidget( SerializedProperty property ) : base( property )
 	{
 		_graph = property.Parent?.Targets?.FirstOrDefault() as ShaderGraphPlus;
 
@@ -30,24 +26,7 @@ internal sealed class BlendModeControlWidget : ControlWidget
 		_enumDesc = EditorTypeLibrary.GetEnumDescription( propertyType );
 	}
 
-	private bool IsEntrySupported( EnumDescription.Entry entry )
-	{
-		if ( _graph is null )
-			return entry.Browsable;
-
-		if ( !entry.Browsable )
-			return false;
-
-		return entry.Name switch
-		{
-			nameof( BlendMode.Opaque ) => _graph.UserTemplateInfo.SupportsOpaqueBlend,
-			nameof( BlendMode.Masked ) => _graph.UserTemplateInfo.SupportsMaskedBlend,
-			nameof( BlendMode.Translucent ) => _graph.UserTemplateInfo.SupportsTranslucentBlend,
-			nameof( BlendMode.Dynamic ) => _graph.UserTemplateInfo.SupportsDynamicBlend,
-
-			_ => true
-		};
-	}
+	protected abstract bool IsEntrySupported( EnumDescription.Entry entry );
 
 	private bool IsNoneSupported()
 	{
@@ -103,7 +82,7 @@ internal sealed class BlendModeControlWidget : ControlWidget
 		}
 	}
 
-	void ToggleValue( EnumDescription.Entry e )
+	protected void ToggleValue( EnumDescription.Entry e )
 	{
 		SerializedProperty.SetValue( e.IntegerValue );
 	}
@@ -130,15 +109,15 @@ internal sealed class BlendModeControlWidget : ControlWidget
 			MaximumWidth = menuWidth
 		};
 
-		foreach ( var o in _enumDesc )
+		foreach ( var entry in _enumDesc )
 		{
-			if ( !IsEntrySupported( o ) )
+			if ( !IsEntrySupported( entry ) )
 				continue;
 
-			var b = scroller.Canvas.Layout.Add( new BlendModeMenuOption( o, SerializedProperty ) );
+			var b = scroller.Canvas.Layout.Add( new EnumMenuOption( entry, SerializedProperty ) );
 			b.MouseLeftPress = () =>
 			{
-				ToggleValue( o );
+				ToggleValue( entry );
 				_menu.Update();
 				_menu.Close();
 			};
@@ -157,12 +136,70 @@ internal sealed class BlendModeControlWidget : ControlWidget
 	}
 }
 
-file class BlendModeMenuOption : Widget
+/// <summary>
+/// Custom enum editor for BlendMode that filters options based on template/shading model features
+/// </summary>
+[CustomEditor( typeof( BlendMode ) )]
+internal sealed class BlendModeControlWidget : CustomEnumControlWidget
+{
+	public BlendModeControlWidget( SerializedProperty property ) : base( property )
+	{
+	}
+
+	protected override bool IsEntrySupported( EnumDescription.Entry entry )
+	{
+		if ( _graph is null )
+			return entry.Browsable;
+
+		if ( !entry.Browsable )
+			return false;
+
+		return entry.Name switch
+		{
+			nameof( BlendMode.Opaque ) => _graph.UserTemplateInfo.SupportsOpaqueBlend,
+			nameof( BlendMode.Masked ) => _graph.UserTemplateInfo.SupportsMaskedBlend,
+			nameof( BlendMode.Translucent ) => _graph.UserTemplateInfo.SupportsTranslucentBlend,
+			nameof( BlendMode.Dynamic ) => _graph.UserTemplateInfo.SupportsDynamicBlend,
+
+			_ => true
+		};
+	}
+}
+
+/*
+[CustomEditor( typeof( RenderFace ) )]
+internal sealed class RenderFaceControlWidget : CustomEnumControlWidget
+{
+	public RenderFaceControlWidget( SerializedProperty property ) : base( property )
+	{
+	}
+
+	protected override bool IsEntrySupported( EnumDescription.Entry entry )
+	{
+		if ( _graph is null )
+			return entry.Browsable;
+
+		if ( !entry.Browsable )
+			return false;
+
+		return entry.Name switch
+		{
+			nameof( RenderFace.Front ) => _graph.UserTemplateInfo.SupportsRenderFaceFront,
+			nameof( RenderFace.Back ) => _graph.UserTemplateInfo.SupportsRenderFaceBack,
+			nameof( RenderFace.Both ) => _graph.UserTemplateInfo.SupportsRenderFaceBoth,
+
+			_ => true
+		};
+	}
+}
+*/
+
+file class EnumMenuOption : Widget
 {
 	EnumDescription.Entry info;
 	SerializedProperty property;
 
-	public BlendModeMenuOption( EnumDescription.Entry e, SerializedProperty p ) : base( null )
+	public EnumMenuOption( EnumDescription.Entry e, SerializedProperty p ) : base( null )
 	{
 		info = e;
 		property = p;

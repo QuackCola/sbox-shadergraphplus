@@ -63,6 +63,7 @@ public class PreviewSettings
 	/// Current viewmode of the preview veiwport
 	/// </summary>
 	public ViewMode ViewMode { get; set; } = ViewMode.Perspective;
+
 	public bool RenderBackfaces { get; set; } = false;
 
 	/// <summary>
@@ -161,10 +162,16 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public bool AddToNodeLibrary { get; set; }
 
 	[Hide]
-	private bool HasNoTemplate => string.IsNullOrWhiteSpace( ShaderTemplate );
+	private bool HasTemplate => !string.IsNullOrWhiteSpace( ShaderTemplate );
 
 	[Hide]
-	private bool ShowShadingModel => string.IsNullOrWhiteSpace( ShaderTemplate ) && Domain == ShaderDomain.Surface;
+	private bool HasNoTemplate => !HasTemplate;
+
+	[Hide]
+	private bool ShowShadingModel => HasNoTemplate && Domain == ShaderDomain.Surface;
+
+	[Hide]
+	private bool ShowRenderFace => HasNoTemplate && Domain == ShaderDomain.Surface;
 
 	[Hide]
 	private bool ShowBlendMode => SupportsBlendModes && Domain == ShaderDomain.Surface;
@@ -188,7 +195,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( ShowShadingModel ), true )]
 	public ShadingModel ShadingModel { get; set; }
 
-	[ShowIf( nameof( Domain ), ShaderDomain.Surface )]
+	[ShowIf( nameof( ShowRenderFace ), true )]
 	public RenderFace RenderFace { get; set; }
 
 	[Group( "Advanced" ), ShaderTemplatePath]
@@ -243,10 +250,43 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			else if ( UserTemplateInfo.SupportsUnlitShading ) ShadingModel = ShadingModel.Unlit;
 		}
 
-		// Ensure template ShaderDomain
-		if ( !string.IsNullOrWhiteSpace( ShaderTemplate ) )
+		/*
+		// Auto-correct RenderFace if current is not supported
+		bool currentCullingModeSupported = RenderFace switch
 		{
+			RenderFace.Front => UserTemplateInfo.SupportsRenderFaceFront,
+			RenderFace.Back => UserTemplateInfo.SupportsRenderFaceBack,
+			RenderFace.Both => UserTemplateInfo.SupportsRenderFaceBoth,
+			_ => false
+		};
+
+		if ( !currentCullingModeSupported )
+		{
+			// Find the first supported RenderFace
+			if ( UserTemplateInfo.SupportsRenderFaceFront ) RenderFace = RenderFace.Front;
+			else if ( UserTemplateInfo.SupportsRenderFaceBack ) RenderFace = RenderFace.Back;
+			else if ( UserTemplateInfo.SupportsRenderFaceBoth ) RenderFace = RenderFace.Both;
+		}
+		*/
+
+		if ( HasTemplate )
+		{	
+			// Ensure template ShaderDomain
 			Domain = UserTemplateInfo.SupportsSurfaceDomain ? ShaderDomain.Surface : ShaderDomain.PostProcess;
+
+			// Ensure template culling mode
+			if ( UserTemplateInfo.SupportsRenderFaceFront )
+			{
+				RenderFace = RenderFace.Front;
+			}
+			else if ( UserTemplateInfo.SupportsRenderFaceBack )
+			{
+				RenderFace = RenderFace.Back;
+			}
+			else if ( UserTemplateInfo.SupportsRenderFaceBoth )
+			{
+				RenderFace = RenderFace.Both;
+			}
 		}
 	}
 

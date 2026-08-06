@@ -5,9 +5,22 @@ namespace ShaderGraphPlus;
 /// <summary>
 /// Readonly representation of <see cref="ShaderTemplateResource"/>
 /// </summary>
-public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool SupportsUnlitShading, bool SupportsSurfaceDomain, bool SupportsOpaqueBlend, bool SupportsMaskedBlend, bool SupportsTranslucentBlend, bool SupportsDynamicBlend, bool ShowOpacityInput, bool ShowPositionOffset )
+public sealed record UserShaderTemplateInfo(
+	bool SupportsLitShading, 
+	bool SupportsUnlitShading,
+	bool SupportsSurfaceDomain,
+	bool SupportsRenderFaceFront,
+	bool SupportsRenderFaceBack,
+	bool SupportsRenderFaceBoth,
+	bool SupportsOpaqueBlend,
+	bool SupportsMaskedBlend,
+	bool SupportsTranslucentBlend,
+	bool SupportsDynamicBlend,
+	bool ShowOpacityInput,
+	bool ShowPositionOffset )
 {
-	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true )
+
+	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true, true )
 	{
 	}
 
@@ -17,6 +30,9 @@ public sealed record UserShaderTemplateInfo( bool SupportsLitShading, bool Suppo
 			template.ShadingModel == ShadingModel.Lit,
 			template.ShadingModel == ShadingModel.Unlit,
 			template.ShaderDomain == ShaderDomain.Surface,
+			template.RenderFace == RenderFace.Front,
+			template.RenderFace == RenderFace.Back,
+			template.RenderFace == RenderFace.Both,
 			template.OpaqueBlend,
 			template.MaskedBlend,
 			template.TranslucentBlend,
@@ -42,6 +58,10 @@ public sealed partial class ShaderTemplateResource
 	[TabPage( "General" )]
 	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
+
+	[TabPage( "General" )]
+	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
+	public RenderFace RenderFace { get; set; } = RenderFace.Front;
 
 	[TabPage( "General" ), Group( "Supported Optional Material Inputs" )]
 	[HideIf( nameof( ShaderDomain ), ShaderDomain.PostProcess )]
