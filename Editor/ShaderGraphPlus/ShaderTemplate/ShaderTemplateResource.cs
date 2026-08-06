@@ -89,7 +89,7 @@ public sealed partial class ShaderTemplateResource
 		{
 			if ( !Code.Contains( tag.Key ) )
 			{
-				templateErrors.Add( $"\"{path}\" Missing tag '{tag.Key}'" );
+				templateErrors.Add( $"Shader Template \"{path}\" Missing tag '{tag.Key}'" );
 			}
 		}
 
