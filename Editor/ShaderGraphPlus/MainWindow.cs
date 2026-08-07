@@ -1889,7 +1889,7 @@ public class MainWindow : DockWindow
 		}
 
 		// Reload shader template
-		if ( serializedProperty.Name == nameof( ShaderGraphPlus.ShaderTemplate ) )
+		if ( _properties.Target is ShaderGraphPlus && serializedProperty.IsPropertyName( nameof( ShaderGraphPlus.ShaderTemplate ) ) )
 		{
 			LoadShaderTemplate();
 		}
