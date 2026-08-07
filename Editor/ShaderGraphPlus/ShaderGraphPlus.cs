@@ -162,10 +162,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public bool AddToNodeLibrary { get; set; }
 
 	[Hide]
-	private bool HasTemplate => !string.IsNullOrWhiteSpace( ShaderTemplate );
+	public bool HasTemplate => !string.IsNullOrWhiteSpace( ShaderTemplate );
 
 	[Hide]
-	private bool HasNoTemplate => !HasTemplate;
+	public bool HasNoTemplate => !HasTemplate;
 
 	[Hide]
 	private bool ShowShadingModel => HasNoTemplate && Domain == ShaderDomain.Surface;

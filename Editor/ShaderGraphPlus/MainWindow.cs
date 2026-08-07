@@ -1431,7 +1431,7 @@ public class MainWindow : DockWindow
 
 		TemplateIssues.Clear();
 
-		if ( !string.IsNullOrWhiteSpace( _graph.ShaderTemplate ) )
+		if ( _graph.HasTemplate )
 		{
 			var templateAsset = AssetSystem.FindByPath( _graph.ShaderTemplate );
 
