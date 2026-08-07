@@ -13,7 +13,7 @@ internal sealed class TabPageAttribute : Attribute
 	}
 }
 
-[EditorForAssetType( "shdrtpl" )]
+[EditorForAssetType( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension )]
 [EditorApp( "Shader Template Editor", "gradient", "edit shader templates" )]
 public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 {
@@ -35,7 +35,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		CreateUI();
 		Show();
 
-		StateCookie = "ShaderTemplateEditor";
+		StateCookie = ShaderGraphPlusGlobals.ShaderTemplateEditorStateCookieName;
 
 		CreateNew();
 	}
@@ -130,7 +130,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		}
 
 		var confirm = new PopupWindow(
-			"Save Current Shader Template", "The open template has unsaved changes. Would you like to save now?", "Cancel",
+			$"Save Current {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}", "The open template has unsaved changes. Would you like to save now?", "Cancel",
 			new Dictionary<string, Action>()
 			{
 				{ "No", () => action?.Invoke() },
@@ -188,7 +188,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 	private void CreateToolBar()
 	{
-		var toolBar = new ToolBar( this, "ShaderTemplateEditorToolbar" );
+		var toolBar = new ToolBar( this, ShaderGraphPlusGlobals.ShaderTemplateEditorToolbarName );
 		AddToolBar( toolBar, ToolbarPosition.Top );
 
 		toolBar.AddOption( "New", "common/new.png", New ).StatusTip = "New Template";
@@ -206,11 +206,11 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	{
 		var fd = new FileDialog( null )
 		{
-			Title = $"Open Shader Template",
-			DefaultSuffix = $".shdrtpl"
+			Title = $"Open {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}",
+			DefaultSuffix = $".{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}"
 		};
 
-		fd.SetNameFilter( $"Shader Template ( *.shdrtpl)" );
+		fd.SetNameFilter( $"{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName} (*.{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension})" );
 
 		if ( !fd.Execute() )
 			return;
@@ -260,14 +260,14 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	{
 		var fd = new FileDialog( null )
 		{
-			Title = $"Save Shader Template",
-			DefaultSuffix = $".shdrtpl"
+			Title = $"Save {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}",
+			DefaultSuffix = $".{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}"
 		};
 
-		fd.SelectFile( $"untitled.shdrtpl" );
+		fd.SelectFile( $"untitled.{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}" );
 		fd.SetFindFile();
 		fd.SetModeSave();
-		fd.SetNameFilter( $"Shader Template (*.shdrtpl)" );
+		fd.SetNameFilter( $"S{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName} (*.{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension})" );
 		if ( !fd.Execute() )
 			return null;
 
@@ -338,7 +338,7 @@ public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		}
 
 		var confirm = new PopupWindow(
-			"Save Current Shader Template", "The open template has unsaved changes. Would you like to save now?", "Cancel",
+			$"Save Current {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}", "The open template has unsaved changes. Would you like to save now?", "Cancel",
 			new Dictionary<string, Action>()
 			{
 				{ "No", () => { _dirty = false; Close(); } },

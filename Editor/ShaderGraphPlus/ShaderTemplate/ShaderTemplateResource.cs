@@ -43,7 +43,7 @@ public sealed record UserShaderTemplateInfo(
 	}
 }
 
-[AssetType( Name = "Shader Template", Extension = "shdrtpl" )]
+[AssetType( Name = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName, Extension = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension )]
 public sealed partial class ShaderTemplateResource
 {
 	/// <summary>

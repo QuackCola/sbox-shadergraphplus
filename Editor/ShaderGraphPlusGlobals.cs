@@ -22,4 +22,11 @@ internal static class ShaderGraphPlusGlobals
 
 	internal const string SubgraphAssetTypeName = "Shader Graph Plus Function";
 	internal const string SubgraphAssetTypeExtension = "sgpfunc";
+
+	internal const string ShaderTemplateCleanName = "ShaderTemplate";
+	internal const string ShaderTemplateAssetTypeName = "Shader Template";
+	internal const string ShaderTemplateAssetTypeExtension = "shdrtpl";
+
+	internal const string ShaderTemplateEditorStateCookieName = "ShaderTemplateEditor";
+	internal const string ShaderTemplateEditorToolbarName = "ShaderTemplateEditorToolbar";
 }
