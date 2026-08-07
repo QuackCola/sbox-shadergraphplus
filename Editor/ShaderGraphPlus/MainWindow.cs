@@ -1113,7 +1113,7 @@ public class MainWindow : DockWindow
 
 		file.AddSeparator();
 
-		file.AddOption( "Reload Shader Template", "common/reload.png", LoadShaderTemplate );
+		file.AddOption( "Reload Shader Template", "common/reload.png", () => { LoadShaderTemplate( true ); } );
 
 		file.AddSeparator();
 
@@ -1425,7 +1425,7 @@ public class MainWindow : DockWindow
 
 	}
 
-	private void LoadShaderTemplate()
+	private void LoadShaderTemplate( bool setDirty = false )
 	{
 		if ( _graph is null ) return;
 
@@ -1460,7 +1460,10 @@ public class MainWindow : DockWindow
 			_graph.ValidateTemplateSettings();
 		}
 
-		GeneratePreviewCode();
+		if ( setDirty )
+		{
+			SetDirty();
+		}
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]
