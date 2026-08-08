@@ -42,6 +42,7 @@ public static class ShaderTemplate
 		// double up all { and }
 		formatableString = formatableString.Replace( "{", "{{" ).Replace( "}", "}}" );
 
+		// Replace all friendly named tags with the ones used by string.Format()
 		foreach ( var tag in TemplateTagMap )
 		{
 			formatableString = formatableString.Replace( tag.Key, tag.Value );
