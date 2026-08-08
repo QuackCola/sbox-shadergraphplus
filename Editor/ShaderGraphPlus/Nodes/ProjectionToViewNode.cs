@@ -2,10 +2,10 @@
 namespace ShaderGraphPlus.Nodes;
 
 /// <summary>
-/// Projection-space coordinates converted to world-space.
+/// Projection-space coordinates converted to view space
 /// </summary>
-[Title( "Projection To World" ), Category( "Variables/Matrix" ), Icon( "apps" )]
-public sealed class ProjectionToWorldNode : ShaderNodePlus
+[Title( "Projection To View" ), Category( "Variables/Matrix" ), Icon( "apps" )]
+public sealed class ProjectionToViewNode : ShaderNodePlus
 {
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.GlobalVariableNode;
@@ -15,5 +15,5 @@ public sealed class ProjectionToWorldNode : ShaderNodePlus
 
 	[Output( typeof( Float4x4 ) ), Title( "Matrix" )]
 	[Hide]
-	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matProjectionToWorld" );
+	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matProjectionToView" );
 }

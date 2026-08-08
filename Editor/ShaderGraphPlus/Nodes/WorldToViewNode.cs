@@ -1,6 +1,9 @@
 ﻿
 namespace ShaderGraphPlus.Nodes;
 
+/// <summary>
+/// World-space coordinates converted to view space.
+/// </summary>
 [Title( "World To View" ), Category( "Variables/Matrix" ), Icon( "apps" )]
 public sealed class WorldToViewNode : ShaderNodePlus
 {
@@ -12,8 +15,5 @@ public sealed class WorldToViewNode : ShaderNodePlus
 
 	[Output( typeof( Float4x4 ) ), Title( "Matrix" )]
 	[Hide]
-	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
-	{
-		return new NodeResult( ResultType.Float4x4, "g_matWorldToView", true );
-	};
+	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matWorldToView" );
 }

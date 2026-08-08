@@ -898,7 +898,8 @@ public class MainWindow : DockWindow
 		Update();
 
 		_dirty = true;
-		_graphCanvas.WindowTitle = $"{_asset?.Name ?? "untitled"}*";
+
+		UpdateTitle();
 
 		if ( evaluate )
 			GeneratePreviewCode();
@@ -1270,7 +1271,9 @@ public class MainWindow : DockWindow
 		_dirty = false;
 		_graphView.Graph = _graph;
 		_blackboardView.Graph = _graph;
-		_graphCanvas.WindowTitle = "untitled";
+
+		UpdateTitle();
+
 		_preview.Model = null;
 		_preview.Tint = Color.White;
 		_undoStack.Clear();
@@ -1376,7 +1379,9 @@ public class MainWindow : DockWindow
 		LoadShaderTemplate();
 
 		_blackboardView.Graph = _graph;
-		_graphCanvas.WindowTitle = _asset.Name;
+
+		UpdateTitle();
+
 		_undoStack.Clear();
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
@@ -1565,7 +1570,8 @@ public class MainWindow : DockWindow
 		MainAssetBrowser.Instance?.Local.UpdateAssetList();
 
 		_dirty = false;
-		_graphCanvas.WindowTitle = _asset.Name;
+
+		UpdateTitle();
 
 		if ( IsSubgraph )
 		{
@@ -1623,6 +1629,11 @@ public class MainWindow : DockWindow
 		EditorEvent.Run( "shadergraphplus.update.subgraph", _asset.RelativePath );
 
 		return true;
+	}
+
+	private void UpdateTitle()
+	{
+		WindowTitle = $"Shader Graph Plus - {_asset?.Path ?? "untitled"}{(_dirty ? "*" : "")}";
 	}
 
 	private void WritePostProcessingShaderClass( string classCode )

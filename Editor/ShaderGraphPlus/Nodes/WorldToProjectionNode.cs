@@ -1,6 +1,9 @@
 ﻿
 namespace ShaderGraphPlus.Nodes;
 
+/// <summary>
+/// World-space coordinates converted to view-space. This coordinate system is built relative to the camera, with it as the origin
+/// </summary>
 [Title( "World To Projection" ), Category( "Variables/Matrix" ), Icon( "apps" )]
 public sealed class WorldToProjectionNode : ShaderNodePlus
 {
@@ -12,8 +15,5 @@ public sealed class WorldToProjectionNode : ShaderNodePlus
 
 	[Output( typeof( Float4x4 ) ), Title( "Matrix" )]
 	[Hide]
-	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
-	{
-		return new NodeResult( ResultType.Float4x4, "g_matWorldToProjection", true );
-	};
+	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matWorldToProjection" );
 }

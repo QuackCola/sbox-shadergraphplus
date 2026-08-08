@@ -1,6 +1,9 @@
 ﻿
 namespace ShaderGraphPlus.Nodes;
 
+/// <summary>
+/// View-space coordinates converted to projection-space.
+/// </summary>
 [Title( "View To Projection" ), Category( "Variables/Matrix" ), Icon( "apps" )]
 public sealed class ViewToProjectionNode : ShaderNodePlus
 {
@@ -12,8 +15,5 @@ public sealed class ViewToProjectionNode : ShaderNodePlus
 
 	[Output( typeof( Float4x4 ) ), Title( "Matrix" )]
 	[Hide]
-	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
-	{
-		return new NodeResult( ResultType.Float4x4, "g_matViewToProjection", true );
-	};
+	public static NodeResult.Func Result => ( GraphCompiler compiler ) => new NodeResult( ResultType.Float4x4, "g_matViewToProjection" );
 }
