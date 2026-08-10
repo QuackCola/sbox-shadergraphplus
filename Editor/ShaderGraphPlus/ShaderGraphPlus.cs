@@ -34,7 +34,7 @@ public enum ShaderDomain
 {
 	[Icon( "view_in_ar" )]
 	Surface,
-	[Icon( "light_mode" )]
+	[Icon( "nights_stay" )]
 	Sky,
 	[Icon( "desktop_windows" )]
 	PostProcess,
