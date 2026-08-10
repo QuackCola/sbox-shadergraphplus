@@ -15,7 +15,7 @@ internal sealed class TabPageAttribute : Attribute
 
 [EditorForAssetType( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension )]
 [EditorApp( "Shader Template Editor", "gradient", "edit shader templates" )]
-public class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
+public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 {
 	private ShaderTemplateResource _template;
 	private Asset _asset;
