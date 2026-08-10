@@ -77,11 +77,6 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public bool IsNotPreview => !IsPreview;
 
-	/// <summary>
-	/// Does the current graph represent a sky shader
-	/// </summary>
-	public bool IsSkyShader => Graph.Domain == ShaderDomain.Sky;
-
 	private partial class CompileResult
 	{
 		public List<(NodeResult localResult, NodeResult funcResult)> Results = new();
@@ -104,6 +99,22 @@ public sealed partial class GraphCompiler
 			Functions = functions;
 		}
 	}
+
+
+	/// <summary>
+	/// Does the current graph represent a surface shader
+	/// </summary>
+	public bool IsSurfaceShader => Graph.Domain == ShaderDomain.Surface;
+
+	/// <summary>
+	/// Does the current graph represent a sky shader
+	/// </summary>
+	public bool IsSkyShader => Graph.Domain == ShaderDomain.Sky;
+
+	/// <summary>
+	/// Does the current graph represent a postprocessing shader
+	/// </summary>
+	public bool IsPostProcessingShader => Graph.Domain == ShaderDomain.PostProcess;
 
 	public enum ShaderStage
 	{
@@ -1426,7 +1437,7 @@ public sealed partial class GraphCompiler
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.Domain != ShaderDomain.Surface || Graph.ShadingModel != ShadingModel.Lit ) return "";
+		if ( !IsSurfaceShader || Graph.ShadingModel != ShadingModel.Lit ) return "";
 
 		var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 
@@ -1564,7 +1575,7 @@ public sealed partial class GraphCompiler
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.Domain == ShaderDomain.PostProcess || Graph.Domain == ShaderDomain.Sky || Graph.ShadingModel == ShadingModel.Unlit )
+		if ( IsPostProcessingShader || IsSkyShader || Graph.ShadingModel == ShadingModel.Unlit )
 		{
 			var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 			if ( resultNode == null )
@@ -1743,12 +1754,6 @@ public sealed partial class GraphCompiler
 
 		var includes = IsVs ? VertexIncludes : PixelIncludes;
 
-		//if ( IsPs && Graph.Domain == ShaderDomain.PostProcess )
-		//{
-		//	sb.AppendLine( "#include \"postprocess/functions.hlsl\"" );
-		//	sb.AppendLine( "#include \"postprocess/common.hlsl\"" );
-		//}
-
 		foreach ( var include in includes )
 		{
 			sb.AppendLine( $"#include \"{include}\"" );
@@ -1777,12 +1782,6 @@ public sealed partial class GraphCompiler
 
 			sb.AppendLine();
 		}
-
-		// Support for color buffer in post-process shaders
-		//if ( IsPs && Graph.Domain is ShaderDomain.PostProcess )
-		//{
-		//	sb.AppendLine( "Texture2D g_tColorBuffer < Attribute( \"ColorBuffer\" ); SrgbRead ( true ); >;" );
-		//}
 
 		if ( IsPreview )
 		{
@@ -2066,7 +2065,7 @@ public sealed partial class GraphCompiler
 	private string GeneratePixelInit()
 	{
 		Stage = ShaderStage.Pixel;
-		if ( Graph.Domain == ShaderDomain.Surface && Graph.ShadingModel == ShadingModel.Lit )
+		if ( IsSurfaceShader && Graph.ShadingModel == ShadingModel.Lit )
 			return ShaderTemplateSurface.Material_init;
 		return "";
 	}
