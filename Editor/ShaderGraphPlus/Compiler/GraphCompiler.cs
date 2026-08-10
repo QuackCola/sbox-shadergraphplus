@@ -77,6 +77,11 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public bool IsNotPreview => !IsPreview;
 
+	/// <summary>
+	/// Does the current graph represent a sky shader
+	/// </summary>
+	public bool IsSkyShader => Graph.Domain == ShaderDomain.Sky;
+
 	private partial class CompileResult
 	{
 		public List<(NodeResult localResult, NodeResult funcResult)> Results = new();
@@ -1385,6 +1390,7 @@ public sealed partial class GraphCompiler
 			shaderTemplate = Graph.Domain switch
 			{
 				ShaderDomain.Surface => ShaderTemplate.ToFormattableString( ShaderTemplateSurface.Code ),
+				ShaderDomain.Sky => ShaderTemplate.ToFormattableString( ShaderTemplateSky.Code ),
 				ShaderDomain.PostProcess => ShaderTemplate.ToFormattableString( ShaderTemplatePostProcess.Code ),
 				_ => throw new NotImplementedException(),
 			};
@@ -1420,7 +1426,7 @@ public sealed partial class GraphCompiler
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.ShadingModel != ShadingModel.Lit || Graph.Domain == ShaderDomain.PostProcess ) return "";
+		if ( Graph.Domain != ShaderDomain.Surface || Graph.ShadingModel != ShadingModel.Lit ) return "";
 
 		var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 
@@ -1558,7 +1564,7 @@ public sealed partial class GraphCompiler
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.ShadingModel == ShadingModel.Unlit || Graph.Domain == ShaderDomain.PostProcess )
+		if ( Graph.Domain == ShaderDomain.PostProcess || Graph.Domain == ShaderDomain.Sky || Graph.ShadingModel == ShadingModel.Unlit )
 		{
 			var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 			if ( resultNode == null )
@@ -1595,7 +1601,7 @@ public sealed partial class GraphCompiler
 
 		sb.AppendLine( "#include \"common/features.hlsl\"" );
 
-		if ( Graph.BlendMode == BlendMode.Dynamic )
+		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
 		{
 			sb.AppendLine( "Feature( F_ALPHA_TEST, 0..1, \"Blending\" );" );
 			sb.AppendLine( "Feature( F_TRANSLUCENT, 0..1, \"Blending\" );" );
@@ -1658,13 +1664,13 @@ public sealed partial class GraphCompiler
 			sb.AppendLine();
 		}
 
-		if ( Graph.BlendMode == BlendMode.Dynamic )
+		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
 		{
 			// Dynamic blend mode: Use StaticCombos linked to Features
 			sb.AppendLine( "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );" );
 			sb.AppendLine( "StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );" );
 		}
-		else
+		else if ( !IsSkyShader )
 		{
 			var blendMode = Graph.BlendMode;
 			var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;
@@ -2021,29 +2027,38 @@ public sealed partial class GraphCompiler
 
 		var combo = "";
 
-		if ( IsPreview )
+		if ( IsSkyShader )
 		{
 			sb.AppendLine();
-			sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
-
-			combo = "D_RENDER_BACKFACES";
+			sb.Append( $"RenderState( CullMode, NONE );" );
 		}
 		else
 		{
-			combo = "F_RENDER_BACKFACES";
+			if ( IsPreview )
+			{
+				sb.AppendLine();
+				sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
+
+				combo = "D_RENDER_BACKFACES";
+			}
+			else
+			{
+				combo = "F_RENDER_BACKFACES";
+			}
+
+			sb.AppendLine();
+
+			var renderFace = Graph.RenderFace switch
+			{
+				RenderFace.Front => $"{combo} ? NONE : BACK",
+				RenderFace.Back => $"{combo} ? NONE : FRONT",
+				RenderFace.Both => "NONE",
+				_ => "NONE",
+			};
+
+			sb.Append( $"RenderState( CullMode, {renderFace} );" );
 		}
 
-		sb.AppendLine();
-
-		var renderFace = Graph.RenderFace switch
-		{
-			RenderFace.Front => $"{combo} ? NONE : BACK",
-			RenderFace.Back => $"{combo} ? NONE : FRONT",
-			RenderFace.Both => "NONE",
-			_ => "NONE",
-		};
-
-		sb.Append( $"RenderState( CullMode, {renderFace} );" );
 
 		return sb.ToString();
 	}
@@ -2051,7 +2066,7 @@ public sealed partial class GraphCompiler
 	private string GeneratePixelInit()
 	{
 		Stage = ShaderStage.Pixel;
-		if ( Graph.ShadingModel == ShadingModel.Lit && Graph.Domain != ShaderDomain.PostProcess )
+		if ( Graph.Domain == ShaderDomain.Surface && Graph.ShadingModel == ShadingModel.Lit )
 			return ShaderTemplateSurface.Material_init;
 		return "";
 	}

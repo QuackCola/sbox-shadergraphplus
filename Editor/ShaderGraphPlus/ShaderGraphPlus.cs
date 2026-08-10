@@ -34,6 +34,8 @@ public enum ShaderDomain
 {
 	[Icon( "view_in_ar" )]
 	Surface,
+	[Icon( "light_mode" )]
+	Sky,
 	[Icon( "desktop_windows" )]
 	PostProcess,
 }
@@ -212,7 +214,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	}
 
 	/// <summary>
-	/// Validates and auto-corrects BlendMode and ShadingModel if current values are not supported
+	/// Validates settings to what is supported by the current custom user template.
 	/// </summary>
 	public void ValidateTemplateSettings()
 	{

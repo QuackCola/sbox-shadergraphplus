@@ -31,16 +31,13 @@ public sealed class Result : BaseResult
 	}
 
 	[Hide]
-	private bool IsLit => Graph.ShadingModel == ShadingModel.Lit && Graph.Domain != ShaderDomain.PostProcess;
+	private bool IsLit => Graph.Domain == ShaderDomain.Surface && Graph.ShadingModel == ShadingModel.Lit;
 
 	[Hide]
-	private bool IsPostProcess => Graph.Domain == ShaderDomain.PostProcess;
+	private bool ShowPositionOffset => Graph.Domain == ShaderDomain.Surface && Graph.UserTemplateInfo.ShowPositionOffset;
 
 	[Hide]
-	private bool ShowPositionOffset => IsPostProcess == false && Graph.UserTemplateInfo.ShowPositionOffset;
-
-	[Hide]
-	private bool ShowOpacityInput => IsPostProcess == false && Graph.UserTemplateInfo.ShowOpacityInput;
+	private bool ShowOpacityInput => Graph.Domain == ShaderDomain.Surface && Graph.UserTemplateInfo.ShowOpacityInput;
 
 	[Hide, JsonIgnore]
 	public override bool CanPreview => false;
