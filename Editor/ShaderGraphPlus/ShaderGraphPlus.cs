@@ -200,6 +200,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( ShowRenderFace ), true )]
 	public RenderFace RenderFace { get; set; }
 
+	/// <summary>
+	/// Semi-Custom user provided shader template
+	/// </summary>
 	[Group( "Advanced" ), ShaderTemplatePath]
 	public string ShaderTemplate { get; set; }
 
