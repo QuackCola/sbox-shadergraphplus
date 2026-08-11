@@ -135,7 +135,7 @@ public sealed class PolygonShapeNode : ShaderNodePlus
 		var sides = compiler.ResultOrDefault( Sides, DefaultSides );
 		var width = compiler.ResultOrDefault( Width, DefaultWidth );
 		var height = compiler.ResultOrDefault( Height, DefaultHeight );
-		
+
 		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "PolygonShape", $"{coords}", $"{sides}", $"{width}", $"{height}" ) );

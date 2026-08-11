@@ -55,7 +55,7 @@ public sealed class RoundGradientNode : ShaderNodePlus
 		var radius = compiler.ResultOrDefault( Radius, DefaultRadius );
 		var density = compiler.ResultOrDefault( Density, DefaultDensity );
 		var invert = compiler.ResultOrDefault( Invert, DefaultInvert );
-		
+
 		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "RoundGradient", $"{coords}",
