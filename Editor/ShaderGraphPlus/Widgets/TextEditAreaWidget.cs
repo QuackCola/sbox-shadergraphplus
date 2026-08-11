@@ -17,6 +17,7 @@ public class TextEditAreaWidget : Widget
 	public TextEditAreaWidget( Widget parent ) : base( parent )
 	{
 		_textEdit = new TextEdit( this );
+		_textEdit.TabSize = 32;
 		_textEdit.TextChanged = x => ValueChanged?.Invoke( x );
 		_textEdit.AcceptDrops = false;
 
