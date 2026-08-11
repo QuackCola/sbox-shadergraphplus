@@ -201,7 +201,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		toolBar.AddOption( "Save", "common/save.png", () => Save() ).StatusTip = "Save Template";
 	}
 
-	void ResetTemplateCodeToDefault()
+	private void ResetTemplateCodeToDefault()
 	{
 		if ( _template == null || _textEditArea == null )
 			return;
@@ -225,7 +225,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	}
 
 	[Shortcut( "editor.quit", "CTRL+Q" )]
-	void Quit()
+	private void Quit()
 	{
 		Close();
 	}
