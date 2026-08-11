@@ -1,5 +1,5 @@
 {
-  "ShaderDomain": "Surface",
+  "ShaderDomain": "Sky",
   "ShadingModel": "Unlit",
   "RenderFace": "Both",
   "Opacity": false,
