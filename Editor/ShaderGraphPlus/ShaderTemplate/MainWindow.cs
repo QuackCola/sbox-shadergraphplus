@@ -24,6 +24,8 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	private Widget _primaryDockCanvas;
 	private TabWidget _tabWidget;
 
+	private TextEditAreaWidget _textEditArea;
+
 	public bool CanOpenMultipleAssets => false;
 
 	public ShaderTemplateEditorWindow() : base()
@@ -103,15 +105,15 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		container.Layout = Layout.Column();
 		container.VerticalSizeMode = SizeMode.CanGrow;
 
-		var textEditArea = new TextEditAreaWidget( container );
-		textEditArea.Value = _template.Code;
-		textEditArea.ValueChanged = ( x ) =>
+		_textEditArea = new TextEditAreaWidget( container );
+		_textEditArea.Value = _template.Code;
+		_textEditArea.ValueChanged = ( x ) =>
 		{
 			_template.Code = x;
 			SetDirty();
 		};
 
-		container.Layout.Add( textEditArea );
+		container.Layout.Add( _textEditArea );
 
 		return container;
 	}
@@ -166,6 +168,9 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		file.AddOption( "Save", "common/save.png", Save, "editor.save" ).StatusTip = "Save Template";
 		file.AddOption( "Save As...", "common/save.png", SaveAs, "editor.save-as" ).StatusTip = "Save Template As...";
 
+		file.AddSeparator();
+
+		file.AddOption( "Reset Template Code To Default", "common/reset.png", () => ResetTemplateCodeToDefault() ).StatusTip = "Reset Template Code To Default";
 
 		var view = MenuBar.AddMenu( "View" );
 		view.AboutToShow += () => OnViewMenu( view );
@@ -194,6 +199,29 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		toolBar.AddOption( "New", "common/new.png", New ).StatusTip = "New Template";
 		toolBar.AddOption( "Open", "common/open.png", Open ).StatusTip = "Open Template";
 		toolBar.AddOption( "Save", "common/save.png", () => Save() ).StatusTip = "Save Template";
+	}
+
+	void ResetTemplateCodeToDefault()
+	{
+		if ( _template == null || _textEditArea == null )
+			return;
+
+		switch ( _template.ShaderDomain )
+		{
+			case ShaderDomain.Surface:
+				_template.Code = ShaderTemplateSurface.Code;
+				break;
+			case ShaderDomain.Sky:
+				_template.Code = ShaderTemplateSky.Code;
+				break;
+			case ShaderDomain.PostProcess:
+				_template.Code = ShaderTemplatePostProcess.Code;
+				break;
+		}
+
+		_textEditArea.Value = _template.Code;
+
+		SetDirty();
 	}
 
 	[Shortcut( "editor.quit", "CTRL+Q" )]
