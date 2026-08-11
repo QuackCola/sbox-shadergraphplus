@@ -365,6 +365,47 @@ public sealed partial class GraphCompiler
 		result.Globals.Add( name, global );
 	}
 
+	public NodeResult GetTextureCoordinates( Vector2 tiling, bool useSecondaryCoord = false )
+	{
+		var result = "";
+
+		if ( IsSurfaceShader )
+		{
+			if ( IsPreview )
+			{
+				result = $"{ResultValue( useSecondaryCoord )} ? i.vTextureCoords.zw : i.vTextureCoords.xy";
+				return new( ResultType.Vector2, $"{ResultValue( tiling.IsNearZeroLength )} ? {result} : ({result}) * {ResultValue( tiling )}" );
+
+			}
+			else
+			{
+				result = useSecondaryCoord ? "i.vTextureCoords.zw" : "i.vTextureCoords.xy";
+			}
+		}
+		else
+		{
+			result = IsVs ? $"CalculateViewportUv( i.vPositionPs.xy )" : $"CalculateViewportUv( i.vPositionSs.xy )";
+		}
+
+		return tiling.IsNearZeroLength ? new( ResultType.Vector2, result ) : new( ResultType.Vector2, $"{result} * {ResultValue( tiling )}" );
+	}
+
+	public string GetTextureCoordinates()
+	{
+		var result = "";
+
+		if ( IsSurfaceShader )
+		{
+			result = "i.vTextureCoords.xy";
+		}
+		else
+		{
+			result = IsVs ? $"CalculateViewportUv( i.vPositionPs.xy )" : $"CalculateViewportUv( i.vPositionSs.xy )";
+		}
+
+		return result;
+	}
+
 	/// <summary>
 	/// Emit a scalar <c>float</c> expression. If <paramref name="r"/> is float2/float3/float4, uses swizzle
 	/// so wiring a vector into a <c>float</c> HLSL parameter does not rely on implicit truncation (-Wconversion).

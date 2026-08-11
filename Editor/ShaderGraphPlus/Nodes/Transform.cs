@@ -262,23 +262,12 @@ public sealed class PolarCoordinates : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var center = compiler.ResultOrDefault( Center, DefaultCenter );
 		var radialScale = compiler.ResultOrDefault( RadialScale, DefaultRadialScale );
 		var lengthScale = compiler.ResultOrDefault( LengthScale, DefaultLengthScale );
 
-
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
-
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Vector2, $"PolarCoordinates( ( {coords} ) - ( {(center.IsValid ? center : "0.0f")} ), {(radialScale.IsValid ? radialScale : "1.0f")}, {(lengthScale.IsValid ? lengthScale : "1.0f")} )" );
 	};

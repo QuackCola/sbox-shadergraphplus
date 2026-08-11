@@ -71,7 +71,7 @@ float2 BumpOffset( float flHeightMap, float flDepthScale, float flReferencePlane
 			$"{inputHeight}, " +
 			$"{inputDepthScale}, " +
 			$"{inputReferencePlane}, " +
-			$"{(inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : "i.vTextureCoords.xy")}, " +
+			$"{(inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates())}, " +
 			$"{tangentViewVector}"
 		);
 
