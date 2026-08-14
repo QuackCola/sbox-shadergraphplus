@@ -173,7 +173,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowShadingModel => HasNoTemplate && Domain == ShaderDomain.Surface;
 
 	[Hide]
-	private bool ShowRenderFace => HasNoTemplate && Domain == ShaderDomain.Surface;
+	private bool ShowRenderFace => UserTemplateInfo.SupportsAllRenderFaceModes && Domain == ShaderDomain.Surface;
 
 	[Hide]
 	private bool ShowBlendMode => SupportsBlendModes && Domain == ShaderDomain.Surface;
@@ -279,18 +279,21 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			// Ensure template ShaderDomain
 			Domain = UserTemplateInfo.SupportsSurfaceDomain ? ShaderDomain.Surface : ShaderDomain.PostProcess;
 
-			// Ensure template culling mode
-			if ( UserTemplateInfo.SupportsRenderFaceFront )
+			if ( !UserTemplateInfo.SupportsAllRenderFaceModes )
 			{
-				RenderFace = RenderFace.Front;
-			}
-			else if ( UserTemplateInfo.SupportsRenderFaceBack )
-			{
-				RenderFace = RenderFace.Back;
-			}
-			else if ( UserTemplateInfo.SupportsRenderFaceBoth )
-			{
-				RenderFace = RenderFace.Both;
+				// Ensure template culling mode
+				if ( UserTemplateInfo.SupportsRenderFaceFront )
+				{
+					RenderFace = RenderFace.Front;
+				}
+				else if ( UserTemplateInfo.SupportsRenderFaceBack )
+				{
+					RenderFace = RenderFace.Back;
+				}
+				else if ( UserTemplateInfo.SupportsRenderFaceBoth )
+				{
+					RenderFace = RenderFace.Both;
+				}
 			}
 		}
 	}

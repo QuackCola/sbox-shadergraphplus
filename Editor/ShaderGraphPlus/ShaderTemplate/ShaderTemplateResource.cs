@@ -20,6 +20,8 @@ public sealed record UserShaderTemplateInfo(
 	bool ShowPositionOffset )
 {
 
+	public bool SupportsAllRenderFaceModes => SupportsRenderFaceFront && SupportsRenderFaceBack && SupportsRenderFaceBoth;
+
 	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true, true )
 	{
 	}
@@ -30,9 +32,9 @@ public sealed record UserShaderTemplateInfo(
 			template.ShadingModel == ShadingModel.Lit,
 			template.ShadingModel == ShadingModel.Unlit,
 			template.ShaderDomain == ShaderDomain.Surface,
-			template.RenderFace == RenderFace.Front,
-			template.RenderFace == RenderFace.Back,
-			template.RenderFace == RenderFace.Both,
+			!template.EnforceRenderFace || template.RenderFace == RenderFace.Front,
+			!template.EnforceRenderFace || template.RenderFace == RenderFace.Back,
+			!template.EnforceRenderFace || template.RenderFace == RenderFace.Both,
 			template.OpaqueBlend,
 			template.MaskedBlend,
 			template.TranslucentBlend,
@@ -60,6 +62,13 @@ public sealed partial class ShaderTemplateResource
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
 
 	[TabPage( "General" )]
+	[Title( "Enforce Render Face" )]
+	[ToggleGroup( "EnforceRenderFace" )]
+	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
+	public bool EnforceRenderFace { get; set; } = true;
+
+	[TabPage( "General" )]
+	[ToggleGroup( "EnforceRenderFace" )]
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
 	public RenderFace RenderFace { get; set; } = RenderFace.Front;
 
