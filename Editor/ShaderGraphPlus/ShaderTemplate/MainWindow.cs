@@ -88,7 +88,15 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_tabWidget = new TabWidget( this );
 
 		_tabWidget.AddPage( "General", "settings", CreateTab( so, "General" ) );
-		_tabWidget.AddPage( "Code", "code", CreateCodeTab( so ) );
+
+		if ( so.TryGetProperty( nameof( ShaderTemplateResource.Code ), out var codeProp ) )
+		{
+			_tabWidget.AddPage( "Code", "code", CreateCodeTab( codeProp ) );
+		}
+		else
+		{
+			throw new Exception( "Failed to get code SerilaizedProperty" );
+		}
 
 		_primaryDockCanvas.Layout.Add( _tabWidget );
 	}
@@ -112,7 +120,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		return container;
 	}
 
-	private Widget CreateCodeTab( SerializedObject serialized )
+	private Widget CreateCodeTab( SerializedProperty property )
 	{
 		var container = new Widget( null );
 		container.Layout = Layout.Column();
@@ -122,8 +130,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_textEditArea.Value = _template.Code;
 		_textEditArea.ValueChanged = ( x ) =>
 		{
-			_template.Code = x;
-			SetDirty();
+			property.SetValue( x );
 		};
 
 		container.Layout.Add( _textEditArea );
@@ -267,29 +274,6 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		return UndoSystem.Redo();
 	}
 
-	public void ExecuteUndoableAction( string title, Action action )
-	{
-		var preState = _template.Serialize();
-
-		action.Invoke();
-
-		var postState = _template.Serialize();
-
-		UndoSystem.Insert( title,
-			() =>
-			{
-				_template.Deserialize( preState );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
-			},
-			() =>
-			{
-				_template.Deserialize( postState );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
-			} );
-	}
-
 	private void Open()
 	{
 		var fd = new FileDialog( null )
@@ -413,6 +397,29 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	
 	}
 	*/
+
+	public void ExecuteUndoableAction( string title, Action action )
+	{
+		var preState = _template.Serialize();
+
+		action.Invoke();
+
+		var postState = _template.Serialize();
+
+		UndoSystem.Insert( title,
+			() =>
+			{
+				_template.Deserialize( preState );
+				_textEditArea.Value = _template.Code;
+				SetDirty();
+			},
+			() =>
+			{
+				_template.Deserialize( postState );
+				_textEditArea.Value = _template.Code;
+				SetDirty();
+			} );
+	}
 
 	private void OnPropertyUpdated( SerializedProperty serializedProperty, string oldestSerialized )
 	{
