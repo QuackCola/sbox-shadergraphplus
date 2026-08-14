@@ -24,6 +24,11 @@ public sealed record UserShaderTemplateInfo(
 
 	public bool SupportsAllBlendModes => SupportsOpaqueBlend && SupportsMaskedBlend && SupportsTranslucentBlend && SupportsDynamicBlend;
 
+	/// <summary>
+	/// Lets <seealso cref="ShaderGraphPlus"/> know whether to fallback to the Opaque blend mode or not.
+	/// </summary>
+	public bool SupportsNoBlendModes => !SupportsOpaqueBlend && !SupportsMaskedBlend && !SupportsTranslucentBlend && !SupportsDynamicBlend;
+
 	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true, true )
 	{
 	}
@@ -83,6 +88,7 @@ public sealed partial class ShaderTemplateResource
 	public bool PositionOffset { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
+	[InfoBox( "When no blend modes are toggled, the opaque blending mode will be used.", "info", EditorTint.Blue )]
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
 	public bool OpaqueBlend { get; set; } = true;
 

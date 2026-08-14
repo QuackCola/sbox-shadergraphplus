@@ -176,7 +176,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowRenderFace => UserTemplateInfo.SupportsAllRenderFaceModes && Domain == ShaderDomain.Surface;
 
 	[Hide]
-	private bool ShowBlendMode => UserTemplateInfo.SupportsAllBlendModes && Domain == ShaderDomain.Surface;
+	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !UserTemplateInfo.SupportsNoBlendModes ;
 
 	/// <summary>
 	/// What shader type this graph is
@@ -226,11 +226,19 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 		if ( !currentBlendModeSupported )
 		{
-			// Find the first supported blend mode
-			if ( UserTemplateInfo.SupportsOpaqueBlend ) BlendMode = BlendMode.Opaque;
-			else if ( UserTemplateInfo.SupportsMaskedBlend ) BlendMode = BlendMode.Masked;
-			else if ( UserTemplateInfo.SupportsTranslucentBlend ) BlendMode = BlendMode.Translucent;
-			else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
+			if ( UserTemplateInfo.SupportsNoBlendModes )
+			{	
+				// Fallback to Opaque blend mode.
+				BlendMode = BlendMode.Opaque;
+			}
+			else
+			{
+				// Find the first supported blend mode
+				if ( UserTemplateInfo.SupportsOpaqueBlend ) BlendMode = BlendMode.Opaque;
+				else if ( UserTemplateInfo.SupportsMaskedBlend ) BlendMode = BlendMode.Masked;
+				else if ( UserTemplateInfo.SupportsTranslucentBlend ) BlendMode = BlendMode.Translucent;
+				else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
+			}
 		}
 
 		// Auto-correct ShadingModel if current is not supported
@@ -288,6 +296,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 					RenderFace = RenderFace.Both;
 				}
 			}
+
 		}
 	}
 
