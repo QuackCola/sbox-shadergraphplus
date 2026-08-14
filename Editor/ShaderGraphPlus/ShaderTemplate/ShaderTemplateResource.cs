@@ -69,7 +69,7 @@ public sealed partial class ShaderTemplateResource
 	public ShadingModel ShadingModel { get; set; } = ShadingModel.Lit;
 
 	/// <summary>
-	/// Should this template restrict RenderFace to the specified option
+	/// Should this template enforce RenderFace to the specified option
 	/// </summary>
 	[TabPage( "General" )]
 	[Title( "Enforce Render Face" )]
