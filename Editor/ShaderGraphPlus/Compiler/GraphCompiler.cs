@@ -1653,6 +1653,7 @@ public sealed partial class GraphCompiler
 
 		sb.AppendLine( "#include \"common/features.hlsl\"" );
 
+		/*
 		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
 		{
 			sb.AppendLine( "Feature( F_ALPHA_TEST, 0..1, \"Blending\" );" );
@@ -1660,6 +1661,7 @@ public sealed partial class GraphCompiler
 			sb.AppendLine( "FeatureRule( Allow1( F_TRANSLUCENT, F_ALPHA_TEST ), \"Alpha Test and Translucent are not compatible\" );" );
 			sb.AppendLine( "FeatureRule( Requires1( F_ADDITIVE_BLEND, F_TRANSLUCENT ), \"Requires translucency\" );" );
 		}
+		*/
 
 		// Register any Graph level Shader Features...
 		//RegisterShaderFeatures( Graph.shaderFeatureNodeResults );
@@ -1716,13 +1718,16 @@ public sealed partial class GraphCompiler
 			sb.AppendLine();
 		}
 
+		/*
 		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
 		{
 			// Dynamic blend mode: Use StaticCombos linked to Features
 			sb.AppendLine( "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );" );
 			sb.AppendLine( "StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );" );
 		}
-		else if ( !IsSkyShader )
+		else if ( !IsSkyShader ) 
+		*/
+		if ( !IsSkyShader )
 		{
 			var blendMode = Graph.BlendMode;
 			var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;

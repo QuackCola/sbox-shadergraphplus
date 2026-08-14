@@ -12,8 +12,10 @@ public enum BlendMode
 	Masked,
 	[Icon( "blur_on" )]
 	Translucent,
+	/*
 	[Icon( "tune" )]
 	Dynamic,
+	*/
 }
 
 public enum ShadingModel
@@ -220,7 +222,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			BlendMode.Opaque => UserTemplateInfo.SupportsOpaqueBlend,
 			BlendMode.Masked => UserTemplateInfo.SupportsMaskedBlend,
 			BlendMode.Translucent => UserTemplateInfo.SupportsTranslucentBlend,
-			BlendMode.Dynamic => UserTemplateInfo.SupportsDynamicBlend,
+			//BlendMode.Dynamic => UserTemplateInfo.SupportsDynamicBlend,
 			_ => false
 		};
 
@@ -237,7 +239,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 				if ( UserTemplateInfo.SupportsOpaqueBlend ) BlendMode = BlendMode.Opaque;
 				else if ( UserTemplateInfo.SupportsMaskedBlend ) BlendMode = BlendMode.Masked;
 				else if ( UserTemplateInfo.SupportsTranslucentBlend ) BlendMode = BlendMode.Translucent;
-				else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
+				//else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
 			}
 		}
 

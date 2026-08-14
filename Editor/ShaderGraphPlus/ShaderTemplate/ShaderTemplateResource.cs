@@ -15,21 +15,21 @@ public sealed record UserShaderTemplateInfo(
 	bool SupportsOpaqueBlend,
 	bool SupportsMaskedBlend,
 	bool SupportsTranslucentBlend,
-	bool SupportsDynamicBlend,
+	//bool SupportsDynamicBlend,
 	bool ShowOpacityInput,
 	bool ShowPositionOffset )
 {
 
 	public bool SupportsAllRenderFaceModes => SupportsRenderFaceFront && SupportsRenderFaceBack && SupportsRenderFaceBoth;
 
-	public bool SupportsAllBlendModes => SupportsOpaqueBlend && SupportsMaskedBlend && SupportsTranslucentBlend && SupportsDynamicBlend;
+	public bool SupportsAllBlendModes => SupportsOpaqueBlend && SupportsMaskedBlend && SupportsTranslucentBlend;// && SupportsDynamicBlend;
 
 	/// <summary>
 	/// Lets <seealso cref="ShaderGraphPlus"/> know whether to fallback to the Opaque blend mode or not.
 	/// </summary>
-	public bool SupportsNoBlendModes => !SupportsOpaqueBlend && !SupportsMaskedBlend && !SupportsTranslucentBlend && !SupportsDynamicBlend;
+	public bool SupportsNoBlendModes => !SupportsOpaqueBlend && !SupportsMaskedBlend && !SupportsTranslucentBlend;// && !SupportsDynamicBlend;
 
-	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true, true )
+	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true )
 	{
 	}
 
@@ -45,7 +45,7 @@ public sealed record UserShaderTemplateInfo(
 			template.ShaderDomain == ShaderDomain.Surface && template.OpaqueBlend,
 			template.ShaderDomain == ShaderDomain.Surface && template.MaskedBlend,
 			template.ShaderDomain == ShaderDomain.Surface && template.TranslucentBlend,
-			template.ShaderDomain == ShaderDomain.Surface && template.DynamicBlend,
+			//template.ShaderDomain == ShaderDomain.Surface && template.DynamicBlend,
 			template.ShaderDomain == ShaderDomain.Surface && template.Opacity,
 			template.ShaderDomain == ShaderDomain.Surface && template.PositionOffset
 		);
@@ -103,9 +103,12 @@ public sealed partial class ShaderTemplateResource
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
 	public bool TranslucentBlend { get; set; } = true;
 
+	/*
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
-	public bool DynamicBlend { get; set; } = true;
+	[Hide]
+	public bool DynamicBlend { get; set; } = false;
+	*/
 
 	[TabPage( "Code" ), TextArea]
 	public string Code { get; set; } = ShaderTemplateSurface.Code;
