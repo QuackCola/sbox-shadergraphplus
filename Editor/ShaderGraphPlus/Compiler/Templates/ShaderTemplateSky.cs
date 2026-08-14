@@ -4,12 +4,12 @@ public static class ShaderTemplateSky
 {
 	public static string Code { get; set; } = @"HEADER
 {
-	Description = ""[sgp_shader_description]"";
+	Description = ""/*sgp_shader_description*/"";
 }
 
 FEATURES
 {
-[sgp_shader_feature_defines]
+/*sgp_shader_feature_defines*/
 }
 
 MODES
@@ -19,13 +19,13 @@ MODES
 
 COMMON
 {
-[sgp_shader_common]
+/*sgp_shader_common*/
 }
 
 struct VertexInput
 {
 	float4 vPositionOs : POSITION < Semantic( PosXyz ); >;
-[sgp_vertex_input_data]
+/*sgp_vertex_input_data*/
 };
 
 struct PixelInput
@@ -42,7 +42,7 @@ struct PixelInput
 	#if ( PROGRAM == VFX_PROGRAM_PS )
 		float4 vPositionSs : SV_Position;
 	#endif
-[sgp_pixel_input_data]
+/*sgp_pixel_input_data*/
 };
 
 VS
@@ -52,9 +52,9 @@ VS
 	// input path. The sky box builds its own position, so it isn't needed.
 	#include ""system.fxc""
 
-[sgp_vertex_globals]
-[sgp_vertex_combo_rules]
-[sgp_vertex_functions]
+/*sgp_vertex_globals*/
+/*sgp_vertex_combo_rules*/
+/*sgp_vertex_functions*/
 
 	PixelInput MainVs( VertexInput v )
 	{
@@ -71,7 +71,7 @@ VS
 		// g_vHighPrecisionLightingOffsetWs back on to recover absolute world space.
 		i.vPositionWithOffsetWs = vPositionWs - g_vHighPrecisionLightingOffsetWs.xyz;
 		i.vRayWs = normalize( v.vPositionOs.xyz );
-[sgp_vertex_code]
+/*sgp_vertex_code*/
 		return i;
 	}
 }
@@ -85,9 +85,9 @@ PS
 
 	#include ""common/pixel.hlsl""
 
-[sgp_pixel_globals]
-[sgp_pixel_combo_rules]
-[sgp_pixel_functions]
+/*sgp_pixel_globals*/
+/*sgp_pixel_combo_rules*/
+/*sgp_pixel_functions*/
 
 	// Sky renders behind everything: no depth write, reversed-Z far plane test.
 	RenderState( DepthWriteEnable, false );
@@ -100,9 +100,10 @@ PS
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{
 
-[sgp_pixel_code]
+/*sgp_pixel_code*/
 
-		return [sgp_pixel_output];
+		return /*sgp_pixel_output*/;
 	}
-}";
+}
+";
 }

@@ -8,12 +8,12 @@ public static class ShaderTemplateSurface
 {
 	public static string Code { get; set; } = @"HEADER
 {
-	Description = ""[sgp_shader_description]"";
+	Description = ""/*sgp_shader_description*/"";
 }
 
 FEATURES
 {
-[sgp_shader_feature_defines]
+/*sgp_shader_feature_defines*/
 }
 
 MODES
@@ -25,14 +25,14 @@ MODES
 
 COMMON
 {
-[sgp_shader_common]
+/*sgp_shader_common*/
 }
 
 struct VertexInput
 {
 	#include ""common/vertexinput.hlsl""
 	float4 vColor : COLOR0 < Semantic( Color ); >;
-[sgp_vertex_input_data]
+/*sgp_vertex_input_data*/
 };
 
 struct PixelInput
@@ -46,16 +46,16 @@ struct PixelInput
 	#if ( PROGRAM == VFX_PROGRAM_PS )
 		bool vFrontFacing : SV_IsFrontFace;
 	#endif
-[sgp_pixel_input_data]
+/*sgp_pixel_input_data*/
 };
 
 VS
 {
 	#include ""common/vertex.hlsl""
 
-[sgp_vertex_globals]
-[sgp_vertex_combo_rules]
-[sgp_vertex_functions]
+/*sgp_vertex_globals*/
+/*sgp_vertex_combo_rules*/
+/*sgp_vertex_functions*/
 
 	PixelInput MainVs( VertexInput v )
 	{
@@ -67,7 +67,7 @@ VS
 		i.vTintColor = extraShaderData.vTint;
 
 		VS_DecodeObjectSpaceNormalAndTangent( v, i.vNormalOs, i.vTangentUOs_flTangentVSign );
-[sgp_vertex_code]
+/*sgp_vertex_code*/
 		return FinalizeVertex( i );
 	}
 }
@@ -76,18 +76,19 @@ PS
 {
 	#include ""common/pixel.hlsl""
 
-[sgp_pixel_globals]
-[sgp_pixel_combo_rules]
-[sgp_pixel_functions]
+/*sgp_pixel_globals*/
+/*sgp_pixel_combo_rules*/
+/*sgp_pixel_functions*/
 
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{
 
-[sgp_pixel_code]
+/*sgp_pixel_code*/
 
-		return [sgp_pixel_output];
+		return /*sgp_pixel_output*/;
 	}
-}";
+}
+";
 
 	public static string Material_init => @"Material m = Material::Init( i );
 m.Albedo = float3( 1, 1, 1 );
