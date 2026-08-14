@@ -296,7 +296,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 					RenderFace = RenderFace.Both;
 				}
 			}
-
 		}
 	}
 
