@@ -1,6 +1,7 @@
 {
   "ShaderDomain": "PostProcess",
   "ShadingModel": "Lit",
+  "EnforceRenderFace": true,
   "RenderFace": "Front",
   "Opacity": true,
   "PositionOffset": true,

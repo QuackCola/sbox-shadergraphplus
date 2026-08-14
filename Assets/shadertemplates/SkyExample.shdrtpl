@@ -1,6 +1,7 @@
 {
   "ShaderDomain": "Sky",
   "ShadingModel": "Unlit",
+  "EnforceRenderFace": true,
   "RenderFace": "Both",
   "Opacity": false,
   "PositionOffset": false,
