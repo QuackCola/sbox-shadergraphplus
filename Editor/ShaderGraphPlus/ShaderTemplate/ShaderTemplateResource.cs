@@ -129,7 +129,17 @@ public sealed partial class ShaderTemplateResource
 		{
 			if ( !Code.Contains( tag.Key ) )
 			{
-				templateErrors.Add( $"Shader Template \"{path}\" Missing tag '{tag.Key}'" );
+				templateErrors.Add( $"Shader Template \"{path}\" missing tag '{tag.Key}'" );
+
+				continue;
+			}
+
+			// Detect duplicate tags
+			var firstIndex = Code.IndexOf( tag.Key );
+
+			if ( firstIndex != Code.LastIndexOf( tag.Key ) && firstIndex != -1 )
+			{
+				templateErrors.Add( $"Shader Template \"{path}\" contains more than 1 '{tag.Key}' tag" );
 			}
 		}
 

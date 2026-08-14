@@ -1,4 +1,4 @@
-
+﻿
 internal static class StringExtentions
 {
 }
