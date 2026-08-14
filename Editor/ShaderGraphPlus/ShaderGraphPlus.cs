@@ -170,10 +170,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public bool HasNoTemplate => !HasTemplate;
 
 	[Hide]
-	private bool ShowShadingModel => HasNoTemplate && Domain == ShaderDomain.Surface;
+	private bool ShowShadingModel => Domain == ShaderDomain.Surface && HasNoTemplate;
 
 	[Hide]
-	private bool ShowRenderFace => UserTemplateInfo.SupportsAllRenderFaceModes && Domain == ShaderDomain.Surface;
+	private bool ShowRenderFace => Domain == ShaderDomain.Surface && UserTemplateInfo.SupportsAllRenderFaceModes;
 
 	[Hide]
 	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !UserTemplateInfo.SupportsNoBlendModes ;
