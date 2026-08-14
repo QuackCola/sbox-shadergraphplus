@@ -88,7 +88,7 @@ public sealed partial class ShaderTemplateResource
 	public bool PositionOffset { get; set; } = true;
 
 	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[InfoBox( "When no blend modes are toggled, the opaque blending mode will be used.", "info", EditorTint.Blue )]
+	[InfoBox( "When no blend modes are toggled, the opaque blending mode will be used", "info", EditorTint.Blue )]
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
 	public bool OpaqueBlend { get; set; } = true;
 
