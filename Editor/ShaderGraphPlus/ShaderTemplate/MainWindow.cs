@@ -194,6 +194,10 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		file.AddOption( "Reset Template Code To Default", "common/reset.png", () => ResetTemplateCodeToDefault() ).StatusTip = "Reset Template Code To Default";
 
+		file.AddSeparator();
+
+		file.AddOption( "Quit", null, Quit, "editor.quit" ).StatusTip = "Quit";
+
 		var view = MenuBar.AddMenu( "View" );
 		view.AboutToShow += () => OnViewMenu( view );
 	}
