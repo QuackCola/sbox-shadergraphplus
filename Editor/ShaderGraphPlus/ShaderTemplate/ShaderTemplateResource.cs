@@ -42,12 +42,12 @@ public sealed record UserShaderTemplateInfo(
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Front,
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Back,
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Both,
-			template.OpaqueBlend,
-			template.MaskedBlend,
-			template.TranslucentBlend,
-			template.DynamicBlend,
-			template.Opacity,
-			template.PositionOffset
+			template.ShaderDomain == ShaderDomain.Surface && template.OpaqueBlend,
+			template.ShaderDomain == ShaderDomain.Surface && template.MaskedBlend,
+			template.ShaderDomain == ShaderDomain.Surface && template.TranslucentBlend,
+			template.ShaderDomain == ShaderDomain.Surface && template.DynamicBlend,
+			template.ShaderDomain == ShaderDomain.Surface && template.Opacity,
+			template.ShaderDomain == ShaderDomain.Surface && template.PositionOffset
 		);
 	}
 }
