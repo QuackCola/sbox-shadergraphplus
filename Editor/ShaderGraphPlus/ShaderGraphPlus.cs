@@ -176,14 +176,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowRenderFace => UserTemplateInfo.SupportsAllRenderFaceModes && Domain == ShaderDomain.Surface;
 
 	[Hide]
-	private bool ShowBlendMode => SupportsBlendModes && Domain == ShaderDomain.Surface;
-
-	[Hide]
-	private bool SupportsBlendModes =>
-		UserTemplateInfo.SupportsOpaqueBlend &&
-		UserTemplateInfo.SupportsMaskedBlend &&
-		UserTemplateInfo.SupportsTranslucentBlend &&
-		UserTemplateInfo.SupportsDynamicBlend;
+	private bool ShowBlendMode => UserTemplateInfo.SupportsAllBlendModes && Domain == ShaderDomain.Surface;
 
 	/// <summary>
 	/// What shader type this graph is

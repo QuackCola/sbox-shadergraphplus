@@ -22,6 +22,8 @@ public sealed record UserShaderTemplateInfo(
 
 	public bool SupportsAllRenderFaceModes => SupportsRenderFaceFront && SupportsRenderFaceBack && SupportsRenderFaceBoth;
 
+	public bool SupportsAllBlendModes => SupportsOpaqueBlend && SupportsMaskedBlend && SupportsTranslucentBlend && SupportsDynamicBlend;
+
 	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true, true )
 	{
 	}
