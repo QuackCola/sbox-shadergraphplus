@@ -19,8 +19,8 @@ public static class ShaderTemplate
 		{ "/*sgp_vertex_combo_rules*/", "{10}" },
 		{ "/*sgp_pixel_combo_rules*/", "{11}" },
 
-		{ "/*sgp_pixel_functions*/", "{12}" },
 		{ "/*sgp_vertex_functions*/", "{13}" },
+		{ "/*sgp_pixel_functions*/", "{12}" },
 
 		{ "/*sgp_vertex_code*/", "{8}" },
 
