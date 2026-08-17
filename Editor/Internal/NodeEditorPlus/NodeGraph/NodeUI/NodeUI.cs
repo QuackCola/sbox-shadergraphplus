@@ -201,12 +201,12 @@ public partial class NodeUI : GraphicsItem
 
 			if ( !match.IsValid() )
 			{
-				Inputs.Insert( index, new PlugIn( this, plug ) );
+				Inputs.Insert( Math.Min( index, Inputs.Count ), new PlugIn( this, plug ) );
 			}
 			else if ( Inputs.IndexOf( match ) != index )
 			{
 				Inputs.Remove( match );
-				Inputs.Insert( index, match );
+				Inputs.Insert( Math.Min( index, Inputs.Count ), match );
 
 				match.Update();
 			}
