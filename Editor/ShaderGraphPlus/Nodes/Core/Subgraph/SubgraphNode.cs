@@ -78,7 +78,6 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 		var subgraphInputs = Subgraph.Nodes.OfType<SubgraphInput>()
 			.Where( x => !string.IsNullOrWhiteSpace( x.Name ) )
 			.OrderBy( x => x.PortOrder )
-			.ThenBy( x => x.Name )
 			.GroupBy( x => x.Name )
 			.Select( x => x.First() );
 
