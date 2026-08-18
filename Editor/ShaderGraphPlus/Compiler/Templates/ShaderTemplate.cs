@@ -28,6 +28,20 @@ public static class ShaderTemplate
 		{ "/*sgp_pixel_output*/", "{15}" },
 	};
 
+	public record TemplateEntry( string Name, string Path, string Icon )
+	{
+		internal TemplateEntry( string name, string icon ) : this( name, "", icon )
+		{
+		}
+	}
+
+	internal static Dictionary<string, TemplateEntry> BuiltInTemplateEntries => new()
+	{
+		{ "Surface", new ( "Surface", "view_in_ar" ) },
+		{ "Sky", new ( "Sky", "nights_stay" ) },
+		{ "PostProcess", new ( "PostProcess", "desktop_windows" ) },
+	};
+
 	/// <summary>
 	/// Convert the user defined template code to a formatable string that can be used by <seealso cref="string.Format(string, ReadOnlySpan{object?})"/>
 	/// </summary>

@@ -1438,7 +1438,7 @@ public class MainWindow : DockWindow
 
 		if ( _graph.HasTemplate )
 		{
-			var templateAsset = AssetSystem.FindByPath( _graph.ShaderTemplate );
+			var templateAsset = AssetSystem.FindByPath( _graph.ShaderType );
 
 			_shaderTemplate = new ShaderTemplateResource();
 
@@ -1448,7 +1448,7 @@ public class MainWindow : DockWindow
 				_graph.ValidateTemplateSettings();
 
 				// Validate the template
-				if ( !_shaderTemplate.Validate( _graph.ShaderTemplate, out var tagErrors ) )
+				if ( !_shaderTemplate.Validate( _graph.ShaderType, out var tagErrors ) )
 				{
 					TemplateIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } ).ToList();
 				}
@@ -1461,7 +1461,26 @@ public class MainWindow : DockWindow
 		else
 		{
 			_shaderTemplate = null;
-			_graph.UserTemplateInfo = new UserShaderTemplateInfo();
+
+			var templateInfo = new UserShaderTemplateInfo();
+	
+			switch ( _graph.ShaderType )
+			{
+				case "Surface":
+					templateInfo = templateInfo with { SupportsSurfaceDomain = true };
+					break;
+				case "Sky":
+					templateInfo = templateInfo with { SupportsSkyDomain = true };
+					break;
+				case "PostProcess":
+					templateInfo = templateInfo with { SupportsPostProcessDomain = true };
+					break;
+				default:
+					templateInfo = templateInfo with { SupportsSurfaceDomain = true };
+					break;
+			}
+
+			_graph.UserTemplateInfo = templateInfo;
 			_graph.ValidateTemplateSettings();
 		}
 
@@ -1900,7 +1919,7 @@ public class MainWindow : DockWindow
 		}
 
 		// Reload shader template
-		if ( _properties.Target is ShaderGraphPlus && serializedProperty.IsPropertyName( nameof( ShaderGraphPlus.ShaderTemplate ) ) )
+		if ( _properties.Target is ShaderGraphPlus && serializedProperty.IsPropertyName( nameof( ShaderGraphPlus.ShaderType ) ) )
 		{
 			LoadShaderTemplate();
 		}

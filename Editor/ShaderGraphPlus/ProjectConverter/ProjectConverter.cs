@@ -138,10 +138,10 @@ internal class ProjectConverter
 		switch ( ShaderGraph.Domain )
 		{
 			case Editor.ShaderGraph.ShaderDomain.Surface:
-				ShaderGraphPlus.Domain = ShaderDomain.Surface;
+				ShaderGraphPlus.ShaderType = "Surface";
 				break;
 			case Editor.ShaderGraph.ShaderDomain.PostProcess:
-				ShaderGraphPlus.Domain = ShaderDomain.PostProcess;
+				ShaderGraphPlus.ShaderType = "PostProcess";
 				break;
 		}
 

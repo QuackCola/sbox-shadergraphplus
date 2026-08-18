@@ -5,10 +5,14 @@ namespace ShaderGraphPlus;
 /// <summary>
 /// Readonly representation of <see cref="ShaderTemplateResource"/>
 /// </summary>
-public sealed record UserShaderTemplateInfo(
+public sealed record UserShaderTemplateInfo( 
+	string Title,
+	string Icon,
 	bool SupportsLitShading,
 	bool SupportsUnlitShading,
 	bool SupportsSurfaceDomain,
+	bool SupportsSkyDomain,
+	bool SupportsPostProcessDomain,
 	bool SupportsRenderFaceFront,
 	bool SupportsRenderFaceBack,
 	bool SupportsRenderFaceBoth,
@@ -29,16 +33,20 @@ public sealed record UserShaderTemplateInfo(
 	/// </summary>
 	public bool SupportsNoBlendModes => !SupportsOpaqueBlend && !SupportsMaskedBlend && !SupportsTranslucentBlend;// && !SupportsDynamicBlend;
 
-	public UserShaderTemplateInfo() : this( true, true, true, true, true, true, true, true, true, true, true )
+	public UserShaderTemplateInfo() : this( "", "", true, true, false, false, false, true, true, true, true, true, true, true, true )
 	{
 	}
 
 	public static implicit operator UserShaderTemplateInfo( ShaderTemplateResource template )
 	{
 		return new UserShaderTemplateInfo(
+			template.Title,
+			template.Icon,
 			template.ShadingModel == ShadingModel.Lit,
 			template.ShadingModel == ShadingModel.Unlit,
 			template.ShaderDomain == ShaderDomain.Surface,
+			template.ShaderDomain == ShaderDomain.Sky,
+			template.ShaderDomain == ShaderDomain.PostProcess,
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Front,
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Back,
 			!template.EnforceRenderFace || template.RenderFace == RenderFace.Both,
@@ -55,6 +63,17 @@ public sealed record UserShaderTemplateInfo(
 [AssetType( Name = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName, Extension = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension )]
 public sealed partial class ShaderTemplateResource
 {
+
+	/// <summary>
+	/// The name of the Template in the ShaderType dropdown menu. Fallsback to asset name if left empty.
+	/// </summary>
+	[TabPage( "General" )]	
+	public string Title { get; set; } = "";
+
+	[IconName]
+	[TabPage( "General" )]
+	public string Icon { get; set; } = "view_in_ar";
+
 	/// <summary>
 	/// What shader type this shader template represents
 	/// </summary>

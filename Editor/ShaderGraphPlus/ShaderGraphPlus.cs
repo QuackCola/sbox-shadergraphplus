@@ -166,8 +166,8 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public bool AddToNodeLibrary { get; set; }
 
 	[Hide]
-	public bool HasTemplate => !string.IsNullOrWhiteSpace( ShaderTemplate );
-
+	public bool HasTemplate => ShaderType != null && ShaderType.EndsWith( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension );
+	
 	[Hide]
 	public bool HasNoTemplate => !HasTemplate;
 
@@ -180,11 +180,29 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide]
 	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !UserTemplateInfo.SupportsNoBlendModes;
 
-	/// <summary>
-	/// What shader type this graph is
-	/// </summary>
-	[ShowIf( nameof( HasNoTemplate ), true )]
-	public ShaderDomain Domain { get; set; }
+	[Editor( "ShaderTypeDropdown" )]
+	public string ShaderType { get; set; }
+
+	[Hide]
+	public ShaderDomain Domain
+	{
+		get
+		{
+			if ( UserTemplateInfo.SupportsSurfaceDomain )
+			{
+				return ShaderDomain.Surface;
+				
+			}
+			else if ( UserTemplateInfo.SupportsSkyDomain )
+			{
+				return ShaderDomain.Sky;
+			}
+			else
+			{
+				return ShaderDomain.PostProcess;
+			}
+		}
+	}
 
 	[ShowIf( nameof( ShowBlendMode ), true )]
 	public BlendMode BlendMode { get; set; }
@@ -194,12 +212,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	[ShowIf( nameof( ShowRenderFace ), true )]
 	public RenderFace RenderFace { get; set; }
-
-	/// <summary>
-	/// Semi-Custom user provided shader template
-	/// </summary>
-	[Group( "Advanced" ), ShaderTemplatePath]
-	public string ShaderTemplate { get; set; }
 
 	[Hide]
 	public PreviewSettings PreviewSettings { get; set; } = new();
@@ -279,9 +291,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 		if ( HasTemplate )
 		{
-			// Ensure template ShaderDomain
-			Domain = UserTemplateInfo.SupportsSurfaceDomain ? ShaderDomain.Surface : ShaderDomain.PostProcess;
-
 			if ( !UserTemplateInfo.SupportsAllRenderFaceModes )
 			{
 				// Ensure template culling mode
