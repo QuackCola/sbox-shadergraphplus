@@ -13,6 +13,7 @@ internal static class ShaderGraphPlusGlobals
 		public const string ShaderFeatureEnumPreviewIndexEditor = "shadergraphplus_ShaderFeatureEnumPreviewIndexEditor";
 		public const string NamedRerouteReferenceEditor = "shadergraphplus_NamedRerouteReferenceEditor";
 		public const string PortTypeChoiceEditor = "shadergraphplus_PortTypeChoiceEditor";
+		public const string ShaderTypeDropdownEditor = "shadergraphplus_ShaderTypeDropdown";
 	}
 
 	internal const string CleanName = "ShaderGraphPlus";

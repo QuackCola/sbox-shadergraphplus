@@ -1,6 +1,7 @@
 using Editor;
 using ShaderGraphPlus.Nodes;
 using static Editor.SceneViewportWidget;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -180,7 +181,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide]
 	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !UserTemplateInfo.SupportsNoBlendModes;
 
-	[Editor( "ShaderTypeDropdown" )]
+	[Editor( ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
 	public string ShaderType { get; set; }
 
 	[Hide]

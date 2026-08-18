@@ -1,8 +1,9 @@
 ﻿using Editor;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
-[CustomEditor( typeof( string ), NamedEditor = "ShaderTypeDropdown" )]
+[CustomEditor( typeof( string ), NamedEditor = ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
 public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 {
 	private ShaderGraphPlus _graph;
