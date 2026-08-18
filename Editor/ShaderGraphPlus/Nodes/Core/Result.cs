@@ -103,8 +103,8 @@ public sealed class Result : BaseResult
 		if ( Graph is ShaderGraphPlus shaderGraph )
 		{
 			hashCode.Add( shaderGraph.ShaderType );
-			hashCode.Add( shaderGraph.UserTemplateInfo );
 			hashCode.Add( shaderGraph.ShadingModel );
+			hashCode.Add( shaderGraph.UserTemplateInfo );
 		}
 
 		var hc = hashCode.ToHashCode();
