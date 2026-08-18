@@ -27,7 +27,7 @@ public partial class ShaderGraphPlus
 				ShaderDomain.PostProcess => "PostProcess",
 				_ => throw new NotImplementedException(),
 			};
-		
+
 			obj.Add( nameof( ShaderType ), shaderType );
 		}
 	}

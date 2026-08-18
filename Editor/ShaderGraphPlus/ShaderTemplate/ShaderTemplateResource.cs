@@ -5,7 +5,7 @@ namespace ShaderGraphPlus;
 /// <summary>
 /// Readonly representation of <see cref="ShaderTemplateResource"/>
 /// </summary>
-public sealed record UserShaderTemplateInfo( 
+public sealed record UserShaderTemplateInfo(
 	string Title,
 	string Icon,
 	bool SupportsLitShading,
@@ -67,7 +67,7 @@ public sealed partial class ShaderTemplateResource
 	/// <summary>
 	/// The name of the Template in the ShaderType dropdown menu. Fallsback to asset name if left empty.
 	/// </summary>
-	[TabPage( "General" )]	
+	[TabPage( "General" )]
 	public string Title { get; set; } = "";
 
 	[IconName]

@@ -27,7 +27,7 @@ public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 	protected override string GetDisplayText()
 	{
 		var value = SerializedProperty.GetValue<string>();
-		
+
 		if ( string.IsNullOrEmpty( value ) )
 		{
 			return ShaderTemplate.BuiltInTemplateEntries.FirstOrDefault().Key;
@@ -79,7 +79,7 @@ public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 				{
 					label = template.Title;
 				}
-				
+
 				if ( !string.IsNullOrWhiteSpace( template.Icon ) )
 				{
 					icon = template.Icon;

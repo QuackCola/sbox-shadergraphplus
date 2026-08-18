@@ -167,7 +167,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	[Hide]
 	public bool HasTemplate => ShaderType != null && ShaderType.EndsWith( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension );
-	
+
 	[Hide]
 	public bool HasNoTemplate => !HasTemplate;
 
@@ -191,7 +191,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			if ( UserTemplateInfo.SupportsSurfaceDomain )
 			{
 				return ShaderDomain.Surface;
-				
+
 			}
 			else if ( UserTemplateInfo.SupportsSkyDomain )
 			{

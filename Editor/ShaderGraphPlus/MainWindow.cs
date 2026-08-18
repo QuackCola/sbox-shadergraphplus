@@ -1463,7 +1463,7 @@ public class MainWindow : DockWindow
 			_shaderTemplate = null;
 
 			var templateInfo = new UserShaderTemplateInfo();
-	
+
 			switch ( _graph.ShaderType )
 			{
 				case "Surface":
