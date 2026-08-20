@@ -1456,8 +1456,6 @@ public class MainWindow : DockWindow
 				{
 					TemplateIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } ).ToList();
 				}
-
-				Log.Info( $"Using User Provided Template '{_graph.ShaderTypeInfo.Title}'" );
 			}
 			else
 			{
@@ -1475,8 +1473,6 @@ public class MainWindow : DockWindow
 				"PostProcess" => ShaderTemplatePostProcess.ShaderTypeInfo,
 				_ => ShaderTemplateSurface.ShaderTypeInfo,
 			};
-
-			Log.Info( $"Using Built-In Template '{_graph.ShaderTypeInfo.Title}'" );
 
 			_graph.ValidateTemplateSettings();
 		}

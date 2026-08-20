@@ -1,6 +1,6 @@
 ﻿namespace ShaderGraphPlus;
 
-public static class ShaderTemplate
+public static partial class ShaderTemplate
 {
 	/// <summary>
 	/// Maps user freindly tags to their internal representation to be used in <see cref="ToFormattableString"/>
@@ -46,46 +46,25 @@ public static class ShaderTemplate
 		Color,
 	}
 
-
-	[Flags]
-	public enum SupportFlags
-	{
-		[Hide]
-		None = 0,
-
-		OpaqueBlend = 1 << 0,
-		MaskedBlend = 1 << 1,
-		TranslucentBlend = 1 << 2,
-
-		LitShading = 1 << 3,
-		UnlitShading = 1 << 4,
-
-		RenderFaceFront = 1 << 5,
-		RenderFaceBack = 1 << 6,
-		RenderFaceBoth = 1 << 7,
-	}
-
-	public sealed record ShaderTypeInfo( string Title, string Icon, ShaderDomain Domian, IEnumerable<string> SupportInfo, IEnumerable<TemplateInputPlugInfo> InputPlugs ) : IValid
+	public sealed record ShaderTypeInfo( string Title, string Icon, ShaderDomain Domian, SupportFlags SupportFlags, IEnumerable<TemplateInputPlugInfo> InputPlugs ) : IValid
 	{
 		public bool IsValid => !string.IsNullOrWhiteSpace( Title ) && InputPlugs.Any();
 
-		internal ShaderTypeInfo() : this( "", "", ShaderDomain.Surface, new List<string>(), new List<TemplateInputPlugInfo>() )
+		internal ShaderTypeInfo() : this( "", "", ShaderDomain.Surface, SupportFlags.None, new List<TemplateInputPlugInfo>() )
 		{
 		}
 
 		/// <summary>
-		/// Check <see cref="SupportInfo"/> to see if the provided support string exists.
+		/// Check <see cref="SupportFlags"/> to see if the provided support flag exists.
 		/// </summary>
-		public bool Supports( string name ) => SupportInfo.Contains( name );
+		public bool ContainsFlag( SupportFlags flag ) => SupportFlags.Contains( flag );
 
-		public bool Supports( params string[] names ) => names.All( x => SupportInfo.Contains( x ) );
-		
 		public bool HasPlug( string name ) => InputPlugs.Any( x => x.Name == name );
 
 		public static implicit operator ShaderTypeInfo( ShaderTemplateResource userTemplate )
 		{
 			var templatePlugs = new List<TemplateInputPlugInfo>();
-			var supportInfo = new List<string>();
+			var supportFlags = SupportFlags.None;
 
 			switch ( userTemplate.ShaderDomain )
 			{
@@ -96,12 +75,14 @@ public static class ShaderTemplate
 						if ( userTemplate.ShadingModel == ShadingModel.Lit )
 						{
 							defaultInputs = ShaderTemplateSurface.DefaultInputsLit.ToDictionary( x => x.Name, x => x );
-							supportInfo.Add( "SupportsLitShading" );
+
+							supportFlags = supportFlags.WithFlag( SupportFlags.LitShading, true );
 						}
 						else
 						{
 							defaultInputs = ShaderTemplateSurface.DefaultInputsUnlit.ToDictionary( x => x.Name, x => x );
-							supportInfo.Add( "SupportsUnlitShading" );
+
+							supportFlags = supportFlags.WithFlag( SupportFlags.UnlitShading, true );
 						}
 
 						if ( !userTemplate.Opacity )
@@ -118,15 +99,15 @@ public static class ShaderTemplate
 
 						if ( userTemplate.OpaqueBlend )
 						{
-							supportInfo.Add( "SupportsOpaqueBlend" );
+							supportFlags = supportFlags.WithFlag( SupportFlags.OpaqueBlend, true );
 						}
 						if ( userTemplate.MaskedBlend )
 						{
-							supportInfo.Add( "SupportsMaskedBlend" );
+							supportFlags = supportFlags.WithFlag( SupportFlags.MaskedBlend, true );
 						}
 						if ( userTemplate.TranslucentBlend )
 						{
-							supportInfo.Add( "SupportsTranslucentBlend" );
+							supportFlags = supportFlags.WithFlag( SupportFlags.TranslucentBlend, true );
 						}
 
 						break;
@@ -149,28 +130,26 @@ public static class ShaderTemplate
 				switch ( userTemplate.RenderFace )
 				{
 					case RenderFace.Front:
-						supportInfo.Add( "SupportsRenderFaceFront" );
+						supportFlags = supportFlags.WithFlag( SupportFlags.RenderFaceFront, true );
 						break;
 					case RenderFace.Back:
-						supportInfo.Add( "SupportsRenderFaceBack" );
+						supportFlags = supportFlags.WithFlag( SupportFlags.RenderFaceBack, true );
 						break;
 					case RenderFace.Both:
-						supportInfo.Add( "SupportsRenderFaceBoth" );
+						supportFlags = supportFlags.WithFlag( SupportFlags.RenderFaceBoth, true );
 						break;
 				}
 			}
 			else
 			{
-				supportInfo.Add( "SupportsRenderFaceFront" );
-				supportInfo.Add( "SupportsRenderFaceBack" );
-				supportInfo.Add( "SupportsRenderFaceBoth" );
+				supportFlags = supportFlags.WithFlag( SupportFlags.AllRenderFace, true );
 			}
 
 			return new ShaderTypeInfo(
 				userTemplate.Title,
 				userTemplate.Icon,
 				userTemplate.ShaderDomain,
-				supportInfo,
+				supportFlags,
 				templatePlugs
 			);
 		}

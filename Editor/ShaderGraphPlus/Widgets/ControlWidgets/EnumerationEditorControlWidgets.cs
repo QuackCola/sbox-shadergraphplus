@@ -1,5 +1,6 @@
 ﻿
 using Editor;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -156,9 +157,9 @@ internal sealed class BlendModeControlWidget : CustomEnumControlWidget
 
 		return entry.Name switch
 		{
-			nameof( BlendMode.Opaque ) => _graph.ShaderTypeInfo.Supports( "SupportsOpaqueBlend" ),
-			nameof( BlendMode.Masked ) => _graph.ShaderTypeInfo.Supports( "SupportsMaskedBlend" ),
-			nameof( BlendMode.Translucent ) => _graph.ShaderTypeInfo.Supports( "SupportsTranslucentBlend" ),
+			nameof( BlendMode.Opaque ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ),
+			nameof( BlendMode.Masked ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ),
+			nameof( BlendMode.Translucent ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ),
 			//nameof( BlendMode.Dynamic ) => _graph.UserTemplateInfo.SupportsDynamicBlend,
 
 			_ => true

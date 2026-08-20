@@ -109,7 +109,7 @@ PS
 }
 ";
 
-	internal static ShaderTypeInfo ShaderTypeInfo => new( "Sky", "nights_stay", ShaderDomain.Sky, new List<string>(), DefaultInputs );
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Sky", "nights_stay", ShaderDomain.Sky, SupportFlags.None, DefaultInputs );
 
 	internal static List<TemplateInputPlugInfo> DefaultInputs => new()
 	{

@@ -119,21 +119,7 @@ m.TextureCoords = i.vTextureCoords.xy;
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
 
-	internal static ShaderTypeInfo ShaderTypeInfo => new( "Surface", "view_in_ar", ShaderDomain.Surface, DefaultSupportInfo, DefaultInputsLit );
-
-	internal static List<string> DefaultSupportInfo => new()
-	{
-		{ "SupportsOpaqueBlend" },
-		{ "SupportsMaskedBlend" },
-		{ "SupportsTranslucentBlend" },
-		
-		{ "SupportsLitShading" },
-		{ "SupportsUnlitShading" },
-
-		{ "SupportsRenderFaceFront" },
-		{ "SupportsRenderFaceBack" },
-		{ "SupportsRenderFaceBoth" },
-	};
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Surface", "view_in_ar", ShaderDomain.Surface, SupportFlags.All, DefaultInputsLit );
 
 	internal static List<TemplateInputPlugInfo> DefaultInputsLit => new()
 	{

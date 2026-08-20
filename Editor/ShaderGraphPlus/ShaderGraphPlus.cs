@@ -177,10 +177,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowShadingModel => Domain == ShaderDomain.Surface && HasNoTemplate;
 
 	[Hide]
-	private bool ShowRenderFace => Domain == ShaderDomain.Surface && ( ShaderTypeInfo.Supports( "SupportsRenderFaceFront" ) && ShaderTypeInfo.Supports( "SupportsRenderFaceBack" ) && ShaderTypeInfo.Supports( "SupportsRenderFaceBoth" ) );
+	private bool ShowRenderFace => Domain == ShaderDomain.Surface && ( ShaderTypeInfo.ContainsFlag( SupportFlags.AllRenderFace ) );
 
 	[Hide]
-	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !( !ShaderTypeInfo.Supports( "SupportsOpaqueBlend" ) && !ShaderTypeInfo.Supports( "SupportsMaskedBlend" ) && !ShaderTypeInfo.Supports( "SupportsTranslucentBlend" ) );
+	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !( !ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) );
 
 	[Editor( ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
 	public string ShaderType { get; set; } = ShaderTemplateSurface.ShaderTypeInfo.Title;
@@ -215,16 +215,15 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		// Auto-correct BlendMode if current is not supported
 		bool currentBlendModeSupported = BlendMode switch
 		{
-			BlendMode.Opaque => ShaderTypeInfo.Supports( "SupportsOpaqueBlend" ),
-			BlendMode.Masked => ShaderTypeInfo.Supports( "SupportsMaskedBlend" ),
-			BlendMode.Translucent => ShaderTypeInfo.Supports( "SupportsTranslucentBlend" ),
-			//BlendMode.Dynamic => UserTemplateInfo.SupportsDynamicBlend,
+			BlendMode.Opaque => ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ),
+			BlendMode.Masked => ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ),
+			BlendMode.Translucent => ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ),
 			_ => false
 		};
 
 		if ( !currentBlendModeSupported )
 		{
-			if ( !ShaderTypeInfo.Supports( "SupportsOpaqueBlend" ) && !ShaderTypeInfo.Supports( "SupportsMaskedBlend" ) && !ShaderTypeInfo.Supports( "SupportsTranslucentBlend" ) )
+			if ( !ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) )
 			{
 				// Fallback to Opaque blend mode.
 				BlendMode = BlendMode.Opaque;
@@ -232,44 +231,41 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			else
 			{
 				// Find the first supported blend mode
-				if ( ShaderTypeInfo.Supports( "SupportsOpaqueBlend" ) ) BlendMode = BlendMode.Opaque;
-				else if ( ShaderTypeInfo.Supports( "SupportsMaskedBlend" ) ) BlendMode = BlendMode.Masked;
-				else if ( ShaderTypeInfo.Supports( "SupportsTranslucentBlend" ) ) BlendMode = BlendMode.Translucent;
-				//else if ( UserTemplateInfo.SupportsDynamicBlend ) BlendMode = BlendMode.Dynamic;
+				if ( ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) ) BlendMode = BlendMode.Opaque;
+				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) ) BlendMode = BlendMode.Masked;
+				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) ) BlendMode = BlendMode.Translucent;
 			}
 		}
 
 		// Auto-correct ShadingModel if current is not supported
 		bool currentShadingModelSupported = ShadingModel switch
 		{
-			ShadingModel.Lit => ShaderTypeInfo.Supports( "SupportsLitShading" ),
-			ShadingModel.Unlit => ShaderTypeInfo.Supports( "SupportsUnlitShading" ),
+			ShadingModel.Lit => ShaderTypeInfo.ContainsFlag( SupportFlags.LitShading ),
+			ShadingModel.Unlit => ShaderTypeInfo.ContainsFlag( SupportFlags.UnlitShading ),
 			_ => false
 		};
 
 		if ( !currentShadingModelSupported )
 		{
 			// Find the first supported shading model
-			if ( ShaderTypeInfo.Supports( "SupportsLitShading" ) ) ShadingModel = ShadingModel.Lit;
-			else if ( ShaderTypeInfo.Supports( "SupportsUnlitShading" ) ) ShadingModel = ShadingModel.Unlit;
+			if ( ShaderTypeInfo.ContainsFlag( SupportFlags.LitShading ) ) ShadingModel = ShadingModel.Lit;
+			else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.UnlitShading ) ) ShadingModel = ShadingModel.Unlit;
 		}
-
-		Log.Info( $"ShadingModel {ShadingModel}" );
 
 		if ( HasTemplate )
 		{
-			if ( !( ShaderTypeInfo.Supports( "SupportsRenderFaceFront" ) && ShaderTypeInfo.Supports( "SupportsRenderFaceBack" ) && ShaderTypeInfo.Supports( "SupportsRenderFaceBoth" ) ) )
+			if ( !ShaderTypeInfo.ContainsFlag( SupportFlags.AllRenderFace ) )
 			{
 				// Ensure template culling mode
-				if ( ShaderTypeInfo.Supports( "SupportsRenderFaceFront" ) )
+				if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceFront ) )
 				{
 					RenderFace = RenderFace.Front;
 				}
-				else if ( ShaderTypeInfo.Supports( "SupportsRenderFaceBack" ) )
+				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceBack ) )
 				{
 					RenderFace = RenderFace.Back;
 				}
-				else if ( ShaderTypeInfo.Supports( "SupportsRenderFaceBoth" ) )
+				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceBoth ) )
 				{
 					RenderFace = RenderFace.Both;
 				}
