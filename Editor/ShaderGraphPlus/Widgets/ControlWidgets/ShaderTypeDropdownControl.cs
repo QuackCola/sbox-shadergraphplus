@@ -4,7 +4,7 @@ using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 namespace ShaderGraphPlus;
 
 [CustomEditor( typeof( string ), NamedEditor = ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
-public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
+internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 {
 	private ShaderGraphPlus _graph;
 	private Entry _currentEntry;
