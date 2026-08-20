@@ -34,10 +34,10 @@ public sealed class Result : BaseResult
 	private bool IsLit => Graph.Domain == ShaderDomain.Surface && Graph.ShadingModel == ShadingModel.Lit;
 
 	[Hide]
-	private bool ShowPositionOffset => Graph.Domain == ShaderDomain.Surface && Graph.UserTemplateInfo.ShowPositionOffset;
+	private bool ShowPositionOffset => Graph.Domain == ShaderDomain.Surface && Graph.ShaderTypeInfo.HasPlug( "PositionOffset" );
 
 	[Hide]
-	private bool ShowOpacityInput => Graph.Domain == ShaderDomain.Surface && Graph.UserTemplateInfo.ShowOpacityInput;
+	private bool ShowOpacityInput => Graph.Domain == ShaderDomain.Surface && Graph.ShaderTypeInfo.HasPlug( "Opacity" );
 
 	[Hide, JsonIgnore]
 	public override bool CanPreview => false;
@@ -104,7 +104,7 @@ public sealed class Result : BaseResult
 		{
 			hashCode.Add( shaderGraph.ShaderType );
 			hashCode.Add( shaderGraph.ShadingModel );
-			hashCode.Add( shaderGraph.UserTemplateInfo );
+			hashCode.Add( shaderGraph.ShaderTypeInfo );
 		}
 
 		var hc = hashCode.ToHashCode();

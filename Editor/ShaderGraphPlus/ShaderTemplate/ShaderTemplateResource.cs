@@ -2,64 +2,6 @@
 
 namespace ShaderGraphPlus;
 
-/// <summary>
-/// Readonly representation of <see cref="ShaderTemplateResource"/>
-/// </summary>
-public sealed record UserShaderTemplateInfo(
-	string Title,
-	string Icon,
-	bool SupportsLitShading,
-	bool SupportsUnlitShading,
-	bool SupportsSurfaceDomain,
-	bool SupportsSkyDomain,
-	bool SupportsPostProcessDomain,
-	bool SupportsRenderFaceFront,
-	bool SupportsRenderFaceBack,
-	bool SupportsRenderFaceBoth,
-	bool SupportsOpaqueBlend,
-	bool SupportsMaskedBlend,
-	bool SupportsTranslucentBlend,
-	//bool SupportsDynamicBlend,
-	bool ShowOpacityInput,
-	bool ShowPositionOffset )
-{
-
-	public bool SupportsAllRenderFaceModes => SupportsRenderFaceFront && SupportsRenderFaceBack && SupportsRenderFaceBoth;
-
-	public bool SupportsAllBlendModes => SupportsOpaqueBlend && SupportsMaskedBlend && SupportsTranslucentBlend;// && SupportsDynamicBlend;
-
-	/// <summary>
-	/// Lets <seealso cref="ShaderGraphPlus"/> know whether to fallback to the Opaque blend mode or not.
-	/// </summary>
-	public bool SupportsNoBlendModes => !SupportsOpaqueBlend && !SupportsMaskedBlend && !SupportsTranslucentBlend;// && !SupportsDynamicBlend;
-
-	public UserShaderTemplateInfo() : this( "", "", true, true, false, false, false, true, true, true, true, true, true, true, true )
-	{
-	}
-
-	public static implicit operator UserShaderTemplateInfo( ShaderTemplateResource template )
-	{
-		return new UserShaderTemplateInfo(
-			template.Title,
-			template.Icon,
-			template.ShadingModel == ShadingModel.Lit,
-			template.ShadingModel == ShadingModel.Unlit,
-			template.ShaderDomain == ShaderDomain.Surface,
-			template.ShaderDomain == ShaderDomain.Sky,
-			template.ShaderDomain == ShaderDomain.PostProcess,
-			!template.EnforceRenderFace || template.RenderFace == RenderFace.Front,
-			!template.EnforceRenderFace || template.RenderFace == RenderFace.Back,
-			!template.EnforceRenderFace || template.RenderFace == RenderFace.Both,
-			template.ShaderDomain == ShaderDomain.Surface && template.OpaqueBlend,
-			template.ShaderDomain == ShaderDomain.Surface && template.MaskedBlend,
-			template.ShaderDomain == ShaderDomain.Surface && template.TranslucentBlend,
-			//template.ShaderDomain == ShaderDomain.Surface && template.DynamicBlend,
-			template.ShaderDomain == ShaderDomain.Surface && template.Opacity,
-			template.ShaderDomain == ShaderDomain.Surface && template.PositionOffset
-		);
-	}
-}
-
 [AssetType( Name = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName, Extension = ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension )]
 public sealed partial class ShaderTemplateResource
 {

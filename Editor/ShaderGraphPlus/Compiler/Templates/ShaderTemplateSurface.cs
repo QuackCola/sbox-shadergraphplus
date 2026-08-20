@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Diagnostics.CodeAnalysis;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -117,4 +118,42 @@ m.TextureCoords = i.vTextureCoords.xy;
 ";
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
+
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Surface", "view_in_ar", ShaderDomain.Surface, DefaultSupportInfo, DefaultInputsLit );
+
+	internal static List<string> DefaultSupportInfo => new()
+	{
+		{ "SupportsOpaqueBlend" },
+		{ "SupportsMaskedBlend" },
+		{ "SupportsTranslucentBlend" },
+		
+		{ "SupportsLitShading" },
+		{ "SupportsUnlitShading" },
+
+		{ "SupportsRenderFaceFront" },
+		{ "SupportsRenderFaceBack" },
+		{ "SupportsRenderFaceBoth" },
+	};
+
+	internal static List<TemplateInputPlugInfo> DefaultInputsLit => new()
+	{
+		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Vector3, "Emission", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Vector3, "Normal", "Normal (Tangent)", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Float, "Roughness", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Float, "Metalness", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Float, "AmbientOcclusion", GraphCompiler.ShaderStage.Pixel ) },
+
+		{ new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
+	};
+
+	internal static List<TemplateInputPlugInfo> DefaultInputsUnlit => new()
+	{
+		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
+		{ new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
+	
+		{ new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
+	};
+
 }

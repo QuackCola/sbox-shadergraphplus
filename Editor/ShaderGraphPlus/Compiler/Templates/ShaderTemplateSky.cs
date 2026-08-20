@@ -1,4 +1,6 @@
-﻿namespace ShaderGraphPlus;
+﻿using static ShaderGraphPlus.ShaderTemplate;
+
+namespace ShaderGraphPlus;
 
 public static class ShaderTemplateSky
 {
@@ -106,4 +108,11 @@ PS
 	}
 }
 ";
+
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Sky", "nights_stay", ShaderDomain.Sky, new List<string>(), DefaultInputs );
+
+	internal static List<TemplateInputPlugInfo> DefaultInputs => new()
+	{
+		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
+	};
 }

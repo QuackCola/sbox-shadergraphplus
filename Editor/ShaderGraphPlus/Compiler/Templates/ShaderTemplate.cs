@@ -28,7 +28,162 @@ public static class ShaderTemplate
 		{ "/*sgp_pixel_output*/", "{15}" },
 	};
 
-	public record TemplateEntry( string Name, string Path, string Icon )
+	public enum TemplateInputPlugType
+	{
+		[Icon( "check_box" )]
+		Bool,
+		[Icon( "looks_one" )]
+		Int,
+		[Icon( "looks_one" )]
+		Float,
+		[Title( "Float2" ), Icon( "looks_two" )]
+		Vector2,
+		[Title( "Float3" ), Icon( "looks_3" )]
+		Vector3,
+		[Title( "Float4" ), Icon( "looks_4" )]
+		Vector4,
+		[Title( "Color" ), Icon( "palette" )]
+		Color,
+	}
+
+
+	[Flags]
+	public enum SupportFlags
+	{
+		[Hide]
+		None = 0,
+
+		OpaqueBlend = 1 << 0,
+		MaskedBlend = 1 << 1,
+		TranslucentBlend = 1 << 2,
+
+		LitShading = 1 << 3,
+		UnlitShading = 1 << 4,
+
+		RenderFaceFront = 1 << 5,
+		RenderFaceBack = 1 << 6,
+		RenderFaceBoth = 1 << 7,
+	}
+
+	public sealed record ShaderTypeInfo( string Title, string Icon, ShaderDomain Domian, IEnumerable<string> SupportInfo, IEnumerable<TemplateInputPlugInfo> InputPlugs ) : IValid
+	{
+		public bool IsValid => !string.IsNullOrWhiteSpace( Title ) && InputPlugs.Any();
+
+		internal ShaderTypeInfo() : this( "", "", ShaderDomain.Surface, new List<string>(), new List<TemplateInputPlugInfo>() )
+		{
+		}
+
+		/// <summary>
+		/// Check <see cref="SupportInfo"/> to see if the provided support string exists.
+		/// </summary>
+		public bool Supports( string name ) => SupportInfo.Contains( name );
+
+		public bool Supports( params string[] names ) => names.All( x => SupportInfo.Contains( x ) );
+		
+		public bool HasPlug( string name ) => InputPlugs.Any( x => x.Name == name );
+
+		public static implicit operator ShaderTypeInfo( ShaderTemplateResource userTemplate )
+		{
+			var templatePlugs = new List<TemplateInputPlugInfo>();
+			var supportInfo = new List<string>();
+
+			switch ( userTemplate.ShaderDomain )
+			{
+				case ShaderDomain.Surface:
+					{
+						Dictionary<string, TemplateInputPlugInfo> defaultInputs;
+
+						if ( userTemplate.ShadingModel == ShadingModel.Lit )
+						{
+							defaultInputs = ShaderTemplateSurface.DefaultInputsLit.ToDictionary( x => x.Name, x => x );
+							supportInfo.Add( "SupportsLitShading" );
+						}
+						else
+						{
+							defaultInputs = ShaderTemplateSurface.DefaultInputsUnlit.ToDictionary( x => x.Name, x => x );
+							supportInfo.Add( "SupportsUnlitShading" );
+						}
+
+						if ( !userTemplate.Opacity )
+						{
+							defaultInputs.Remove( "Opacity" );
+						}
+
+						if ( !userTemplate.PositionOffset )
+						{
+							defaultInputs.Remove( "PositionOffset" );
+						}
+
+						templatePlugs = defaultInputs.Select( x => x.Value ).ToList();
+
+						if ( userTemplate.OpaqueBlend )
+						{
+							supportInfo.Add( "SupportsOpaqueBlend" );
+						}
+						if ( userTemplate.MaskedBlend )
+						{
+							supportInfo.Add( "SupportsMaskedBlend" );
+						}
+						if ( userTemplate.TranslucentBlend )
+						{
+							supportInfo.Add( "SupportsTranslucentBlend" );
+						}
+
+						break;
+					}
+
+				case ShaderDomain.Sky:
+					templatePlugs = ShaderTemplateSky.DefaultInputs;
+					break;
+
+				case ShaderDomain.PostProcess:
+					templatePlugs = ShaderTemplatePostProcess.DefaultInputs;
+					break;
+				
+				default:
+					throw new NotImplementedException();
+			}
+
+			if ( userTemplate.EnforceRenderFace )
+			{
+				switch ( userTemplate.RenderFace )
+				{
+					case RenderFace.Front:
+						supportInfo.Add( "SupportsRenderFaceFront" );
+						break;
+					case RenderFace.Back:
+						supportInfo.Add( "SupportsRenderFaceBack" );
+						break;
+					case RenderFace.Both:
+						supportInfo.Add( "SupportsRenderFaceBoth" );
+						break;
+				}
+			}
+			else
+			{
+				supportInfo.Add( "SupportsRenderFaceFront" );
+				supportInfo.Add( "SupportsRenderFaceBack" );
+				supportInfo.Add( "SupportsRenderFaceBoth" );
+			}
+
+			return new ShaderTypeInfo(
+				userTemplate.Title,
+				userTemplate.Icon,
+				userTemplate.ShaderDomain,
+				supportInfo,
+				templatePlugs
+			);
+		}
+	}
+
+	public sealed record TemplateInputPlugInfo( TemplateInputPlugType Plugtype, string Name, string FriendlyName, GraphCompiler.ShaderStage Stage )
+	{
+		public TemplateInputPlugInfo( TemplateInputPlugType plugtype, string name, GraphCompiler.ShaderStage stage ) : this( plugtype, name, name, stage )
+		{
+		}
+	}
+
+	public sealed record TemplateEntry( string Name, string Path, string Icon )
 	{
 		internal TemplateEntry( string name, string icon ) : this( name, "", icon )
 		{

@@ -21,8 +21,8 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 
 		if ( _graph.HasTemplate )
 		{
-			label = _graph.UserTemplateInfo.Title;
-			icon = _graph.UserTemplateInfo.Icon;
+			label = _graph.ShaderTypeInfo.Title;
+			icon = _graph.ShaderTypeInfo.Icon;
 		}
 		else if ( template == null && ShaderTemplate.BuiltInTemplateEntries.TryGetValue( value, out var builtInEntry ) )
 		{
@@ -57,7 +57,7 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 
 		if ( _graph.HasTemplate )
 		{
-			return _graph.UserTemplateInfo.Title;
+			return _graph.ShaderTypeInfo.Title;
 		}
 		else
 		{

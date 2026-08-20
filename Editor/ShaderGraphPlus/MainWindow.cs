@@ -1,8 +1,10 @@
 ﻿using Editor;
+using Editor.NodeEditor;
 using Sandbox.Rendering;
 using ShaderGraphPlus.Internal;
 using ShaderGraphPlus.Nodes;
 using System.Text;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -1285,6 +1287,8 @@ public class MainWindow : DockWindow
 		_output.ClearErrors();
 		_output.ClearWarnings();
 
+		LoadShaderTemplate();
+
 		if ( !IsSubgraph )
 		{
 			var result = _graphView.CreateNewNode( _graphView.FindNodeType( typeof( Result ) ), 0 );
@@ -1444,7 +1448,7 @@ public class MainWindow : DockWindow
 
 			if ( _shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) ) )
 			{
-				_graph.UserTemplateInfo = _shaderTemplate;
+				_graph.ShaderTypeInfo = _shaderTemplate;
 				_graph.ValidateTemplateSettings();
 
 				// Validate the template
@@ -1452,6 +1456,8 @@ public class MainWindow : DockWindow
 				{
 					TemplateIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } ).ToList();
 				}
+
+				Log.Info( $"Using User Provided Template '{_graph.ShaderTypeInfo.Title}'" );
 			}
 			else
 			{
@@ -1462,25 +1468,16 @@ public class MainWindow : DockWindow
 		{
 			_shaderTemplate = null;
 
-			var templateInfo = new UserShaderTemplateInfo();
-
-			switch ( _graph.ShaderType )
+			_graph.ShaderTypeInfo = _graph.ShaderType switch
 			{
-				case "Surface":
-					templateInfo = templateInfo with { SupportsSurfaceDomain = true };
-					break;
-				case "Sky":
-					templateInfo = templateInfo with { SupportsSkyDomain = true };
-					break;
-				case "PostProcess":
-					templateInfo = templateInfo with { SupportsPostProcessDomain = true };
-					break;
-				default:
-					templateInfo = templateInfo with { SupportsSurfaceDomain = true };
-					break;
-			}
+				"Surface" => ShaderTemplateSurface.ShaderTypeInfo,
+				"Sky" => ShaderTemplateSky.ShaderTypeInfo,
+				"PostProcess" => ShaderTemplatePostProcess.ShaderTypeInfo,
+				_ => ShaderTemplateSurface.ShaderTypeInfo,
+			};
 
-			_graph.UserTemplateInfo = templateInfo;
+			Log.Info( $"Using Built-In Template '{_graph.ShaderTypeInfo.Title}'" );
+
 			_graph.ValidateTemplateSettings();
 		}
 

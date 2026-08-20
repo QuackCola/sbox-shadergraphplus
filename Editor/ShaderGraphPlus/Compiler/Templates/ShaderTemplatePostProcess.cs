@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-using System.Diagnostics.CodeAnalysis;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -88,4 +88,11 @@ PS
 	}
 }
 ";
+
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "PostProcess", "desktop_windows", ShaderDomain.PostProcess, new List<string>(), DefaultInputs );
+
+	internal static List<TemplateInputPlugInfo> DefaultInputs => new()
+	{
+		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
+	};
 }
