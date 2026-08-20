@@ -7,22 +7,43 @@ namespace ShaderGraphPlus;
 public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 {
 	private ShaderGraphPlus _graph;
-	private string _currentEntryIcon;
+	private Entry _currentEntry;
 
 	public ShaderTypeDropdownControl( SerializedProperty property ) : base( property )
 	{
 		_graph = property.Parent?.Targets?.FirstOrDefault() as ShaderGraphPlus;
-
-		_currentEntryIcon = _graph.HasTemplate ? _graph.UserTemplateInfo.Icon : "view_in_ar";
-
+		
 		var value = property.GetValue<string>();
-
 		var template = AssetSystem.All.FirstOrDefault( x => x.Path == value );
 
-		if ( template == null && !ShaderTemplate.BuiltInTemplateEntries.ContainsKey( value ) )
+		var label = "";
+		var icon = "";
+
+		if ( _graph.HasTemplate )
 		{
-			property.SetValue( ShaderTemplate.BuiltInTemplateEntries.FirstOrDefault().Key );
+			label = _graph.UserTemplateInfo.Title;
+			icon = _graph.UserTemplateInfo.Icon;
 		}
+		else if ( template == null && ShaderTemplate.BuiltInTemplateEntries.TryGetValue( value, out var builtInEntry ) )
+		{
+			label = builtInEntry.Name;
+			icon = builtInEntry.Icon;
+		}
+		else if ( template == null && !ShaderTemplate.BuiltInTemplateEntries.ContainsKey( value ) )
+		{
+			var defaultEntry = ShaderTemplate.BuiltInTemplateEntries.FirstOrDefault();
+
+			label = defaultEntry.Value.Name;
+			icon = defaultEntry.Value.Icon;
+
+			property.SetValue( defaultEntry.Key );
+		}
+
+		_currentEntry = new Entry()
+		{
+			Label = label,
+			Icon = icon,
+		};
 	}
 
 	protected override string GetDisplayText()
@@ -48,7 +69,7 @@ public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 	{
 		if ( item is Entry entry )
 		{
-			_currentEntryIcon = entry.Icon;
+			_currentEntry = entry;
 		}
 
 		base.OnItemSelected( item );
@@ -106,9 +127,9 @@ public sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 		Paint.SetPen( color );
 		Paint.SetDefaultFont();
 
-		if ( !string.IsNullOrEmpty( _currentEntryIcon ) )
+		if ( !string.IsNullOrEmpty( _currentEntry.Icon ) )
 		{
-			var i = Paint.DrawIcon( rect, _currentEntryIcon, 16, TextFlag.LeftCenter );
+			var i = Paint.DrawIcon( rect, _currentEntry.Icon, 16, TextFlag.LeftCenter );
 			rect.Left += i.Width + 8;
 		}
 
