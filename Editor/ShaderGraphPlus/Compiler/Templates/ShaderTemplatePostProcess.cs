@@ -89,10 +89,11 @@ PS
 }
 ";
 
-	internal static ShaderTypeInfo ShaderTypeInfo => new( "PostProcess", "desktop_windows", ShaderDomain.PostProcess, SupportFlags.None, DefaultInputs );
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "PostProcess", "desktop_windows", ShaderDomain.PostProcess, new List<string>(), DefaultInputs );
 
-	internal static List<TemplateInputPlugInfo> DefaultInputs => new()
+	internal static Dictionary<string, TemplateInputPlugInfo> DefaultInputs => new()
 	{
-		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
+		// Pixel Stage Inputs
+		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
 	};
 }

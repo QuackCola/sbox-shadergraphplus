@@ -155,55 +155,33 @@ internal sealed class BlendModeControlWidget : CustomEnumControlWidget
 		if ( !entry.Browsable )
 			return false;
 
+		var sti = _graph.ShaderTypeInfo;
+
+		if ( sti.HasSupport( SupportsAllBlend ) )
+		{
+			return true;
+		}
+
 		return entry.Name switch
 		{
-			nameof( BlendMode.Opaque ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ),
-			nameof( BlendMode.Masked ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ),
-			nameof( BlendMode.Translucent ) => _graph.ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ),
+			nameof( BlendMode.Opaque ) => sti.HasSupport( SupportsOpaqueBlend ),
+			nameof( BlendMode.Masked ) => sti.HasSupport( SupportsMaskedBlend ),
+			nameof( BlendMode.Translucent ) => sti.HasSupport( SupportsTranslucentBlend ),
 			//nameof( BlendMode.Dynamic ) => _graph.UserTemplateInfo.SupportsDynamicBlend,
-
 			_ => true
 		};
 	}
 }
-
-/*
-[CustomEditor( typeof( RenderFace ) )]
-internal sealed class RenderFaceControlWidget : CustomEnumControlWidget
-{
-	public RenderFaceControlWidget( SerializedProperty property ) : base( property )
-	{
-	}
-
-	protected override bool IsEntrySupported( EnumDescription.Entry entry )
-	{
-		if ( _graph is null )
-			return entry.Browsable;
-
-		if ( !entry.Browsable )
-			return false;
-
-		return entry.Name switch
-		{
-			nameof( RenderFace.Front ) => _graph.UserTemplateInfo.SupportsRenderFaceFront,
-			nameof( RenderFace.Back ) => _graph.UserTemplateInfo.SupportsRenderFaceBack,
-			nameof( RenderFace.Both ) => _graph.UserTemplateInfo.SupportsRenderFaceBoth,
-
-			_ => true
-		};
-	}
-}
-*/
 
 file class EnumMenuOption : Widget
 {
-	EnumDescription.Entry info;
-	SerializedProperty property;
+	private EnumDescription.Entry _info;
+	private SerializedProperty _property;
 
 	public EnumMenuOption( EnumDescription.Entry e, SerializedProperty p ) : base( null )
 	{
-		info = e;
-		property = p;
+		_info = e;
+		_property = p;
 
 		Layout = Layout.Row();
 		Layout.Margin = 8;
@@ -230,8 +208,8 @@ file class EnumMenuOption : Widget
 
 	bool HasValue()
 	{
-		var value = property.GetValue<long>( 0 );
-		return value == info.IntegerValue;
+		var value = _property.GetValue<long>( 0 );
+		return value == _info.IntegerValue;
 	}
 
 	protected override void OnPaint()

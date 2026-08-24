@@ -2,30 +2,24 @@
 
 public static partial class ShaderTemplate
 {
-	[Flags]
-	public enum SupportFlags
-	{
-		[Hide]
-		None = 0,
+	public const string SupportsOpaqueBlend = "SupportsOpaqueBlend";
+	public const string SupportsMaskedBlend = "SupportsMaskedBlend";
+	public const string SupportsTranslucentBlend = "SupportsTranslucentBlend";
 
-		OpaqueBlend = 1 << 0,
-		MaskedBlend = 1 << 1,
-		TranslucentBlend = 1 << 2,
+	/// <summary>
+	/// Supports all 3 blend modes.
+	/// </summary>
+	public const string SupportsAllBlend = "SupportsAllBlend";
 
-		LitShading = 1 << 3,
-		UnlitShading = 1 << 4,
+	public const string SupportsLitShading = "SupportsLitShading";
+	public const string SupportsUnlitShading = "SupportsUnlitShading";
 
-		RenderFaceFront = 1 << 5,
-		RenderFaceBack = 1 << 6,
-		RenderFaceBoth = 1 << 7,
+	public const string SupportsRenderFaceFront = "SupportsRenderFaceFront";
+	public const string SupportsRenderFaceBack = "SupportsRenderFaceBack";
+	public const string SupportsRenderFaceBoth = "SupportsRenderFaceBoth";
 
-		[Hide]
-		AllRenderFace = RenderFaceFront | RenderFaceBack | RenderFaceBoth,
-
-		[Hide]
-		AllBlend = OpaqueBlend | MaskedBlend | TranslucentBlend,
-
-		[Hide]
-		All = OpaqueBlend | MaskedBlend | TranslucentBlend | LitShading | UnlitShading | RenderFaceFront | RenderFaceBack | RenderFaceBoth
-	}
+	/// <summary>
+	/// Supports all 3 render face modes.
+	/// </summary>
+	public const string SupportsAllRenderFace = "SupportsAllRenderFace";
 }

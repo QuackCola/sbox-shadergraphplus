@@ -119,27 +119,41 @@ m.TextureCoords = i.vTextureCoords.xy;
 
 	public static string Material_output => "ShadingModelStandard::Shade( m )";
 
-	internal static ShaderTypeInfo ShaderTypeInfo => new( "Surface", "view_in_ar", ShaderDomain.Surface, SupportFlags.All, DefaultInputsLit );
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Surface", "view_in_ar", ShaderDomain.Surface, DefaultSupportStrings, DefaultLitInputs );
 
-	internal static List<TemplateInputPlugInfo> DefaultInputsLit => new()
+	internal static List<string> DefaultSupportStrings => new()
 	{
-		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Vector3, "Emission", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Vector3, "Normal", "Normal (Tangent)", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Float, "Roughness", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Float, "Metalness", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Float, "AmbientOcclusion", GraphCompiler.ShaderStage.Pixel ) },
+		{ SupportsAllBlend },
 
-		{ new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
+		{ SupportsLitShading },
+		{ SupportsUnlitShading },
+
+		{ SupportsAllRenderFace }
 	};
 
-	internal static List<TemplateInputPlugInfo> DefaultInputsUnlit => new()
+	internal static Dictionary<string,TemplateInputPlugInfo> DefaultLitInputs => new()
 	{
-		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
-		{ new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
+		// Pixel Stage Inputs
+		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Emission", new( TemplateInputPlugType.Vector3, "Emission", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Opacity", new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Normal", new( TemplateInputPlugType.Vector3, "Normal", "Normal (Tangent)", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Roughness", new( TemplateInputPlugType.Float, "Roughness", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Metalness", new( TemplateInputPlugType.Float, "Metalness", GraphCompiler.ShaderStage.Pixel ) },
+		{ "AmbientOcclusion", new( TemplateInputPlugType.Float, "AmbientOcclusion", GraphCompiler.ShaderStage.Pixel ) },
+
+		// Vertex Stage Inputs
+		{ "PositionOffset", new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
+	};
+
+	internal static Dictionary<string,TemplateInputPlugInfo> DefaultUnlitInputs => new()
+	{
+		// Pixel Stage Inputs
+		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
+		{ "Opacity", new( TemplateInputPlugType.Float, "Opacity", GraphCompiler.ShaderStage.Pixel ) },
 	
-		{ new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
+		// Vertex Stage Inputs
+		{ "PositionOffset", new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
 	};
 
 }

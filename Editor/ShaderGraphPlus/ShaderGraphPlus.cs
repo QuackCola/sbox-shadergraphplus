@@ -177,10 +177,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowShadingModel => Domain == ShaderDomain.Surface && HasNoTemplate;
 
 	[Hide]
-	private bool ShowRenderFace => Domain == ShaderDomain.Surface && ( ShaderTypeInfo.ContainsFlag( SupportFlags.AllRenderFace ) );
+	private bool ShowRenderFace => Domain == ShaderDomain.Surface && ( ShaderTypeInfo.HasSupport( SupportsAllRenderFace ) );
 
 	[Hide]
-	private bool ShowBlendMode => Domain == ShaderDomain.Surface && !( !ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) );
+	private bool ShowBlendMode => Domain == ShaderDomain.Surface;
 
 	[Editor( ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
 	public string ShaderType { get; set; } = ShaderTemplateSurface.ShaderTypeInfo.Title;
@@ -215,59 +215,62 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		// Auto-correct BlendMode if current is not supported
 		bool currentBlendModeSupported = BlendMode switch
 		{
-			BlendMode.Opaque => ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ),
-			BlendMode.Masked => ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ),
-			BlendMode.Translucent => ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ),
+			BlendMode.Opaque => ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ),
+			BlendMode.Masked => ShaderTypeInfo.HasSupport( SupportsMaskedBlend ),
+			BlendMode.Translucent => ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ),
 			_ => false
 		};
 
 		if ( !currentBlendModeSupported )
 		{
-			if ( !ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) && !ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) )
+			if ( !ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ) && !ShaderTypeInfo.HasSupport( SupportsMaskedBlend ) && !ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ) )
 			{
-				// Fallback to Opaque blend mode.
-				BlendMode = BlendMode.Opaque;
+				BlendMode = BlendMode.Opaque; // Fallback to Opaque blend mode.
 			}
 			else
 			{
 				// Find the first supported blend mode
-				if ( ShaderTypeInfo.ContainsFlag( SupportFlags.OpaqueBlend ) ) BlendMode = BlendMode.Opaque;
-				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.MaskedBlend ) ) BlendMode = BlendMode.Masked;
-				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.TranslucentBlend ) ) BlendMode = BlendMode.Translucent;
+				if ( ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ) ) BlendMode = BlendMode.Opaque;
+				else if ( ShaderTypeInfo.HasSupport( SupportsMaskedBlend ) ) BlendMode = BlendMode.Masked;
+				else if ( ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ) ) BlendMode = BlendMode.Translucent;
 			}
 		}
 
 		// Auto-correct ShadingModel if current is not supported
 		bool currentShadingModelSupported = ShadingModel switch
 		{
-			ShadingModel.Lit => ShaderTypeInfo.ContainsFlag( SupportFlags.LitShading ),
-			ShadingModel.Unlit => ShaderTypeInfo.ContainsFlag( SupportFlags.UnlitShading ),
+			ShadingModel.Lit => ShaderTypeInfo.HasSupport( SupportsLitShading ),
+			ShadingModel.Unlit => ShaderTypeInfo.HasSupport( SupportsUnlitShading ),
 			_ => false
 		};
 
 		if ( !currentShadingModelSupported )
 		{
 			// Find the first supported shading model
-			if ( ShaderTypeInfo.ContainsFlag( SupportFlags.LitShading ) ) ShadingModel = ShadingModel.Lit;
-			else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.UnlitShading ) ) ShadingModel = ShadingModel.Unlit;
+			if ( ShaderTypeInfo.HasSupport( SupportsLitShading ) ) ShadingModel = ShadingModel.Lit;
+			else if ( ShaderTypeInfo.HasSupport( SupportsUnlitShading ) ) ShadingModel = ShadingModel.Unlit;
 		}
 
 		if ( HasTemplate )
 		{
-			if ( !ShaderTypeInfo.ContainsFlag( SupportFlags.AllRenderFace ) )
+			if ( !ShaderTypeInfo.HasSupport( SupportsAllRenderFace ) )
 			{
 				// Ensure template culling mode
-				if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceFront ) )
+				if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceFront ) )
 				{
 					RenderFace = RenderFace.Front;
 				}
-				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceBack ) )
+				else if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceBack ) )
 				{
 					RenderFace = RenderFace.Back;
 				}
-				else if ( ShaderTypeInfo.ContainsFlag( SupportFlags.RenderFaceBoth ) )
+				else if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceBoth ) )
 				{
 					RenderFace = RenderFace.Both;
+				}
+				else
+				{
+					RenderFace = RenderFace.Front; // Fallback to backface culling.
 				}
 			}
 		}

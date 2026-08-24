@@ -109,10 +109,11 @@ PS
 }
 ";
 
-	internal static ShaderTypeInfo ShaderTypeInfo => new( "Sky", "nights_stay", ShaderDomain.Sky, SupportFlags.None, DefaultInputs );
+	internal static ShaderTypeInfo ShaderTypeInfo => new( "Sky", "nights_stay", ShaderDomain.Sky, new List<string>(), DefaultInputs );
 
-	internal static List<TemplateInputPlugInfo> DefaultInputs => new()
+	internal static Dictionary<string, TemplateInputPlugInfo> DefaultInputs => new()
 	{
-		{ new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
+		// Pixel Stage Inputs
+		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) }
 	};
 }
