@@ -131,7 +131,7 @@ m.TextureCoords = i.vTextureCoords.xy;
 		{ SupportsAllRenderFace }
 	};
 
-	internal static Dictionary<string,TemplateInputPlugInfo> DefaultLitInputs => new()
+	internal static Dictionary<string, TemplateInputPlugInfo> DefaultLitInputs => new()
 	{
 		// Pixel Stage Inputs
 		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },
@@ -146,7 +146,7 @@ m.TextureCoords = i.vTextureCoords.xy;
 		{ "PositionOffset", new( TemplateInputPlugType.Vector3, "PositionOffset", GraphCompiler.ShaderStage.Vertex ) },
 	};
 
-	internal static Dictionary<string,TemplateInputPlugInfo> DefaultUnlitInputs => new()
+	internal static Dictionary<string, TemplateInputPlugInfo> DefaultUnlitInputs => new()
 	{
 		// Pixel Stage Inputs
 		{ "Albedo", new( TemplateInputPlugType.Vector3, "Albedo", GraphCompiler.ShaderStage.Pixel ) },

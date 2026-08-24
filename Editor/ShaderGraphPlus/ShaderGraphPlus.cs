@@ -177,7 +177,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	private bool ShowShadingModel => Domain == ShaderDomain.Surface && HasNoTemplate;
 
 	[Hide]
-	private bool ShowRenderFace => Domain == ShaderDomain.Surface && ( ShaderTypeInfo.HasSupport( SupportsAllRenderFace ) );
+	private bool ShowRenderFace => Domain == ShaderDomain.Surface && (ShaderTypeInfo.HasSupport( SupportsAllRenderFace ));
 
 	[Hide]
 	private bool ShowBlendMode => Domain == ShaderDomain.Surface;

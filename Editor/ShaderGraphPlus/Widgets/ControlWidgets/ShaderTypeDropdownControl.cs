@@ -12,7 +12,7 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 	public ShaderTypeDropdownControl( SerializedProperty property ) : base( property )
 	{
 		_graph = property.Parent?.Targets?.FirstOrDefault() as ShaderGraphPlus;
-		
+
 		var value = property.GetValue<string>();
 		var template = AssetSystem.All.FirstOrDefault( x => x.Path == value );
 

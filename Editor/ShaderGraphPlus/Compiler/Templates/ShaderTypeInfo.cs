@@ -2,7 +2,7 @@
 
 public static partial class ShaderTemplate
 {
-	public sealed record ShaderTypeInfo( string Title, string Icon, ShaderDomain Domian, IEnumerable<string> SupportStrings, Dictionary<string,TemplateInputPlugInfo> InputPlugs ) : IValid
+	public sealed record ShaderTypeInfo( string Title, string Icon, ShaderDomain Domian, IEnumerable<string> SupportStrings, Dictionary<string, TemplateInputPlugInfo> InputPlugs ) : IValid
 	{
 		public bool IsValid => !string.IsNullOrWhiteSpace( Title ) && InputPlugs.Any();
 
@@ -86,7 +86,7 @@ public static partial class ShaderTemplate
 				case ShaderDomain.PostProcess:
 					templatePlugs = ShaderTemplatePostProcess.DefaultInputs;
 					break;
-				
+
 				default:
 					throw new NotImplementedException();
 			}
