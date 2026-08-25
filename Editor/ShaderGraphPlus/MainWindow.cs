@@ -616,7 +616,7 @@ public class MainWindow : DockWindow
 			return null;
 		}
 
-		// SkyBox2D.SkyMaterial requiers that the shader name contains 'sky' in the name.
+		// SkyBox2D.SkyMaterial requires that the shader name contains 'sky' in the name.
 		if ( _graph.Domain == ShaderDomain.Sky && !_asset.Name.Contains( "sky" ) )
 		{
 			OnError( [ new GraphCompiler.GraphIssue() { Node = null, Message = "The string 'sky' must be in the name of the graph when ShaderType is Sky", IsWarning = false } ] );
