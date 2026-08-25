@@ -18,6 +18,7 @@ internal static class ShaderGraphPlusGlobals
 
 	internal static class EditorEvents
 	{
+		internal const string SubgraphUpdate = "shadergraphplus_UpdateSubgraph";
 		internal const string ShaderTemplateUpdate = "shadergraphplus_ShaderTemplateUpdate";
 	}
 

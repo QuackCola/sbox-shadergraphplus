@@ -1657,7 +1657,7 @@ public class MainWindow : DockWindow
 
 		AddToRecentFiles( savePath );
 
-		EditorEvent.Run( "shadergraphplus.update.subgraph", _asset.RelativePath );
+		EditorEvent.Run( ShaderGraphPlusGlobals.EditorEvents.SubgraphUpdate, _asset.RelativePath );
 
 		return true;
 	}
@@ -1977,8 +1977,8 @@ public class MainWindow : DockWindow
 	}
 	*/
 
-	[Event( "shadergraphplus.update.subgraph" )]
-	public void OnSubgraphUpdate( string updatedPath )
+	[Event( ShaderGraphPlusGlobals.EditorEvents.SubgraphUpdate )]
+	internal void OnSubgraphUpdate( string updatedPath )
 	{
 		foreach ( var node in _graph.Nodes )
 		{
