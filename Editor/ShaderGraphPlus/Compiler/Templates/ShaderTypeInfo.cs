@@ -20,6 +20,14 @@ public static partial class ShaderTemplate
 		/// </summary>
 		public bool HasInputPlug( string name ) => InputPlugs.ContainsKey( name );
 
+		/// <summary>
+		/// Try to get the named input plug.
+		/// </summary>
+		public bool TryGetInputPlug( string name, out TemplateInputPlugInfo plug )
+		{
+			return InputPlugs.TryGetValue( name, out plug );
+		}
+
 		public static implicit operator ShaderTypeInfo( ShaderTemplateResource userTemplate )
 		{
 			var templatePlugs = new Dictionary<string, TemplateInputPlugInfo>();
