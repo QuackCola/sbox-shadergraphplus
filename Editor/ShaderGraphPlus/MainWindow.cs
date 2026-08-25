@@ -125,6 +125,7 @@ public class MainWindow : DockWindow
 		Selection = new();
 
 		_graph = new();
+		_graph.Title = "untitled";
 		_graph.IsSubgraph = IsSubgraph;
 
 		CreateToolBar();
@@ -1270,6 +1271,7 @@ public class MainWindow : DockWindow
 
 		_asset = null;
 		_graph = new();
+		_graph.Title = "untitled";
 		_dirty = false;
 		_graphView.Graph = _graph;
 		_blackboardView.Graph = _graph;
@@ -1369,6 +1371,11 @@ public class MainWindow : DockWindow
 		graph.Deserialize( System.IO.File.ReadAllText( path ), null, Path.GetFileName( path ) );
 		graph.Path = asset.RelativePath;
 		graph.IsSubgraph = IsSubgraph;
+
+		if ( !IsSubgraph )
+		{
+			_graph.Title = asset.Name;
+		}
 
 		_preview.Model = string.IsNullOrWhiteSpace( graph.Model ) ? null : Model.Load( graph.Model );
 		_preview.LoadSettings( graph.PreviewSettings );
