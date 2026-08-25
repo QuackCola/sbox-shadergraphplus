@@ -144,7 +144,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public string Model { get; set; }
 
 	/// <summary>
-	/// The name of the Node when used in ShaderGraph
+	/// The name of the Node when used in ShaderGraph or when graph is not a subgraph the asset name
 	/// </summary>
 	[ShowIf( nameof( IsSubgraph ), true )]
 	public string Title { get; set; }
