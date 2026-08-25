@@ -371,8 +371,6 @@ public sealed class PreviewPanel : Widget
 		{
 			_preview.View = v;
 		};
-		//_perspectiveModeButton.Hidden = true;
-		//_perspectiveModeButton.Visible = false;
 
 		toolBar.AddSeparator();
 
@@ -1061,8 +1059,7 @@ public sealed class Preview : SceneRenderingWidget
 	public void SetFeature( string id, int value )
 	{
 		_shaderFeatures.Add( id, value );
-		//_sceneObject.Attributes.SetFeature( id, value );
-		throw new NotImplementedException( "TODO : Implement when SceneObject.Attributes.SetFeature is added." );
+		throw new NotImplementedException( "TODO" );
 	}
 
 	public void SetDynamicCombo( string id, int value )
@@ -1090,12 +1087,9 @@ public sealed class Preview : SceneRenderingWidget
 		{
 			Scene.RenderAttributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
 		}
-		else
+		else if( _sceneObject.IsValid() )
 		{
-			if ( _sceneObject.IsValid() )
-			{
-				_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
-			}
+			_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
 		}
 	}
 
@@ -1142,8 +1136,6 @@ public sealed class Preview : SceneRenderingWidget
 	private void SetViewmode( ViewMode viewmode )
 	{
 		_mode = viewmode;
-
-		//SGPLog.Info( $"Current Angle : {_angles}" );
 
 		using ( Scene.Push() )
 		{
@@ -1236,8 +1228,10 @@ public sealed class Preview : SceneRenderingWidget
 		_material = Material.Load( "materials/core/shader_editor.vmat" );
 		Model = string.IsNullOrWhiteSpace( model ) ? SphereModel : Model.Load( model );
 
-		_ground = new SceneObject( _world, GroundModel );
-		_ground.RenderingEnabled = false;
+		_ground = new SceneObject( _world, GroundModel )
+		{
+			RenderingEnabled = false
+		};
 	}
 
 	public override void OnDestroyed()
