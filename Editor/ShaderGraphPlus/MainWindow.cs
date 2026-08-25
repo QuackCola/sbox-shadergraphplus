@@ -1911,7 +1911,8 @@ public class MainWindow : DockWindow
 	private void OnPropertyUpdated( SerializedProperty serializedProperty )
 	{
 		BlackboardIssues.Clear();
-		_preview.PostProcessing = _graphView.Graph.Domain == ShaderDomain.PostProcess;
+
+		_preview.PostProcessing = _graph.Domain == ShaderDomain.PostProcess;
 
 		if ( _properties.Target is BlackboardParameter parameter )
 		{
