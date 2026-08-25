@@ -1127,7 +1127,11 @@ public class MainWindow : DockWindow
 
 		file.AddSeparator();
 
-		file.AddOption( "Reload Shader Template", "common/reload.png", () => { LoadShaderTemplate( true ); } );
+		file.AddOption( "Reload Shader Template", "common/reload.png", () => 
+		{ 
+			LoadShaderTemplate();
+			SetDirty();
+		} );
 
 		file.AddSeparator();
 
@@ -1449,7 +1453,7 @@ public class MainWindow : DockWindow
 
 	}
 
-	private void LoadShaderTemplate( bool setDirty = false )
+	private void LoadShaderTemplate()
 	{
 		if ( _graph is null ) return;
 
@@ -1490,11 +1494,6 @@ public class MainWindow : DockWindow
 			};
 
 			_graph.ValidateTemplateSettings();
-		}
-
-		if ( setDirty )
-		{
-			SetDirty();
 		}
 	}
 
