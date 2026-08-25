@@ -37,32 +37,28 @@ public static partial class ShaderTemplate
 			{
 				case ShaderDomain.Surface:
 					{
-						Dictionary<string, TemplateInputPlugInfo> defaultInputs;
-
 						if ( userTemplate.ShadingModel == ShadingModel.Lit )
 						{
-							defaultInputs = ShaderTemplateSurface.DefaultLitInputs;
+							templatePlugs = ShaderTemplateSurface.DefaultLitInputs;
 
 							supportStrings.Add( SupportsLitShading );
 						}
 						else
 						{
-							defaultInputs = ShaderTemplateSurface.DefaultUnlitInputs;
+							templatePlugs = ShaderTemplateSurface.DefaultUnlitInputs;
 
 							supportStrings.Add( SupportsUnlitShading );
 						}
 
 						if ( !userTemplate.Opacity )
 						{
-							defaultInputs.Remove( "Opacity" );
+							templatePlugs.Remove( "Opacity" );
 						}
 
 						if ( !userTemplate.PositionOffset )
 						{
-							defaultInputs.Remove( "PositionOffset" );
+							templatePlugs.Remove( "PositionOffset" );
 						}
-
-						templatePlugs = defaultInputs;
 
 						if ( userTemplate.OpaqueBlend && userTemplate.MaskedBlend && userTemplate.TranslucentBlend )
 						{
