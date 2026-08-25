@@ -82,17 +82,18 @@ public static partial class ShaderTemplate
 
 						break;
 					}
-
 				case ShaderDomain.Sky:
-					templatePlugs = ShaderTemplateSky.DefaultInputs;
-					break;
-
+					{
+						templatePlugs = ShaderTemplateSky.DefaultInputs;
+						break;
+					}
 				case ShaderDomain.PostProcess:
-					templatePlugs = ShaderTemplatePostProcess.DefaultInputs;
-					break;
-
+					{
+						templatePlugs = ShaderTemplatePostProcess.DefaultInputs;
+						break;
+					}
 				default:
-					throw new NotImplementedException();
+					throw new NotImplementedException( $"Unknown ShaderDomain '{userTemplate.ShaderDomain}'" );
 			}
 
 			if ( userTemplate.EnforceRenderFace )
