@@ -1372,9 +1372,9 @@ public class MainWindow : DockWindow
 		graph.Path = asset.RelativePath;
 		graph.IsSubgraph = IsSubgraph;
 
-		if ( !IsSubgraph )
+		if ( !graph.IsSubgraph )
 		{
-			_graph.Title = asset.Name;
+			graph.Title = asset.Name;
 		}
 
 		_preview.Model = string.IsNullOrWhiteSpace( graph.Model ) ? null : Model.Load( graph.Model );
