@@ -16,6 +16,11 @@ internal static class ShaderGraphPlusGlobals
 		internal const string ShaderTypeDropdownEditor = "shadergraphplus_ShaderTypeDropdown";
 	}
 
+	internal static class EditorEvents
+	{
+		internal const string ShaderTemplateUpdate = "shadergraphplus_ShaderTemplateUpdate";
+	}
+
 	internal const string CleanName = "ShaderGraphPlus";
 
 	internal const string AssetTypeName = "Shader Graph Plus";

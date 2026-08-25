@@ -1991,4 +1991,14 @@ public class MainWindow : DockWindow
 
 		GeneratePreviewCode();
 	}
+
+	[Event( ShaderGraphPlusGlobals.EditorEvents.ShaderTemplateUpdate )]
+	internal void OnShaderTemplateUpdate( string templatePath )
+	{
+		if ( _graph.HasTemplate && _graph.ShaderType == templatePath )
+		{
+			LoadShaderTemplate();
+			SetDirty();
+		}
+	}
 }
