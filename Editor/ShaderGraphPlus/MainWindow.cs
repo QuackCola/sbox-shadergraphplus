@@ -597,6 +597,12 @@ public class MainWindow : DockWindow
 		RestoreShader();
 	}
 
+	private void OnWarning( IEnumerable<GraphCompiler.GraphIssue> issues )
+	{
+		_output.GraphIssues = issues.ToList();
+		DockManager.RaiseDock( "Output" );
+	}
+
 	private string GeneratePreviewCode()
 	{
 		if ( _shaderTemplate != null )
@@ -820,28 +826,25 @@ public class MainWindow : DockWindow
 		var code = compiler.Generate();
 
 		#region Errors & Warnings
-
-		nodeErrors.AddRange( compiler.Errors );
+		
 		nodeWarnings.AddRange( compiler.Warnings );
+		nodeErrors.AddRange( compiler.Errors );
 
-		if ( nodeWarnings.Any() ) //&& iErroringNodeErrors.Any() )
+		if ( nodeWarnings.Any() )
 		{
-			// Add any iErroringNodeErrors to the end of the iWarningNodeWarning list.
 			if ( nodeErrors.Any() )
 			{
 				nodeWarnings.AddRange( nodeErrors );
-
 				OnError( nodeWarnings );
 
 				return null;
 			}
-			else // No Errors to add :) not great not terrible...
+			else
 			{
-				_output.GraphIssues = nodeWarnings;
-				DockManager.RaiseDock( "Output" );
+				OnWarning( nodeWarnings );
 			}
 		}
-		else // No warnings? clear em.
+		else
 		{
 			_output.ClearWarnings();
 		}
@@ -852,7 +855,7 @@ public class MainWindow : DockWindow
 
 			return null;
 		}
-		else // No errors :o? clear em :D.
+		else
 		{
 			_output.ClearErrors();
 		}
@@ -861,7 +864,6 @@ public class MainWindow : DockWindow
 		if ( _generatedCode != code )
 		{
 			_generatedCode = code;
-			//_generatedCodeTextView.SetTextContents( code );
 
 			if ( _autoCompile )
 			{
@@ -1336,8 +1338,6 @@ public class MainWindow : DockWindow
 		_dynamicComboIntAttributes.Clear();
 		_shaderFeatures.Clear();
 
-		//_compiledNodes.Clear();
-
 		_preview?.ClearAttributes();
 	}
 
@@ -1643,18 +1643,17 @@ public class MainWindow : DockWindow
 
 		}
 
-
 		// Write generated post processing class to file within the current projects code folder.
-		//if (_graph.MaterialDomain is MaterialDomain.PostProcess)
-		//{
-		//	// If the post processing class code is blank, dont bother generating the class.
-		//	if ( !string.IsNullOrWhiteSpace( code.Item2 ) )
-		//	{
-		//        WritePostProcessingShaderClass( code.Item2 );
-		//    }
-		//	
-		//}
-		//
+		/*
+		if ( _graph.ShaderDomain is ShaderDomain.PostProcess )
+		{
+			// If the post processing class code is blank, dont bother writing the file to disk.
+			if ( !string.IsNullOrWhiteSpace( _postProcessingClassCode ) )
+			{
+				WritePostProcessingShaderClass( _postProcessingClassCode );
+			}
+		}
+		*/
 
 		AddToRecentFiles( savePath );
 
