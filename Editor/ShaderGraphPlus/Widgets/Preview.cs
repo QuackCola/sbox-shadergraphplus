@@ -1087,7 +1087,7 @@ public sealed class Preview : SceneRenderingWidget
 		{
 			Scene.RenderAttributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
 		}
-		else if( _sceneObject.IsValid() )
+		else if ( _sceneObject.IsValid() )
 		{
 			_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
 		}
