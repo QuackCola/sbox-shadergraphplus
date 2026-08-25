@@ -77,7 +77,7 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 
 	protected override IEnumerable<object> GetDropdownValues()
 	{
-		var templates = AssetSystem.All.Where( x => x.Path.EndsWith( $".{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}", StringComparison.OrdinalIgnoreCase ) );
+		var templates = AssetSystem.All.Where( x => !x.Path.StartsWith( "shadertemplates/examples" ) && x.Path.EndsWith( $".{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}", StringComparison.OrdinalIgnoreCase ) );
 
 		List<ShaderTemplate.TemplateEntry> entries = ShaderTemplate.BuiltInTemplateEntries.Values.ToList();
 
