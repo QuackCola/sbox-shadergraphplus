@@ -17,19 +17,9 @@ public abstract class NoiseNode : ShaderNodePlus
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
 		var result = compiler.Result( Coords );
-		var coords = "";
+		var coords = result.IsValid ? $"{result.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = result.IsValid ? $"{result.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = result.IsValid ? $"{result.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
-
-
-		return new( ResultType.Float, $"{Func}({coords})" );
+		return new( ResultType.Float, $"{Func}( {coords} )" );
 	};
 }
 
@@ -109,16 +99,7 @@ public sealed class VoronoiNoise : ShaderNodePlus
 		string angleStr = $"{(angleOffset.IsValid ? angleOffset.Cast( 1 ) : compiler.ResultValue( AngleOffset ))}";
 		string densityStr = $"{(cellDensity.IsValid ? cellDensity.Cast( 1 ) : compiler.ResultValue( CellDensity ))}";
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = result.IsValid ? $"{result.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = result.IsValid ? $"{result.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = result.IsValid ? $"{result.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new( ResultType.Float, $"{(Worley ? "1.0f - " : string.Empty)}VoronoiNoise( {coords}, {angleStr}, {densityStr} )" );
 	};

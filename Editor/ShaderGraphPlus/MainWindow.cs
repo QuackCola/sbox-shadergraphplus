@@ -1,8 +1,10 @@
 ﻿using Editor;
+using Editor.NodeEditor;
 using Sandbox.Rendering;
 using ShaderGraphPlus.Internal;
 using ShaderGraphPlus.Nodes;
 using System.Text;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -43,6 +45,8 @@ public class MainWindow : DockWindow
 	private ShaderGraphPlusView _graphView;
 	private ShaderGraphPlusBlackboardView _blackboardView;
 	private Asset _asset;
+
+	private ShaderTemplateResource _shaderTemplate;
 
 	public string AssetPath => _asset?.Path;
 
@@ -105,7 +109,9 @@ public class MainWindow : DockWindow
 	private ProjectCreator ProjectCreator { get; set; }
 
 	private Dictionary<string, ShaderFeatureBase> ShaderFeatures = new();
+
 	private List<GraphCompiler.GraphIssue> BlackboardIssues { get; set; } = new();
+	private List<GraphCompiler.GraphIssue> TemplateIssues { get; set; } = new();
 
 	public SelectionSystem Selection { get; set; }
 
@@ -579,17 +585,33 @@ public class MainWindow : DockWindow
 		}
 	}
 
+	private void OnError( IEnumerable<GraphCompiler.GraphIssue> issues )
+	{
+		_output.GraphIssues = issues.ToList();
+		DockManager.RaiseDock( "Output" );
+
+		_generatedCode = null;
+		_generatedCodeTextView.SetTextContents( "" );
+
+		RestoreShader();
+	}
+
 	private string GeneratePreviewCode()
 	{
+		if ( _shaderTemplate != null )
+		{
+			if ( TemplateIssues.Any() )
+			{
+				OnError( TemplateIssues );
+
+				return null;
+			}
+		}
+
 		if ( BlackboardIssues.Any() )
 		{
-			_output.GraphIssues = BlackboardIssues;
-			DockManager.RaiseDock( "Output" );
+			OnError( BlackboardIssues );
 
-			_generatedCode = null;
-			_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
 			return null;
 		}
 
@@ -605,18 +627,13 @@ public class MainWindow : DockWindow
 		{
 			_output.GraphIssues = registrationIssues;
 
-			DockManager.RaiseDock( "Output" );
-
-			_generatedCode = null;
-			_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
+			OnError( registrationIssues );
 
 			return null;
 		}
 
 		var resultNode = _graph.Nodes.OfType<BaseResult>().FirstOrDefault();
-		var compiler = new GraphCompiler( _graph, ShaderFeatures, true );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, true );
 		var nodeErrors = new List<GraphCompiler.GraphIssue>();
 		var nodeWarnings = new List<GraphCompiler.GraphIssue>();
 		var evaluatedCustomFunctions = new List<string>();
@@ -804,21 +821,14 @@ public class MainWindow : DockWindow
 			if ( nodeErrors.Any() )
 			{
 				nodeWarnings.AddRange( nodeErrors );
-				_output.GraphIssues = nodeWarnings;
 
-				DockManager.RaiseDock( "Output" );
-
-				_generatedCode = null;
-				_generatedCodeTextView.SetTextContents( "" );
-
-				RestoreShader();
+				OnError( nodeWarnings );
 
 				return null;
 			}
 			else // No Errors to add :) not great not terrible...
 			{
 				_output.GraphIssues = nodeWarnings;
-
 				DockManager.RaiseDock( "Output" );
 			}
 		}
@@ -829,14 +839,7 @@ public class MainWindow : DockWindow
 
 		if ( nodeErrors.Any() )
 		{
-			_output.GraphIssues = nodeErrors;
-
-			DockManager.RaiseDock( "Output" );
-
-			_generatedCode = null;
-			//_generatedCodeTextView.SetTextContents( "" );
-
-			RestoreShader();
+			OnError( nodeErrors );
 
 			return null;
 		}
@@ -883,7 +886,7 @@ public class MainWindow : DockWindow
 		// Go ahead preregister anything before iterating over all the nodes in the graph.
 		RegisterShaderFeatures( out _ );
 
-		var compiler = new GraphCompiler( _graph, ShaderFeatures, false );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, false );
 		return compiler.Generate();
 	}
 
@@ -1113,6 +1116,10 @@ public class MainWindow : DockWindow
 
 		file.AddSeparator();
 
+		file.AddOption( "Reload Shader Template", "common/reload.png", () => { LoadShaderTemplate( true ); } );
+
+		file.AddSeparator();
+
 		_recentFilesMenu = file.AddMenu( "Recent Files" );
 
 		file.AddSeparator();
@@ -1280,6 +1287,8 @@ public class MainWindow : DockWindow
 		_output.ClearErrors();
 		_output.ClearWarnings();
 
+		LoadShaderTemplate();
+
 		if ( !IsSubgraph )
 		{
 			var result = _graphView.CreateNewNode( _graphView.FindNodeType( typeof( Result ) ), 0 );
@@ -1370,6 +1379,9 @@ public class MainWindow : DockWindow
 		_graph = graph;
 		_dirty = false;
 		_graphView.Graph = _graph;
+
+		LoadShaderTemplate();
+
 		_blackboardView.Graph = _graph;
 
 		UpdateTitle();
@@ -1420,6 +1432,55 @@ public class MainWindow : DockWindow
 			DockManager.RaiseDock( "Output" );
 		}
 
+	}
+
+	private void LoadShaderTemplate( bool setDirty = false )
+	{
+		if ( _graph is null ) return;
+
+		TemplateIssues.Clear();
+
+		if ( _graph.HasTemplate )
+		{
+			var templateAsset = AssetSystem.FindByPath( _graph.ShaderType );
+
+			_shaderTemplate = new ShaderTemplateResource();
+
+			if ( _shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) ) )
+			{
+				_graph.ShaderTypeInfo = _shaderTemplate;
+				_graph.ValidateTemplateSettings();
+
+				// Validate the template
+				if ( !_shaderTemplate.Validate( _graph.ShaderType, out var tagErrors ) )
+				{
+					TemplateIssues = tagErrors.Select( x => new GraphCompiler.GraphIssue() { Node = null, Message = x, IsWarning = false } ).ToList();
+				}
+			}
+			else
+			{
+				TemplateIssues = [new GraphCompiler.GraphIssue() { Node = null, Message = $"Shader Template \"{templateAsset.Path}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." }];
+			}
+		}
+		else
+		{
+			_shaderTemplate = null;
+
+			_graph.ShaderTypeInfo = _graph.ShaderType switch
+			{
+				"Surface" => ShaderTemplateSurface.ShaderTypeInfo,
+				"Sky" => ShaderTemplateSky.ShaderTypeInfo,
+				"PostProcess" => ShaderTemplatePostProcess.ShaderTypeInfo,
+				_ => ShaderTemplateSurface.ShaderTypeInfo,
+			};
+
+			_graph.ValidateTemplateSettings();
+		}
+
+		if ( setDirty )
+		{
+			SetDirty();
+		}
 	}
 
 	[Shortcut( "editor.save-as", "CTRL+SHIFT+S" )]
@@ -1848,6 +1909,12 @@ public class MainWindow : DockWindow
 		if ( _properties.Target is BaseNodePlus node )
 		{
 			_graphView.UpdateNode( node );
+		}
+
+		// Reload shader template
+		if ( _properties.Target is ShaderGraphPlus && serializedProperty.IsPropertyName( nameof( ShaderGraphPlus.ShaderType ) ) )
+		{
+			LoadShaderTemplate();
 		}
 
 		var shouldEvaluate = _properties.Target is not CommentNode;

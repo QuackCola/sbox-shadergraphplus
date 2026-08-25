@@ -35,20 +35,10 @@ public sealed class BoxShapeNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var width = compiler.ResultOrDefault( Width, DefaultWidth );
 		var height = compiler.ResultOrDefault( Height, DefaultHeight );
-
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "BoxShape", $"{coords}", $"{width}", $"{height}" ) );
 	};
@@ -89,20 +79,10 @@ public sealed class ElipseShapeNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var width = compiler.ResultOrDefault( Width, DefaultWidth );
 		var height = compiler.ResultOrDefault( Height, DefaultHeight );
-
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "ElipseShape", $"{coords}", $"{width}", $"{height}" ) );
 	};
@@ -151,21 +131,12 @@ public sealed class PolygonShapeNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var sides = compiler.ResultOrDefault( Sides, DefaultSides );
 		var width = compiler.ResultOrDefault( Width, DefaultWidth );
 		var height = compiler.ResultOrDefault( Height, DefaultHeight );
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "PolygonShape", $"{coords}", $"{sides}", $"{width}", $"{height}" ) );
 	};

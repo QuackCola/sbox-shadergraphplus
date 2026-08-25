@@ -50,23 +50,13 @@ public sealed class RoundGradientNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var center = compiler.ResultOrDefault( CenterPos, DefaultCenterPos );
 		var radius = compiler.ResultOrDefault( Radius, DefaultRadius );
 		var density = compiler.ResultOrDefault( Density, DefaultDensity );
 		var invert = compiler.ResultOrDefault( Invert, DefaultInvert );
 
-
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		return new NodeResult( ResultType.Float, compiler.ResultHLSLFunction( "RoundGradient", $"{coords}",
 			$"{center}", $"{radius}", $"{density}", $"{invert}"

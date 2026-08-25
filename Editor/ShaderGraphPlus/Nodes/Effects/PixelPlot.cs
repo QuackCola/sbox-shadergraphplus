@@ -90,7 +90,7 @@ float4 PixelPlot( in Texture2D vColorTex, in SamplerState sSampler, float2 vUv ,
 		}
 
 		string func = compiler.RegisterHLSLFunction( PixelPlot, "PixelPlot" );
-		string funcCall = compiler.ResultHLSLFunction( func, $"{textureResult}, {samplerResult}, {(coordsResult.IsValid ? $"{coordsResult.Cast( 2 )}" : "i.vTextureCoords.xy")}, {gridResult}, {boarderThicknessResult}" );
+		string funcCall = compiler.ResultHLSLFunction( func, $"{textureResult}, {samplerResult}, {(coordsResult.IsValid ? $"{coordsResult.Cast( 2 )}" : compiler.GetTextureCoordinates())}, {gridResult}, {boarderThicknessResult}" );
 
 		return new NodeResult( ResultType.Vector4, funcCall );
 	};

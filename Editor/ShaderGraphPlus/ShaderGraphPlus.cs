@@ -1,6 +1,8 @@
 using Editor;
 using ShaderGraphPlus.Nodes;
 using static Editor.SceneViewportWidget;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
+using static ShaderGraphPlus.ShaderTemplate;
 
 namespace ShaderGraphPlus;
 
@@ -12,6 +14,10 @@ public enum BlendMode
 	Masked,
 	[Icon( "blur_on" )]
 	Translucent,
+	/*
+	[Icon( "tune" )]
+	Dynamic,
+	*/
 }
 
 public enum ShadingModel
@@ -26,17 +32,14 @@ public enum ShadingModel
 	/// </summary>
 	[Icon( "brightness_3" )]
 	Unlit,
-	//[Icon( "build" )] // TODO
-	//Custom,
 }
 
 public enum ShaderDomain
 {
 	[Icon( "view_in_ar" )]
 	Surface,
-	[Icon( "brush" )]
-	[Hide]
-	BlendingSurface, // TODO : Hidden for now since its broken.
+	[Icon( "nights_stay" )]
+	Sky,
 	[Icon( "desktop_windows" )]
 	PostProcess,
 }
@@ -66,6 +69,7 @@ public class PreviewSettings
 	/// Current viewmode of the preview veiwport
 	/// </summary>
 	public ViewMode ViewMode { get; set; } = ViewMode.Perspective;
+
 	public bool RenderBackfaces { get; set; } = false;
 
 	/// <summary>
@@ -98,7 +102,7 @@ public class PreviewSettings
 public partial class ShaderGraphPlus : IBlackboardNodeGraph
 {
 	[Hide]
-	public int Version => 10;
+	public int Version => 11;
 
 	[Hide, JsonIgnore]
 	public IEnumerable<BaseNodePlus> Nodes => _nodes.Values;
@@ -163,23 +167,113 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[ShowIf( nameof( IsSubgraph ), true )]
 	public bool AddToNodeLibrary { get; set; }
 
+	[Hide]
+	public bool HasTemplate => ShaderType != null && ShaderType.EndsWith( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension );
+
+	[Hide]
+	public bool HasNoTemplate => !HasTemplate;
+
+	[Hide]
+	private bool ShowShadingModel => Domain == ShaderDomain.Surface && HasNoTemplate;
+
+	[Hide]
+	private bool ShowRenderFace => Domain == ShaderDomain.Surface && (ShaderTypeInfo.HasSupport( SupportsAllRenderFace ));
+
+	[Hide]
+	private bool ShowBlendMode => Domain == ShaderDomain.Surface;
+
+	[Editor( ControlWidgetCustomEditors.ShaderTypeDropdownEditor )]
+	public string ShaderType { get; set; } = ShaderTemplateSurface.ShaderTypeInfo.Title;
+
+	[Hide]
+	public ShaderDomain Domain => ShaderTypeInfo.IsValid ? ShaderTypeInfo.Domian : ShaderDomain.Surface;
+
+	[ShowIf( nameof( ShowBlendMode ), true )]
 	public BlendMode BlendMode { get; set; }
 
 	[ShowIf( nameof( ShowShadingModel ), true )]
 	public ShadingModel ShadingModel { get; set; }
 
-	[ShowIf( nameof( ShowShadingModel ), true )]
+	[ShowIf( nameof( ShowRenderFace ), true )]
 	public RenderFace RenderFace { get; set; }
-
-	[Hide] private bool ShowShadingModel => Domain != ShaderDomain.PostProcess;
-
-	public ShaderDomain Domain { get; set; }
 
 	[Hide]
 	public PreviewSettings PreviewSettings { get; set; } = new();
 
+	[Hide, JsonIgnore]
+	public ShaderTypeInfo ShaderTypeInfo { get; set; } = new();
+
 	public ShaderGraphPlus()
 	{
+	}
+
+	/// <summary>
+	/// Validates settings to what is supported by the current custom user template.
+	/// </summary>
+	public void ValidateTemplateSettings()
+	{
+		// Auto-correct BlendMode if current is not supported
+		bool currentBlendModeSupported = BlendMode switch
+		{
+			BlendMode.Opaque => ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ),
+			BlendMode.Masked => ShaderTypeInfo.HasSupport( SupportsMaskedBlend ),
+			BlendMode.Translucent => ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ),
+			_ => false
+		};
+
+		if ( !currentBlendModeSupported )
+		{
+			if ( !ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ) && !ShaderTypeInfo.HasSupport( SupportsMaskedBlend ) && !ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ) )
+			{
+				BlendMode = BlendMode.Opaque; // Fallback to Opaque blend mode.
+			}
+			else
+			{
+				// Find the first supported blend mode
+				if ( ShaderTypeInfo.HasSupport( SupportsOpaqueBlend ) ) BlendMode = BlendMode.Opaque;
+				else if ( ShaderTypeInfo.HasSupport( SupportsMaskedBlend ) ) BlendMode = BlendMode.Masked;
+				else if ( ShaderTypeInfo.HasSupport( SupportsTranslucentBlend ) ) BlendMode = BlendMode.Translucent;
+			}
+		}
+
+		// Auto-correct ShadingModel if current is not supported
+		bool currentShadingModelSupported = ShadingModel switch
+		{
+			ShadingModel.Lit => ShaderTypeInfo.HasSupport( SupportsLitShading ),
+			ShadingModel.Unlit => ShaderTypeInfo.HasSupport( SupportsUnlitShading ),
+			_ => false
+		};
+
+		if ( !currentShadingModelSupported )
+		{
+			// Find the first supported shading model
+			if ( ShaderTypeInfo.HasSupport( SupportsLitShading ) ) ShadingModel = ShadingModel.Lit;
+			else if ( ShaderTypeInfo.HasSupport( SupportsUnlitShading ) ) ShadingModel = ShadingModel.Unlit;
+		}
+
+		if ( HasTemplate )
+		{
+			if ( !ShaderTypeInfo.HasSupport( SupportsAllRenderFace ) )
+			{
+				// Ensure template culling mode
+				if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceFront ) )
+				{
+					RenderFace = RenderFace.Front;
+				}
+				else if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceBack ) )
+				{
+					RenderFace = RenderFace.Back;
+				}
+				else if ( ShaderTypeInfo.HasSupport( SupportsRenderFaceBoth ) )
+				{
+					RenderFace = RenderFace.Both;
+				}
+				else
+				{
+					RenderFace = RenderFace.Front; // Fallback to backface culling.
+				}
+			}
+		}
 	}
 
 	public bool ContainsNode( string id )

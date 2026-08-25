@@ -165,22 +165,24 @@ public sealed class SampleTexture2DNode : Texture2DSamplerBase
 		texture ??= Texture.White;
 
 		var textureGlobal = texture2DResult.Code;
-		var coords = compiler.Result( CoordsInput );
+		var inputCoords = compiler.Result( CoordsInput );
 		var samplerGlobal = compiler.ResultSamplerOrDefault( SamplerInput, SamplerState );
 
 		var attributeName = texture2DResult.Code.TrimStart( "g_t" ).ToString();
 		compiler.SetAttribute( attributeName, texture );
 
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
+
 		if ( compiler.Stage == GraphCompiler.ShaderStage.Vertex )
 		{
 			return new NodeResult( ResultType.Vector4, $"{textureGlobal}.SampleLevel(" +
 				$" {samplerGlobal}," +
-				$" {(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")}, 0 )" );
+				$" {coords}, 0 )" );
 		}
 		else
 		{
 			return new NodeResult( ResultType.Vector4, $"{textureGlobal}.Sample( {samplerGlobal}," +
-				$"{(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")} )" );
+				$"{coords} )" );
 		}
 	};
 
@@ -263,16 +265,18 @@ public sealed class SampleTexture2DLodNode : Texture2DSamplerBase
 		texture ??= Texture.White;
 
 		var textureGlobal = texture2DResult.Code;
-		var coords = compiler.Result( CoordsInput );
+		var inputCoords = compiler.Result( CoordsInput );
 		var samplerGlobal = compiler.ResultSamplerOrDefault( SamplerInput, SamplerState );
 		var lodLevel = compiler.ResultOrDefault( LODInput, LODLevel );
 
 		var attributeName = texture2DResult.Code.TrimStart( "g_t" ).ToString();
 		compiler.SetAttribute( attributeName, texture );
 
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
+
 		return new NodeResult( ResultType.Vector4, $"{textureGlobal}.SampleLevel(" +
 				$" {samplerGlobal}," +
-				$" {(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")}, {lodLevel} )" );
+				$" {coords}, {lodLevel} )" );
 	};
 
 	/// <summary>
@@ -362,7 +366,7 @@ public sealed class SampleTexture2DGradientNode : Texture2DSamplerBase
 		texture ??= Texture.White;
 
 		var textureGlobal = texture2DResult.Code;
-		var coords = compiler.Result( CoordsInput );
+		var inputCoords = compiler.Result( CoordsInput );
 		var samplerGlobal = compiler.ResultSamplerOrDefault( SamplerInput, SamplerState );
 		var ddx = compiler.ResultOrDefault( DDXInput, DDX );
 		var ddy = compiler.ResultOrDefault( DDYInput, DDY );
@@ -370,9 +374,11 @@ public sealed class SampleTexture2DGradientNode : Texture2DSamplerBase
 		var attributeName = texture2DResult.Code.TrimStart( "g_t" ).ToString();
 		compiler.SetAttribute( attributeName, texture );
 
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
+
 		return new NodeResult( ResultType.Vector4, $"{textureGlobal}.SampleGrad(" +
 				$" {samplerGlobal}," +
-				$" {(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")}, ( {ddx} ).xy, ( {ddy} ).xy )" );
+				$" {coords}, ( {ddx} ).xy, ( {ddy} ).xy )" );
 	};
 
 	/// <summary>
@@ -869,15 +875,6 @@ public sealed class TextureCoord : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		if ( compiler.IsPreview )
-		{
-			var result = $"{compiler.ResultValue( UseSecondaryCoord )} ? i.vTextureCoords.zw : i.vTextureCoords.xy";
-			return new( ResultType.Vector2, $"{compiler.ResultValue( Tiling.IsNearZeroLength )} ? {result} : ({result}) * {compiler.ResultValue( Tiling )}" );
-		}
-		else
-		{
-			var result = UseSecondaryCoord ? "i.vTextureCoords.zw" : "i.vTextureCoords.xy";
-			return Tiling.IsNearZeroLength ? new( ResultType.Vector2, result ) : new( ResultType.Vector2, $"{result} * {compiler.ResultValue( Tiling )}" );
-		}
+		return compiler.GetTextureCoordinates( Tiling, UseSecondaryCoord );
 	};
 }

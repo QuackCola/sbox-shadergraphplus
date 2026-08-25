@@ -23,15 +23,21 @@ public sealed class Result : BaseResult
 		}
 	}
 
-	[Hide]
-	private bool IsLit => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.ShadingModel == ShadingModel.Lit && shaderGraph.Domain != ShaderDomain.PostProcess);
+	[JsonIgnore, Hide, Browsable( false )]
+	public new ShaderGraphPlus Graph
+	{
+		get => (ShaderGraphPlus)base.Graph;
+		set => base.Graph = value;
+	}
 
 	[Hide]
-	private bool IsPostProcess => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.Domain == ShaderDomain.PostProcess);
+	private bool IsLit => Graph.Domain == ShaderDomain.Surface && Graph.ShadingModel == ShadingModel.Lit;
 
-	// TODO :
-	//[Hide]
-	//private bool IsCustomLighting => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.ShadingModel == ShadingModel.Custom );
+	[Hide]
+	private bool ShowPositionOffset => Graph.Domain == ShaderDomain.Surface && Graph.ShaderTypeInfo.HasInputPlug( "PositionOffset" );
+
+	[Hide]
+	private bool ShowOpacityInput => Graph.Domain == ShaderDomain.Surface && Graph.ShaderTypeInfo.HasInputPlug( "Opacity" );
 
 	[Hide, JsonIgnore]
 	public override bool CanPreview => false;
@@ -42,42 +48,49 @@ public sealed class Result : BaseResult
 
 	[Hide]
 	[Input( typeof( Vector3 ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Emission { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultOpacity ) )]
 	[Input( typeof( float ) )]
+	[ShowIf( nameof( ShowOpacityInput ), true )]
 	public NodeInput Opacity { get; set; }
 
 	[Hide]
 	[Title( "Normal (Tangent)" )]
 	[Input( typeof( Vector3 ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Normal { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultRoughness ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Roughness { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultMetalness ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput Metalness { get; set; }
 
 	[Hide, NodeValueEditor( nameof( DefaultAmbientOcclusion ) )]
 	[Input( typeof( float ) )]
-	[ShowIf( nameof( this.IsLit ), true )]
+	[ShowIf( nameof( IsLit ), true )]
 	public NodeInput AmbientOcclusion { get; set; }
 
 	[InputDefault( nameof( Opacity ) )]
+	[ShowIf( nameof( ShowOpacityInput ), true )]
 	public float DefaultOpacity { get; set; } = 1.0f;
 
 	[InputDefault( nameof( Roughness ) )]
+	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultRoughness { get; set; } = 1.0f;
+
 	[InputDefault( nameof( Metalness ) )]
+	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultMetalness { get; set; } = 0.0f;
+
 	[InputDefault( nameof( AmbientOcclusion ) )]
+	[ShowIf( nameof( IsLit ), true )]
 	public float DefaultAmbientOcclusion { get; set; } = 1.0f;
 
 	[Hide, JsonIgnore]
@@ -86,12 +99,16 @@ public sealed class Result : BaseResult
 	public override void OnFrame()
 	{
 		var hashCode = new HashCode();
+
 		if ( Graph is ShaderGraphPlus shaderGraph )
 		{
+			hashCode.Add( shaderGraph.ShaderType );
 			hashCode.Add( shaderGraph.ShadingModel );
-			hashCode.Add( shaderGraph.Domain );
+			hashCode.Add( shaderGraph.ShaderTypeInfo );
 		}
+
 		var hc = hashCode.ToHashCode();
+
 		if ( hc != _lastHashCode )
 		{
 			_lastHashCode = hc;
@@ -103,14 +120,8 @@ public sealed class Result : BaseResult
 
 	[Hide]
 	[Input( typeof( Vector3 ) )]
-	[HideIf( nameof( IsPostProcess ), true )]
+	[ShowIf( nameof( ShowPositionOffset ), true )]
 	public NodeInput PositionOffset { get; set; }
-
-	// TODO :
-	//[Hide]
-	//[Input( typeof( Vector3 ) )]
-	//[HideIf( nameof( IsCustomLighting ), true )]
-	//public NodeInput CustomLighting { get; set; }
 
 	//[JsonIgnore, Hide]
 	//public override Color PrimaryColor => Color.Lerp( Theme.Blue, Color.White, 0.25f );

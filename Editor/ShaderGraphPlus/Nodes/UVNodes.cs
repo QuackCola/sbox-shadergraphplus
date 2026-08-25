@@ -54,20 +54,11 @@ float2 UVRotation( float2 vUv, float2 vRotationCenter, float flRotation )
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var rotationcenter = compiler.ResultOrDefault( RotationCenter, DefaultRotationCenter );
 		var rotation = compiler.ResultOrDefault( Rotation, DefaultRotation );
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		string func = compiler.RegisterHLSLFunction( UVRotation, "UVRotation" );
 		string funcCall = compiler.ResultHLSLFunction( func, $"{coords}, {rotationcenter}, {rotation}" );
@@ -111,19 +102,10 @@ public sealed class UVScaleNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var scale = compiler.ResultOrDefault( Scale, DefaultScale );
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		//string func = compiler.RegisterHLSLFunction( UVScale );
 		//string funcCall = compiler.ResultFunction( func, $"{coords}, {scale}" );
@@ -181,21 +163,11 @@ float2 UVScaleByPoint( float2 vUv, float flCenter, float2 flScale )
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var center = compiler.ResultOrDefault( Center, DefaultCenter );
 		var scale = compiler.ResultOrDefault( Scale, DefaultScale );
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
-
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		string func = compiler.RegisterHLSLFunction( UVScaleByPoint, "UVScaleByPoint" );
 		string funcCall = compiler.ResultHLSLFunction( func, $"{coords}, {center}, {scale}" );
@@ -247,36 +219,16 @@ float2 UVScroll( float flTime, float2 vUv, float2 vScrollSpeed )
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( Coords );
-		var result_time = compiler.Result( Time );
-		var time = "";
+		var inputCoords = compiler.Result( Coords );
+		var inputTime = compiler.Result( Time );
 		var scrollspeed = compiler.ResultOrDefault( ScrollSpeed, DefaultScrollSpeed );
 
-
-		if ( Time.IsValid() )
-		{
-			time = result_time.Code;
-		}
-		else
-		{
-			time = "g_flTime";
-		}
-
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		//string func = compiler.RegisterHLSLFunction( UVScroll );
-		//string funcCall = compiler.ResultFunction( func, $"{time}, {(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")}, {scrollspeed}" );
+		//string funcCall = compiler.ResultFunction( func, $"{time}, {coords}, {scrollspeed}" );
 
-		return new NodeResult( ResultType.Vector2, $"({coords} + {time} * {scrollspeed})" );
+		return new NodeResult( ResultType.Vector2, $"({coords} + {(Time.IsValid() ? inputTime.Code : "g_flTime")} * {scrollspeed})" );
 	};
 }
 
@@ -350,21 +302,11 @@ public sealed class TileAndOffset : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		var incoords = compiler.Result( UV );
+		var inputCoords = compiler.Result( UV );
 		var tile = compiler.ResultOrDefault( Tile, DefaultTile );
 		var offset = compiler.ResultOrDefault( Offset, DefaultOffset );
 
-		var coords = "";
-
-		if ( compiler.Graph.Domain is ShaderDomain.PostProcess )
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "CalculateViewportUv( i.vPositionSs.xy )";
-		}
-		else
-		{
-			coords = incoords.IsValid ? $"{incoords.Cast( 2 )}" : "i.vTextureCoords.xy";
-		}
-
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
 
 		var funcCall = $"TileAndOffsetUv( {coords}," +
 			$" {(tile.IsValid ? tile.Cast( 2 ) : "1.0f")}," +
@@ -451,15 +393,17 @@ float2 FlipBook( float2 vUV, float flWidth, float flHeight, int nTileIndex, bool
 			return NodeResult.Error( $"{DisplayInfo.Name} Is not ment for postprocessing shaders!" );
 		}
 
-		var coords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var width = compiler.ResultOrDefault( Width, DefaultWidth );
 		var height = compiler.ResultOrDefault( Height, DefaultHeight );
 		var tileindex = compiler.ResultOrDefault( TileIndex, DefaultTileIndex );
 		var invertX = compiler.ResultOrDefault( InvertX, DefaultInvertX );
 		var invertY = compiler.ResultOrDefault( InvertY, DefaultInvertY );
 
+		var coords = inputCoords.IsValid ? $"{inputCoords.Cast( 2 )}" : compiler.GetTextureCoordinates();
+
 		string func = compiler.RegisterHLSLFunction( FlipBook, "FlipBook" );
-		string funcCall = compiler.ResultHLSLFunction( func, $"{(coords.IsValid ? $"{coords.Cast( 2 )}" : "i.vTextureCoords.xy")}, {width}, {height}, {tileindex}, {invertX}, {invertY}" );
+		string funcCall = compiler.ResultHLSLFunction( func, $"{coords}, {width}, {height}, {tileindex}, {invertX}, {invertY}" );
 
 		return new NodeResult( ResultType.Vector2, funcCall );
 	};

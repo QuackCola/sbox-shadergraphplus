@@ -20,6 +20,8 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public ShaderGraphPlus Graph { get; private set; }
 
+	public ShaderTemplateResource UserShaderTemplate { get; private set; }
+
 	/// <summary>
 	/// Current SubGraph
 	/// </summary>
@@ -98,6 +100,22 @@ public sealed partial class GraphCompiler
 		}
 	}
 
+
+	/// <summary>
+	/// Does the current graph represent a surface shader
+	/// </summary>
+	public bool IsSurfaceShader => Graph.Domain == ShaderDomain.Surface;
+
+	/// <summary>
+	/// Does the current graph represent a sky shader
+	/// </summary>
+	public bool IsSkyShader => Graph.Domain == ShaderDomain.Sky;
+
+	/// <summary>
+	/// Does the current graph represent a postprocessing shader
+	/// </summary>
+	public bool IsPostProcessingShader => Graph.Domain == ShaderDomain.PostProcess;
+
 	public enum ShaderStage
 	{
 		Vertex,
@@ -142,7 +160,7 @@ public sealed partial class GraphCompiler
 	public IEnumerable<GraphIssue> Warnings => NodeWarnings
 		.Select( x => new GraphIssue { Node = x.Key, Message = x.Value.FirstOrDefault(), IsWarning = true } );
 
-	public GraphCompiler( ShaderGraphPlus graph, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview )
+	public GraphCompiler( ShaderGraphPlus graph, ShaderTemplateResource userShaderTemplate, Dictionary<string, ShaderFeatureBase> shaderFeatures, bool preview )
 	{
 		Graph = graph;
 		IsPreview = preview;
@@ -151,9 +169,10 @@ public sealed partial class GraphCompiler
 		AddSubgraphs( Graph );
 		ShaderFeatures = shaderFeatures;
 
-		// Set the Initial Vertex and Pixel stage inputs from ShaderTemplate.
-		VertexInputs = ShaderTemplate.VertexInputs;
-		PixelInputs = ShaderTemplate.PixelInputs;
+		if ( userShaderTemplate != null )
+		{
+			UserShaderTemplate = userShaderTemplate;
+		}
 	}
 
 	public bool TryGetPreviewImage( string name, out string imagePath )
@@ -185,7 +204,7 @@ public sealed partial class GraphCompiler
 		if ( string.IsNullOrWhiteSpace( textureInput.DefaultTexture ) )
 			return "";
 
-		var resourceText = string.Format( ShaderTemplate.TextureDefinition,
+		var resourceText = string.Format( TextureDefinitionTemplate.TextureDefinition,
 			textureInput.DefaultTexture,
 			textureInput.ColorSpace,
 			textureInput.ImageFormat,
@@ -231,13 +250,6 @@ public sealed partial class GraphCompiler
 	{
 		name = CleanName( name );
 
-		if ( ShaderTemplate.InternalVertexInputs.ContainsKey( name ) )
-		{
-			SGPLogger.Error( $"VetexInput \"{name}\" is reserved by the GraphCompiler" );
-
-			return;
-		}
-
 		var vertexInput = $"{type} {name} : {semantic};";
 
 		if ( !VertexInputs.TryAdd( name, vertexInput ) )
@@ -249,13 +261,6 @@ public sealed partial class GraphCompiler
 	public void RegisterPixelInput( string type, string name, string semantic )
 	{
 		name = CleanName( name );
-
-		if ( ShaderTemplate.InternalPixelInputs.ContainsKey( name ) )
-		{
-			SGPLogger.Error( $"PixelInput \"{name}\" is reserved by the GraphCompiler" );
-
-			return;
-		}
 
 		var pixelInput = $"{type} {name} : {semantic};";
 
@@ -358,6 +363,47 @@ public sealed partial class GraphCompiler
 			return;
 
 		result.Globals.Add( name, global );
+	}
+
+	public NodeResult GetTextureCoordinates( Vector2 tiling, bool useSecondaryCoord = false )
+	{
+		var result = "";
+
+		if ( IsSurfaceShader )
+		{
+			if ( IsPreview )
+			{
+				result = $"{ResultValue( useSecondaryCoord )} ? i.vTextureCoords.zw : i.vTextureCoords.xy";
+				return new( ResultType.Vector2, $"{ResultValue( tiling.IsNearZeroLength )} ? {result} : ({result}) * {ResultValue( tiling )}" );
+
+			}
+			else
+			{
+				result = useSecondaryCoord ? "i.vTextureCoords.zw" : "i.vTextureCoords.xy";
+			}
+		}
+		else
+		{
+			result = IsVs ? $"CalculateViewportUv( i.vPositionPs.xy )" : $"CalculateViewportUv( i.vPositionSs.xy )";
+		}
+
+		return tiling.IsNearZeroLength ? new( ResultType.Vector2, result ) : new( ResultType.Vector2, $"{result} * {ResultValue( tiling )}" );
+	}
+
+	public string GetTextureCoordinates()
+	{
+		var result = "";
+
+		if ( IsSurfaceShader )
+		{
+			result = "i.vTextureCoords.xy";
+		}
+		else
+		{
+			result = IsVs ? $"CalculateViewportUv( i.vPositionPs.xy )" : $"CalculateViewportUv( i.vPositionSs.xy )";
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -1149,7 +1195,7 @@ public sealed partial class GraphCompiler
 
 		parameter.Result = ResultValue( value, name );
 
-		var options = new StringWriter();
+		using var options = new StringWriter();
 
 		// If we're an attribute, we don't care about the UI options
 		if ( isAttribute )
@@ -1376,17 +1422,6 @@ public sealed partial class GraphCompiler
 		if ( Errors.Any() )
 			return null;
 
-		/*
-		if ( Graph.MaterialDomain == MaterialDomain.BlendingSurface )
-		{
-			VertexInputs.Add( "vColorBlendValues", "float4 vColorBlendValues : TEXCOORD4 < Semantic( VertexPaintBlendParams ); >;" );
-			VertexInputs.Add( "vColorPaintValues", "float4 vColorPaintValues : TEXCOORD5 < Semantic( VertexPaintTintColor ); >;" );
-		
-			PixelInputs.Add( "vBlendValues", "float4 vBlendValues : TEXCOORD14;" );
-			PixelInputs.Add( "vPaintValues", "float4 vPaintValues : TEXCOORD15;" );
-		}
-		*/
-
 		// Pre-Register anything before we Generate anything. Shouldn't cause any issues i hope.
 		foreach ( var node in Graph.Nodes.OfType<IPreRegisterNodeData>() )
 		{
@@ -1400,11 +1435,21 @@ public sealed partial class GraphCompiler
 		if ( Errors.Any() )
 			return null;
 
-		var shaderTemplate = ShaderTemplate.Code;
+		var shaderTemplate = "";
 
-		if ( Graph.Domain is ShaderDomain.BlendingSurface )
+		if ( UserShaderTemplate == null )
 		{
-			shaderTemplate = ShaderTemplateBlending.Code;
+			shaderTemplate = Graph.Domain switch
+			{
+				ShaderDomain.Surface => ShaderTemplate.ToFormattableString( ShaderTemplateSurface.Code ),
+				ShaderDomain.Sky => ShaderTemplate.ToFormattableString( ShaderTemplateSky.Code ),
+				ShaderDomain.PostProcess => ShaderTemplate.ToFormattableString( ShaderTemplatePostProcess.Code ),
+				_ => throw new NotImplementedException(),
+			};
+		}
+		else
+		{
+			shaderTemplate = ShaderTemplate.ToFormattableString( UserShaderTemplate.Code );
 		}
 
 		return string.Format( shaderTemplate,
@@ -1423,7 +1468,7 @@ public sealed partial class GraphCompiler
 			IndentString( GenerateFunctions( PixelResult ), 1 ),  // {12}
 			IndentString( GenerateFunctions( VertexResult ), 1 ),  // {13}
 			IndentString( GeneratePixelInit(), 2 ), // {14}
-			IndentString( pixelOutput, 2 ) // {15}
+			pixelOutput // {15}
 		);
 	}
 
@@ -1433,7 +1478,7 @@ public sealed partial class GraphCompiler
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.ShadingModel != ShadingModel.Lit || Graph.Domain == ShaderDomain.PostProcess ) return "";
+		if ( !IsSurfaceShader || Graph.ShadingModel != ShadingModel.Lit ) return "";
 
 		var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 
@@ -1485,6 +1530,10 @@ public sealed partial class GraphCompiler
 
 			sb.AppendLine( $"m.{property.Name} = {result.Cast( componentCount )};" );
 		}
+
+		sb.AppendLine();
+
+		sb.AppendLine( ShaderTemplateSurface.Material_finalize );
 
 		if ( Graph.IsSubgraph )
 		{
@@ -1539,46 +1588,6 @@ public sealed partial class GraphCompiler
 		var positionOffsetInput = resultNode.GetPositionOffset();
 
 		var sb = new StringBuilder();
-		var sb2 = new StringBuilder();
-
-		foreach ( var vertexInput in VertexInputs )
-		{
-			sb2.AppendLine( $"i.{vertexInput.Key} = v.{vertexInput.Key};" );
-		}
-
-		switch ( Graph.Domain )
-		{
-			case ShaderDomain.Surface:
-				sb.AppendLine( $@"
-PixelInput i = ProcessVertex( v );
-i.vPositionOs = v.vPositionOs.xyz;
-
-{sb2.ToString()}
-ExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( v.nInstanceTransformID );
-i.vTintColor = extraShaderData.vTint;
-
-VS_DecodeObjectSpaceNormalAndTangent( v, i.vNormalOs, i.vTangentUOs_flTangentVSign );
-		" );
-				break;
-			case ShaderDomain.BlendingSurface:
-				sb.AppendLine( $@"
-PixelInput i = ProcessVertex( v );
-
-{sb2.ToString()}
-i.vBlendValues = v.vColorBlendValues;
-i.vPaintValues = v.vColorPaintValues;
-" );
-				break;
-			case ShaderDomain.PostProcess:
-				sb.AppendLine( $@"
-PixelInput i;
-
-{sb2.ToString()}
-i.vPositionPs = float4( v.vPositionOs.xy, 0.0f, 1.0f );
-i.vPositionWs = float3( v.vTexCoord, 0.0f );
-" );
-				break;
-		}
 
 		NodeResult result;
 
@@ -1597,18 +1606,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 			}
 		}
 
-		switch ( Graph.Domain )
-		{
-			case ShaderDomain.Surface:
-				sb.AppendLine( "return FinalizeVertex( i );" );
-				break;
-			case ShaderDomain.BlendingSurface:
-				sb.AppendLine( "return FinalizeVertex( i );" );
-				break;
-			case ShaderDomain.PostProcess:
-				sb.AppendLine( "return i;" );
-				break;
-		}
 		return sb.ToString();
 	}
 
@@ -1619,7 +1616,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 		Subgraph = null;
 		SubgraphStack.Clear();
 
-		if ( Graph.ShadingModel == ShadingModel.Unlit || Graph.Domain == ShaderDomain.PostProcess )
+		if ( IsPostProcessingShader || IsSkyShader || Graph.ShadingModel == ShadingModel.Unlit )
 		{
 			var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
 			if ( resultNode == null )
@@ -1639,11 +1636,11 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 				opacity = opacityResult.Cast( 1 ) ?? "1.0f";
 			}
 
-			return $"return float4( {albedo}, {opacity} );";
+			return $"float4( {albedo}, {opacity} )";
 		}
 		else if ( Graph.ShadingModel == ShadingModel.Lit )
 		{
-			return ShaderTemplate.Material_output;
+			return ShaderTemplateSurface.Material_output;
 		}
 
 		return null;
@@ -1656,13 +1653,18 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 		sb.AppendLine( "#include \"common/features.hlsl\"" );
 
+		/*
+		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
+		{
+			sb.AppendLine( "Feature( F_ALPHA_TEST, 0..1, \"Blending\" );" );
+			sb.AppendLine( "Feature( F_TRANSLUCENT, 0..1, \"Blending\" );" );
+			sb.AppendLine( "FeatureRule( Allow1( F_TRANSLUCENT, F_ALPHA_TEST ), \"Alpha Test and Translucent are not compatible\" );" );
+			sb.AppendLine( "FeatureRule( Requires1( F_ADDITIVE_BLEND, F_TRANSLUCENT ), \"Requires translucency\" );" );
+		}
+		*/
+
 		// Register any Graph level Shader Features...
 		//RegisterShaderFeatures( Graph.shaderFeatureNodeResults );
-
-		if ( Graph.Domain is ShaderDomain.BlendingSurface )
-		{
-			sb.AppendLine( "Feature( F_MULTIBLEND, 0..3 ( 0=\"1 Layers\", 1=\"2 Layers\", 2=\"3 Layers\", 3=\"4 Layers\", 4=\"5 Layers\" ), \"Number Of Blendable Layers\" );" );
-		}
 
 		foreach ( var feature in ShaderFeatures )
 		{
@@ -1716,17 +1718,29 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 			sb.AppendLine();
 		}
 
-		var blendMode = Graph.BlendMode;
-		var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;
-		var translucent = blendMode == BlendMode.Translucent ? 1 : 0;
+		/*
+		if ( !IsSkyShader && Graph.BlendMode == BlendMode.Dynamic )
+		{
+			// Dynamic blend mode: Use StaticCombos linked to Features
+			sb.AppendLine( "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );" );
+			sb.AppendLine( "StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );" );
+		}
+		else if ( !IsSkyShader ) 
+		*/
+		if ( !IsSkyShader )
+		{
+			var blendMode = Graph.BlendMode;
+			var alphaTest = blendMode == BlendMode.Masked ? 1 : 0;
+			var translucent = blendMode == BlendMode.Translucent ? 1 : 0;
 
-		sb.AppendLine( $"#ifndef S_ALPHA_TEST" );
-		sb.AppendLine( IndentString( $"#define S_ALPHA_TEST {alphaTest}", 1 ) );
-		sb.AppendLine( $"#endif" );
+			sb.AppendLine( $"#ifndef S_ALPHA_TEST" );
+			sb.AppendLine( IndentString( $"#define S_ALPHA_TEST {alphaTest}", 1 ) );
+			sb.AppendLine( $"#endif" );
 
-		sb.AppendLine( $"#ifndef S_TRANSLUCENT" );
-		sb.AppendLine( IndentString( $"#define S_TRANSLUCENT {translucent}", 1 ) );
-		sb.AppendLine( $"#endif" );
+			sb.AppendLine( $"#ifndef S_TRANSLUCENT" );
+			sb.AppendLine( IndentString( $"#define S_TRANSLUCENT {translucent}", 1 ) );
+			sb.AppendLine( $"#endif" );
+		}
 
 		sb.AppendLine();
 
@@ -1764,10 +1778,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 			foreach ( var vertexInput in VertexInputs )
 			{
-				if ( !ShaderTemplate.InternalVertexInputs.ContainsValue( vertexInput.Value ) )
-				{
-					sb.AppendLine( vertexInput.Value );
-				}
+				sb.AppendLine( vertexInput.Value );
 			}
 		}
 		else
@@ -1776,10 +1787,7 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 
 			foreach ( var pixelInput in PixelInputs )
 			{
-				if ( !ShaderTemplate.InternalPixelInputs.ContainsValue( pixelInput.Value ) )
-				{
-					sb.AppendLine( pixelInput.Value );
-				}
+				sb.AppendLine( pixelInput.Value );
 			}
 		}
 
@@ -1791,12 +1799,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 		var sb = new StringBuilder();
 
 		var includes = IsVs ? VertexIncludes : PixelIncludes;
-
-		if ( IsPs && Graph.Domain == ShaderDomain.PostProcess )
-		{
-			sb.AppendLine( "#include \"postprocess/functions.hlsl\"" );
-			sb.AppendLine( "#include \"postprocess/common.hlsl\"" );
-		}
 
 		foreach ( var include in includes )
 		{
@@ -1825,12 +1827,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 			}
 
 			sb.AppendLine();
-		}
-
-		// Support for color buffer in post-process shaders
-		if ( IsPs && Graph.Domain is ShaderDomain.PostProcess )
-		{
-			sb.AppendLine( "Texture2D g_tColorBuffer < Attribute( \"ColorBuffer\" ); SrgbRead ( true ); >;" );
 		}
 
 		if ( IsPreview )
@@ -1932,11 +1928,6 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 			{
 				sb.AppendLine( $"{parameter.Value.Result.TypeName} {parameter.Key} < {parameter.Value.Options} >;" );
 			}
-		}
-
-		if ( sb.Length > 0 )
-		{
-			sb.Insert( 0, "\n" );
 		}
 
 		return sb.ToString();
@@ -2079,27 +2070,40 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 	{
 		var sb = new StringBuilder();
 
-		if ( !IsNotPreview )
+		var combo = "";
+
+		if ( IsSkyShader )
 		{
 			sb.AppendLine();
-			sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
-			if ( Graph.RenderFace == RenderFace.Front )
-				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : BACK );" );
-			else if ( Graph.RenderFace == RenderFace.Back )
-				sb.AppendLine( "RenderState( CullMode, D_RENDER_BACKFACES ? NONE : FRONT );" );
-			else
-				sb.AppendLine( "RenderState( CullMode, NONE );" );
+			sb.Append( $"RenderState( CullMode, NONE );" );
 		}
 		else
 		{
-			sb.AppendLine();
-			if ( Graph.RenderFace == RenderFace.Front )
-				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : BACK );" );
-			else if ( Graph.RenderFace == RenderFace.Back )
-				sb.AppendLine( "RenderState( CullMode, F_RENDER_BACKFACES ? NONE : FRONT );" );
+			if ( IsPreview )
+			{
+				sb.AppendLine();
+				sb.AppendLine( "DynamicCombo( D_RENDER_BACKFACES, 0..1, Sys( ALL ) );" );
+
+				combo = "D_RENDER_BACKFACES";
+			}
 			else
-				sb.AppendLine( "RenderState( CullMode, NONE );" );
+			{
+				combo = "F_RENDER_BACKFACES";
+			}
+
+			sb.AppendLine();
+
+			var renderFace = Graph.RenderFace switch
+			{
+				RenderFace.Front => $"{combo} ? NONE : BACK",
+				RenderFace.Back => $"{combo} ? NONE : FRONT",
+				RenderFace.Both => "NONE",
+				_ => "NONE",
+			};
+
+			sb.Append( $"RenderState( CullMode, {renderFace} );" );
 		}
+
 
 		return sb.ToString();
 	}
@@ -2107,8 +2111,8 @@ i.vPositionWs = float3( v.vTexCoord, 0.0f );
 	private string GeneratePixelInit()
 	{
 		Stage = ShaderStage.Pixel;
-		if ( Graph.ShadingModel == ShadingModel.Lit && Graph.Domain != ShaderDomain.PostProcess )
-			return ShaderTemplate.Material_init;
+		if ( IsSurfaceShader && Graph.ShadingModel == ShadingModel.Lit )
+			return ShaderTemplateSurface.Material_init;
 		return "";
 	}
 

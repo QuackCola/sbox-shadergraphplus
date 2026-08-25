@@ -666,9 +666,18 @@ public sealed class Preview : SceneRenderingWidget
 	public void UpdateMaterial()
 	{
 		var modelMaterial = _material;
-		if ( EnablePostProcessing )
+		if ( EnablePostProcessing || modelMaterial.Flags.IsSky )
 		{
 			modelMaterial = Material.Load( "materials/dev/reflectivity_50.vmat" );
+		}
+
+		if ( _material.Flags.IsSky )
+		{
+			_sky.SkyMaterial = _material;
+		}
+		else if ( _sky.SkyMaterial != _defaultSkyMaterial )
+		{
+			_sky.SkyMaterial = _defaultSkyMaterial;
 		}
 
 		if ( _sceneObject is SceneModel sceneModel )
@@ -714,8 +723,10 @@ public sealed class Preview : SceneRenderingWidget
 		set
 		{
 			_material = value;
+
 			UpdateMaterial();
 			UpdatePostProcessing();
+			SetAllAttributes();
 		}
 	}
 
@@ -796,58 +807,10 @@ public sealed class Preview : SceneRenderingWidget
 			_sceneObject.Update( 1 );
 
 			UpdateMaterial();
-
-			foreach ( var samplerState in _samplerStateAttributes )
-			{
-				_sceneObject.Attributes.Set( samplerState.Key, samplerState.Value );
-			}
-
-			foreach ( var texture in _textureAttributes )
-			{
-				_sceneObject.Attributes.Set( texture.Key, texture.Value );
-			}
-
-			foreach ( var v in _float4Attributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			foreach ( var v in _float3Attributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			foreach ( var v in _float2Attributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			foreach ( var v in _floatAttributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			foreach ( var v in _intAttributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			foreach ( var v in _boolAttributes )
-			{
-				_sceneObject.Attributes.Set( v.Key, v.Value );
-			}
-
-			if ( _enableNodePreview )
-			{
-				_sceneObject.Attributes.Set( "g_iStageId", _stageId );
-			}
-			else
-			{
-				_sceneObject.Attributes.Set( "g_iStageId", NoPreviewID );
-			}
+			UpdatePostProcessing();
+			SetAllAttributes();
 
 			_sceneObject.Attributes.SetCombo( "D_RENDER_BACKFACES", _renderBackfaces );
-			UpdatePostProcessing();
 		}
 	}
 
@@ -861,54 +824,238 @@ public sealed class Preview : SceneRenderingWidget
 		set => _sceneObject.UseAnimGraph = value;
 	}
 
+	private void SetAllAttributes()
+	{
+		foreach ( var v in _samplerStateAttributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _textureAttributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _float4Attributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _float3Attributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _float2Attributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _floatAttributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _intAttributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		foreach ( var v in _boolAttributes )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( v.Key, v.Value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( v.Key, v.Value );
+			}
+		}
+
+		if ( _enableNodePreview )
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( "g_iStageId", _stageId );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( "g_iStageId", _stageId );
+			}
+		}
+		else
+		{
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( "g_iStageId", NoPreviewID );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( "g_iStageId", NoPreviewID );
+			}
+		}
+	}
+
 	public void SetAttribute( string id, SamplerState value )
 	{
-		//if ( _samplerStateAttributes.ContainsKey( id ) )
-		//	_samplerStateAttributes.Remove( id );
 		_samplerStateAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Texture value )
 	{
 		_textureAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Color value )
 	{
 		_float4Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Vector3 value )
 	{
 		_float3Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, Vector2 value )
 	{
 		_float2Attributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, float value )
 	{
 		_floatAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, int value )
 	{
 		_intAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetAttribute( string id, in bool value )
 	{
 		_boolAttributes.Add( id, value );
-		_sceneObject.Attributes.Set( id, value );
+
+		if ( _material.Flags.IsSky )
+		{
+			Scene.RenderAttributes.Set( id, value );
+		}
+		else
+		{
+			_sceneObject.Attributes.Set( id, value );
+		}
 	}
 
 	public void SetFeature( string id, int value )
@@ -920,12 +1067,18 @@ public sealed class Preview : SceneRenderingWidget
 
 	public void SetDynamicCombo( string id, int value )
 	{
-		//SGPLog.Info( $"Setting DynamicCombo `{id}` to `{value}`" );
-
 		if ( !_dynamicComboIntAttributes.ContainsKey( id ) )
 		{
 			_dynamicComboIntAttributes.Add( id, value );
-			_sceneObject.Attributes.SetCombo( id, value );
+
+			if ( _material.Flags.IsSky )
+			{
+				Scene.RenderAttributes.Set( id, value );
+			}
+			else
+			{
+				_sceneObject.Attributes.Set( id, value );
+			}
 		}
 	}
 
@@ -933,9 +1086,16 @@ public sealed class Preview : SceneRenderingWidget
 	{
 		_stageId = value;
 
-		if ( _sceneObject.IsValid() )
+		if ( _material.Flags.IsSky )
 		{
-			_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+			Scene.RenderAttributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+		}
+		else
+		{
+			if ( _sceneObject.IsValid() )
+			{
+				_sceneObject.Attributes.Set( "g_iStageId", _enableNodePreview ? _stageId : NoPreviewID );
+			}
 		}
 	}
 
@@ -960,6 +1120,7 @@ public sealed class Preview : SceneRenderingWidget
 			_sceneObject.Attributes.Clear();
 		}
 
+		Scene.RenderAttributes.Clear();
 	}
 
 	public bool IsCompiling
@@ -975,6 +1136,8 @@ public sealed class Preview : SceneRenderingWidget
 
 	private readonly SceneObject _ground;
 	private readonly SkyBox2D _sky;
+
+	private readonly Material _defaultSkyMaterial;
 
 	private void SetViewmode( ViewMode viewmode )
 	{
@@ -1049,6 +1212,7 @@ public sealed class Preview : SceneRenderingWidget
 			}
 			{
 				_sky = new GameObject( true, "sky" ).GetOrAddComponent<SkyBox2D>();
+				_defaultSkyMaterial = _sky.SkyMaterial;
 			}
 		}
 

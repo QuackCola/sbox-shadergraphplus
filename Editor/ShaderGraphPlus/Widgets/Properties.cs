@@ -1,4 +1,5 @@
 ﻿using Editor;
+using System.Runtime.CompilerServices;
 
 namespace ShaderGraphPlus;
 
@@ -68,6 +69,21 @@ public class Properties : Widget
 		Editor.Add( _scroller );
 
 		Layout.AddStretchCell();
+	}
+
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public bool IsTarget<T>( out T targetValue )
+	{
+		targetValue = default( T );
+
+		if ( Target is T target )
+		{
+			targetValue = (T)target;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private void Rebuild()

@@ -9,10 +9,11 @@ internal static class ShaderGraphPlusGlobals
 
 	internal static class ControlWidgetCustomEditors
 	{
-		public const string UIGroupEditor = "shadergraphplus_UiGroupEditor";
-		public const string ShaderFeatureEnumPreviewIndexEditor = "shadergraphplus_ShaderFeatureEnumPreviewIndexEditor";
-		public const string NamedRerouteReferenceEditor = "shadergraphplus_NamedRerouteReferenceEditor";
-		public const string PortTypeChoiceEditor = "shadergraphplus_PortTypeChoiceEditor";
+		internal const string UIGroupEditor = "shadergraphplus_UiGroupEditor";
+		internal const string ShaderFeatureEnumPreviewIndexEditor = "shadergraphplus_ShaderFeatureEnumPreviewIndexEditor";
+		internal const string NamedRerouteReferenceEditor = "shadergraphplus_NamedRerouteReferenceEditor";
+		internal const string PortTypeChoiceEditor = "shadergraphplus_PortTypeChoiceEditor";
+		internal const string ShaderTypeDropdownEditor = "shadergraphplus_ShaderTypeDropdown";
 	}
 
 	internal const string CleanName = "ShaderGraphPlus";
@@ -22,4 +23,11 @@ internal static class ShaderGraphPlusGlobals
 
 	internal const string SubgraphAssetTypeName = "Shader Graph Plus Function";
 	internal const string SubgraphAssetTypeExtension = "sgpfunc";
+
+	internal const string ShaderTemplateCleanName = "ShaderTemplate";
+	internal const string ShaderTemplateAssetTypeName = "Shader Template";
+	internal const string ShaderTemplateAssetTypeExtension = "shdrtpl";
+
+	internal const string ShaderTemplateEditorStateCookieName = "ShaderTemplateEditor";
+	internal const string ShaderTemplateEditorToolbarName = "ShaderTemplateEditorToolbar";
 }
