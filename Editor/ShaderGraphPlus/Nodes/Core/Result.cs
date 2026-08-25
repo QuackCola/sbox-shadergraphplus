@@ -14,14 +14,7 @@ public sealed class Result : BaseResult
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.GraphResultNode;
 
 	[Hide]
-	public override string Title
-	{
-		get
-		{
-			var graph = Graph as ShaderGraphPlus;
-			return $"{DisplayInfo.For( this ).Name} ( {graph.ShadingModel} )";
-		}
-	}
+	public override string Title => Graph.Title;
 
 	[JsonIgnore, Hide, Browsable( false )]
 	public new ShaderGraphPlus Graph

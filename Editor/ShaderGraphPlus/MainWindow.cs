@@ -1560,6 +1560,11 @@ public class MainWindow : DockWindow
 
 		_preview.SaveSettings( _graph.PreviewSettings );
 
+		if ( !IsSubgraph )
+		{
+			_graph.Title = Path.GetFileNameWithoutExtension( savePath );
+		}
+
 		// Write serialized graph to asset file
 		System.IO.File.WriteAllText( savePath, _graph.Serialize() );
 
