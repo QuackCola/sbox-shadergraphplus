@@ -383,7 +383,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_dirty = false;
 		WindowTitle = _asset?.Name;
 
-		EditorEvent.Run( ShaderGraphPlusGlobals.EditorEvents.ShaderTemplateUpdate, _asset?.Path );
+		EditorEvent.Run( ShaderGraphPlusGlobals.EditorEvents.ShaderTemplateUpdate, _asset?.RelativePath );
 
 		return true;
 	}
