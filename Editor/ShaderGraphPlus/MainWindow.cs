@@ -618,7 +618,7 @@ public class MainWindow : DockWindow
 		EditorErrors.Clear();
 
 		// SkyBox2D.SkyMaterial requires that the shader name contains the substring 'sky' in the name.
-		if ( _graph.Domain == ShaderDomain.Sky && ( _asset == null || !_asset.Name.Contains( "sky" ) ) )
+		if ( _graph.Domain == ShaderDomain.Sky && (_asset == null || !_asset.Name.Contains( "sky" )) )
 		{
 			EditorErrors.Add( "The graph name must contain the string 'sky'" );
 		}
@@ -630,7 +630,7 @@ public class MainWindow : DockWindow
 				// Template shat the bed when trying to load.
 				EditorErrors.Add( $"Shader Template \"{_graph.ShaderType}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." );
 			}
-			else if( !_shaderTemplate.Validate( _graph.ShaderType, out var tagErrors ) )
+			else if ( !_shaderTemplate.Validate( _graph.ShaderType, out var tagErrors ) )
 			{
 				// Template loaded but there are issues with the template code.
 				EditorErrors.AddRange( tagErrors );
@@ -1142,8 +1142,8 @@ public class MainWindow : DockWindow
 
 		file.AddSeparator();
 
-		file.AddOption( "Reload Shader Template", "common/reload.png", () => 
-		{ 
+		file.AddOption( "Reload Shader Template", "common/reload.png", () =>
+		{
 			LoadShaderTemplate();
 			SetDirty();
 		} );
