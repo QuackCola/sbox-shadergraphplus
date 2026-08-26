@@ -618,7 +618,7 @@ public class MainWindow : DockWindow
 		EditorErrors.Clear();
 
 		// SkyBox2D.SkyMaterial requires that the shader name contains the substring 'sky' in the name.
-		if ( _graph.Domain == ShaderDomain.Sky && !_asset.Name.Contains( "sky" ) )
+		if ( _graph.Domain == ShaderDomain.Sky && ( _asset == null || !_asset.Name.Contains( "sky" ) ) )
 		{
 			EditorErrors.Add( "The graph name must contain the string 'sky'" );
 		}
