@@ -19,17 +19,21 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 		var label = "";
 		var icon = "";
 
-		if ( _graph.HasTemplate )
+		if ( _graph.HasTemplate && _graph.ShaderTypeInfo.IsValid )
 		{
 			label = _graph.ShaderTypeInfo.Title;
 			icon = _graph.ShaderTypeInfo.Icon;
 		}
-		else if ( template == null && ShaderTemplate.BuiltInTemplateEntries.TryGetValue( value, out var builtInEntry ) )
+		else if ( _graph.HasTemplate && !_graph.ShaderTypeInfo.IsValid )
+		{
+			label = template.Name;
+		}
+		else if ( !_graph.HasTemplate && ShaderTemplate.BuiltInTemplateEntries.TryGetValue( value, out var builtInEntry ) )
 		{
 			label = builtInEntry.Name;
 			icon = builtInEntry.Icon;
 		}
-		else if ( template == null && !ShaderTemplate.BuiltInTemplateEntries.ContainsKey( value ) )
+		else if ( !_graph.HasTemplate && !ShaderTemplate.BuiltInTemplateEntries.ContainsKey( value ) )
 		{
 			var defaultEntry = ShaderTemplate.BuiltInTemplateEntries.FirstOrDefault();
 
@@ -55,7 +59,7 @@ internal sealed class ShaderTypeDropdownControl : DropdownControlWidget<string>
 			return ShaderTemplate.BuiltInTemplateEntries.FirstOrDefault().Key;
 		}
 
-		if ( _graph.HasTemplate )
+		if ( _graph.HasTemplate && _graph.ShaderTypeInfo.IsValid )
 		{
 			return _graph.ShaderTypeInfo.Title;
 		}

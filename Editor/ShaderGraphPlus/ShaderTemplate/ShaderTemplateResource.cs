@@ -75,7 +75,7 @@ public sealed partial class ShaderTemplateResource
 	public string Code { get; set; } = ShaderTemplateSurface.Code;
 
 	/// <summary>
-	/// Validate the template for any issues and output any errors
+	/// Check the template for any errors.
 	/// </summary>
 	/// <param name="path">Path to the ShaderTemplate resource</param>
 	/// <param name="errors">Issues found with this template</param>

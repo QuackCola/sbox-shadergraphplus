@@ -53,7 +53,7 @@ internal abstract class CustomEnumControlWidget : ControlWidget
 			return;
 
 		// Auto-correct if current value is not supported
-		_graph?.ValidateTemplateSettings();
+		_graph?.ValidateShaderTypeInfo();
 
 		var value = SerializedProperty.GetValue<long>( 0 );
 		var color = IsControlHovered ? Theme.Blue : Theme.TextControl;
@@ -94,7 +94,7 @@ internal abstract class CustomEnumControlWidget : ControlWidget
 			return;
 
 		// Auto-correct if current value is not supported
-		_graph?.ValidateTemplateSettings();
+		_graph?.ValidateShaderTypeInfo();
 
 		_menu = new PopupWidget( null );
 		_menu.Layout = Layout.Column();

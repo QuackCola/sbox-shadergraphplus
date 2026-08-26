@@ -168,7 +168,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	public bool AddToNodeLibrary { get; set; }
 
 	[Hide]
-	public bool HasTemplate => ShaderType != null && ShaderType.EndsWith( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension );
+	public bool HasTemplate => !string.IsNullOrWhiteSpace( ShaderType ) && ShaderType.EndsWith( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension );
 
 	[Hide]
 	public bool HasNoTemplate => !HasTemplate;
@@ -208,9 +208,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	}
 
 	/// <summary>
-	/// Validates settings to what is supported by the current custom user template.
+	/// Validates settings to what is supported by the current <see cref="ShaderTypeInfo"/>
 	/// </summary>
-	public void ValidateTemplateSettings()
+	public void ValidateShaderTypeInfo()
 	{
 		// Auto-correct BlendMode if current is not supported
 		bool currentBlendModeSupported = BlendMode switch
