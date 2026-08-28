@@ -312,7 +312,7 @@ public class GraphView : GraphicsView, IGridSizeView
 		using var ms = new MemoryStream();
 		using ( var zs = new GZipStream( ms, CompressionMode.Compress ) )
 		{
-			var data = Encoding.UTF8.GetBytes( _graph.SerializeNodes( nodes.Select( x => x.Node ) ) );
+			var data = Encoding.UTF8.GetBytes( _graph.SerializeNodes( nodes.Select( x => x.Node ).Where( x => x is not IBlackboardNode ) ) );
 			zs.Write( data, 0, data.Length );
 		}
 
