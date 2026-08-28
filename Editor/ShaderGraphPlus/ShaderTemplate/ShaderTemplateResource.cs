@@ -15,8 +15,8 @@ public sealed partial class ShaderTemplateResource
 	/// <summary>
 	/// The icon that will be used in the ShaderType dropdown menu of the ShaderGraphPlus graph settings.
 	/// </summary>
-	[IconName]
 	[TabPage( "General" )]
+	[IconName]
 	public string Icon { get; set; } = "view_in_ar";
 
 	/// <summary>
