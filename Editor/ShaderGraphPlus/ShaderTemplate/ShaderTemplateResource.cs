@@ -7,11 +7,14 @@ public sealed partial class ShaderTemplateResource
 {
 
 	/// <summary>
-	/// The name of the Template in the ShaderType dropdown menu. Fallsback to asset name if left empty.
+	/// The name of the Template in the ShaderType dropdown menu of the ShaderGraphPlus graph settings. Fallsback to asset name if left empty.
 	/// </summary>
 	[TabPage( "General" )]
 	public string Title { get; set; } = "";
 
+	/// <summary>
+	/// The icon that will be used in the ShaderType dropdown menu of the ShaderGraphPlus graph settings.
+	/// </summary>
 	[IconName]
 	[TabPage( "General" )]
 	public string Icon { get; set; } = "view_in_ar";
