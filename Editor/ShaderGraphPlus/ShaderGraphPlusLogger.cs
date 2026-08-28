@@ -9,11 +9,6 @@ public static class SGPLogger
 	/// </summary>
 	public static string Name => ShaderGraphPlusGlobals.CleanName;
 
-	internal static IEnumerable<MainWindow> GetAllShadergraphPlusWindows()
-	{
-		return Editor.Window.All.OfType<MainWindow>();
-	}
-
 	public static void Info( string message, bool shouldLog = true )
 	{
 		if ( shouldLog )
