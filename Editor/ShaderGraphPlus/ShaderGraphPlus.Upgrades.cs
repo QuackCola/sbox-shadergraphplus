@@ -23,7 +23,7 @@ public partial class ShaderGraphPlus
 			return oldVersionElement.GetInt32();
 		}
 
-		SGPLogger.Warning( $"JsonElement has no property named \"__version\" or \"Version\". Defaulting to 0...." );
+		SGPLogger.Warning( $"JsonElement has no property named \"__version\" or \"Version\". Defaulting to 0....", ConCommands.VerboseSerialization );
 
 		return 0;
 	}
