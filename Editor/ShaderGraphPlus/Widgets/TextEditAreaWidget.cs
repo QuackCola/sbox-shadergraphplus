@@ -23,7 +23,6 @@ public class TextEditAreaWidget : Widget
 
 		Layout = Layout.Row();
 		Layout.Spacing = 16;
-		Layout.Margin = 4;
 
 		Layout.Add( _textEdit );
 	}
