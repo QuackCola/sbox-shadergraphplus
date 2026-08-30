@@ -252,12 +252,7 @@ public class ProjectCreator : Dialog
 
 	private void ConfigureTemplate( ShaderGraphPlus shaderGraphPlusTemplate )
 	{
-		//if (shaderGraphPlusTemplate.MaterialDomain is not MaterialDomain.PostProcess)
-		//{
-		//    shaderGraphPlusTemplate.BlendMode = templateUserConfig.blendmode;
-		//}
 		shaderGraphPlusTemplate.Description = _templateUserConfig.Description;
-		//shaderGraphPlusTemplate.ShadingModel = templateUserConfig.shadingmodel;
 	}
 
 	private ShaderGraphPlus ReadTemplate( string templatePath )

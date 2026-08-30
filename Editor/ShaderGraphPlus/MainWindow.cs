@@ -86,8 +86,6 @@ public class MainWindow : DockWindow
 	private readonly Dictionary<string, int> _dynamicComboIntAttributes = new();
 	private readonly Dictionary<string, int> _shaderFeatures = new();
 
-	//private readonly List<BaseNodePlus> _compiledNodes = new();
-
 	private bool _isCompiling = false;
 	private bool _isPendingCompile = false;
 	private RealTimeSince _timeSinceCompile;
@@ -106,7 +104,7 @@ public class MainWindow : DockWindow
 
 	private ProjectCreator ProjectCreator { get; set; }
 
-	private Dictionary<string, ShaderFeatureBase> ShaderFeatures = new();
+	private Dictionary<string, ShaderFeatureBase> _registeredShaderFeatures = new();
 
 	private readonly List<string> EditorErrors = new();
 	private readonly List<string> EditorWarnings = new();
@@ -132,11 +130,13 @@ public class MainWindow : DockWindow
 		Title = FileType;
 		Size = new Vector2( 1700, 1050 );
 
-		Selection = new();
+		Selection = new SelectionSystem();
 
-		_graph = new();
-		_graph.Title = "untitled";
-		_graph.IsSubgraph = IsSubgraph;
+		_graph = new ShaderGraphPlus()
+		{
+			Title = "untitled",
+			IsSubgraph = IsSubgraph
+		};
 
 		CreateToolBar();
 
@@ -155,10 +155,9 @@ public class MainWindow : DockWindow
 
 	private void OpenProjectCreationDialog()
 	{
-		ProjectCreator = new ProjectCreator
-		{
-			DeleteOnClose = true
-		};
+		ProjectCreator = new ProjectCreator();
+		ProjectCreator.DeleteOnClose = true;
+		ProjectCreator.OnProjectCreated += ( path ) => Open( path );
 
 		var initialPath = $"{Project.Current.GetAssetsPath().Replace( "\\", "/" )}/Shaders";
 		if ( !Directory.Exists( initialPath ) )
@@ -168,7 +167,6 @@ public class MainWindow : DockWindow
 
 		ProjectCreator.FolderEditPath = initialPath;
 		ProjectCreator.Show();
-		ProjectCreator.OnProjectCreated += OpenProject;
 	}
 
 	public void AssetOpen( Asset asset )
@@ -559,7 +557,7 @@ public class MainWindow : DockWindow
 
 	private void RegisterShaderFeatures( out List<string> registrationIssues )
 	{
-		ShaderFeatures.Clear();
+		_registeredShaderFeatures.Clear();
 		registrationIssues = new();
 
 		var features = _graph.Parameters.OfType<IBlackboardShaderFeatureParameter>();
@@ -588,9 +586,9 @@ public class MainWindow : DockWindow
 				};
 			}
 
-			if ( shaderFeature.IsValid && !ShaderFeatures.ContainsKey( shaderFeature.Name ) )
+			if ( shaderFeature.IsValid && !_registeredShaderFeatures.ContainsKey( shaderFeature.Name ) )
 			{
-				ShaderFeatures.Add( shaderFeature.Name, shaderFeature );
+				_registeredShaderFeatures.Add( shaderFeature.Name, shaderFeature );
 			}
 		}
 	}
@@ -666,7 +664,7 @@ public class MainWindow : DockWindow
 		}
 
 		var resultNode = _graph.Nodes.OfType<BaseResult>().FirstOrDefault();
-		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, true );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, _registeredShaderFeatures, true );
 		var nodeErrors = new List<GraphCompiler.GraphIssue>();
 		var nodeWarnings = new List<GraphCompiler.GraphIssue>();
 		var evaluatedCustomFunctions = new List<string>();
@@ -912,7 +910,7 @@ public class MainWindow : DockWindow
 		// Go ahead preregister anything before iterating over all the nodes in the graph.
 		RegisterShaderFeatures( out _ );
 
-		var compiler = new GraphCompiler( _graph, _shaderTemplate, ShaderFeatures, false );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, _registeredShaderFeatures, false );
 		return compiler.Generate();
 	}
 
@@ -1374,11 +1372,6 @@ public class MainWindow : DockWindow
 			return;
 
 		PromptSave( () => Open( fd.SelectedFile ) );
-	}
-
-	private void OpenProject( string path )
-	{
-		Open( path );
 	}
 
 	public void Open( string path, bool addToPath = true )
