@@ -29,9 +29,10 @@ public static class Path
 	// Opens a specified textfile in Notepad.
 	public static void OpenInNotepad( string path )
 	{
-		Process p = new Process();
+		using var p = new Process();
 		ProcessStartInfo psi = new ProcessStartInfo( "Notepad.exe", path );
 		p.StartInfo = psi;
+
 		p.Start();
 	}
 
