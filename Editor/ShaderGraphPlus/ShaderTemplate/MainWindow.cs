@@ -28,6 +28,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	private TextEditAreaWidget _textEditArea;
 
 	private UndoSystem UndoSystem;
+	private ShaderDomain _lastShaderDomain;
 
 	public bool CanOpenMultipleAssets => false;
 
@@ -174,6 +175,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_asset = null;
 		_template = new();
 		_dirty = false;
+		_lastShaderDomain = ShaderDomain.Surface;
 
 		WindowTitle = "untitled";
 
@@ -313,6 +315,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_asset = asset;
 		_template = template;
 		_dirty = false;
+		_lastShaderDomain = template.ShaderDomain;
 		//_properties.Target = _template;
 
 		WindowTitle = _asset?.Name;
@@ -432,6 +435,26 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		if ( serializedProperty is null ) return;
 
 		var undoName = $"Modify {serializedProperty.Name}";
+
+		if ( serializedProperty.Name == nameof( ShaderTemplateResource.ShaderDomain ) )
+		{
+			var currentShaderDomain = serializedProperty.GetValue<ShaderDomain>();
+
+			if ( _lastShaderDomain != currentShaderDomain )
+			{
+				_lastShaderDomain = currentShaderDomain;
+
+				var popup = new PopupWindow(
+					"Shader Domian Changed", "Would you like to reset the template code to the selected shader domain default?", "No",
+					new Dictionary<string, Action>()
+					{
+						{ "Yes", () => ResetTemplateCodeToDefault() }
+					}
+				);
+
+				popup.Show();
+			}
+		}
 
 		var serializedTemplate = _template.Serialize();
 
