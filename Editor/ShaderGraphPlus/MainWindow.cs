@@ -1478,7 +1478,8 @@ public class MainWindow : DockWindow
 			}
 			else
 			{
-				_graph.ShaderTypeInfo = new();
+				_shaderTemplate = null;
+				_graph.ShaderTypeInfo = new ShaderTemplate.ShaderTypeInfo();
 			}
 		}
 		else
