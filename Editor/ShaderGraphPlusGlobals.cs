@@ -27,6 +27,8 @@ internal static class ShaderGraphPlusGlobals
 	internal const string AssetTypeName = "Shader Graph Plus";
 	internal const string AssetTypeExtension = "sgrph";
 
+	internal const string ShaderGraphEditorStateCookieName = "ShaderGraphPlus";
+
 	internal const string SubgraphAssetTypeName = "Shader Graph Plus Function";
 	internal const string SubgraphAssetTypeExtension = "sgpfunc";
 
