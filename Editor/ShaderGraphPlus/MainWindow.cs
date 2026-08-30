@@ -148,7 +148,7 @@ public class MainWindow : DockWindow
 		StateCookie = ShaderGraphPlusGlobals.ShaderGraphEditorStateCookieName;
 		CreateNew();
 
-		EditorEvent.Run( "shadergraphplus.created" );
+		EditorEvent.Run( ShaderGraphPlusGlobals.EditorEvents.ShaderGraphPlusEditorCreated );
 
 		OpenProjectCreationDialog();
 	}

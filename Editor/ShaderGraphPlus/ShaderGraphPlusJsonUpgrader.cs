@@ -26,7 +26,7 @@ internal static class ShaderGraphPlusJsonUpgrader
 {
 	private static (MethodDescription Method, SGPJsonUpgraderAttribute Attribute)[] _methods;
 
-	[Event( "shadergraphplus.created", Priority = 100 )]
+	[Event( ShaderGraphPlusGlobals.EditorEvents.ShaderGraphPlusEditorCreated, Priority = 100 )]
 	private static void UpdateUpgraders()
 	{
 		_methods = EditorTypeLibrary.GetMethodsWithAttribute<SGPJsonUpgraderAttribute>().ToArray();
