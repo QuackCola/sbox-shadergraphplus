@@ -316,7 +316,6 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_template = template;
 		_dirty = false;
 		_lastShaderDomain = template.ShaderDomain;
-		//_properties.Target = _template;
 
 		WindowTitle = _asset?.Name;
 
