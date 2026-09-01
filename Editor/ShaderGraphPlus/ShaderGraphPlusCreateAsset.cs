@@ -75,7 +75,7 @@ internal static class ShaderGraphPlusCreateAsset
 		var otherMenu = e.Menu.FindOrCreateMenu( "New" ).FindOrCreateMenu( "Other" );
 		otherMenu.RemoveOption( ShaderGraphPlusGlobals.AssetTypeName );
 		otherMenu.RemoveOption( ShaderGraphPlusGlobals.SubgraphAssetTypeName );
-		otherMenu.RemoveOption( "Shader Template" );
+		otherMenu.RemoveOption( ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName );
 
 		if ( e.Target != null )
 		{
@@ -104,17 +104,17 @@ internal static class ShaderGraphPlusCreateAsset
 
 				CreateAssetFromTemplate( fd.SelectedFile, templatesFolder, ShaderGraphPlusGlobals.SubgraphAssetTypeExtension );
 			} );
-			menu.AddOption( $"{ShaderGraphPlusGlobals.AssetTypeName} Shader Template", "content_paste", () =>
+			menu.AddOption( $"{ShaderGraphPlusGlobals.AssetTypeName} {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}", "content_paste", () =>
 			{
 				var fd = new FileDialog( null );
 
-				fd.Title = $"Create Shader Template";
+				fd.Title = $"Create {ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName}";
 				fd.Directory = e.Target.FullName;
-				fd.DefaultSuffix = $".shdrtpl";
-				fd.SelectFile( $"untitled.shdrtpl" );
+				fd.DefaultSuffix = $".{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}";
+				fd.SelectFile( $"untitled.{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension}" );
 				fd.SetFindFile();
 				fd.SetModeSave();
-				fd.SetNameFilter( $"Shader Template (*.shdrtpl)" );
+				fd.SetNameFilter( $"{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeName} (*.{ShaderGraphPlusGlobals.ShaderTemplateAssetTypeExtension})" );
 
 				if ( !fd.Execute() )
 					return;
