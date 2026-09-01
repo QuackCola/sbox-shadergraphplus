@@ -7,10 +7,10 @@
   "Category": "",
   "Icon": "",
   "AddToNodeLibrary": false,
-  "ShaderType": "Surface",
+  "ShaderType": "Sky",
   "BlendMode": "Opaque",
   "ShadingModel": "UnLit",
-  "RenderFace": "Front",
+  "RenderFace": "Both",
   "PreviewSettings": {
     "ViewMode": "Perspective",
     "RenderBackfaces": false,

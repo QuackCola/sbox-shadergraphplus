@@ -4,16 +4,21 @@ namespace ShaderGraphPlus.AssetBrowser;
 
 internal static class ShaderGraphPlusCreateAsset
 {
-	static void CreateSubgraphAsset( string targetPath )
+	static void CreateAssetFromTemplate( string targetPath, string templateFolder, string extension, string nameAppend = "" )
 	{
-		var template_path = ShaderGraphPlusFileSystem.Root.GetFullPath( "templates" );
-		var sourceFile = $"{template_path}/$name.{ShaderGraphPlusGlobals.SubgraphAssetTypeExtension}";
+		var sourceFile = $"{templateFolder}/$name.{extension}";
 
 		if ( !System.IO.File.Exists( sourceFile ) )
 			return;
 
 		// assure extension
-		targetPath = System.IO.Path.ChangeExtension( targetPath, ShaderGraphPlusGlobals.SubgraphAssetTypeExtension );
+		targetPath = System.IO.Path.ChangeExtension( targetPath, extension );
+
+		if ( !string.IsNullOrWhiteSpace( nameAppend ) )
+		{
+			var fileName = System.IO.Path.GetFileNameWithoutExtension( targetPath );
+			targetPath = targetPath.Replace( fileName, $"{fileName}_{nameAppend}" );
+		}
 
 		System.IO.File.Copy( sourceFile, targetPath );
 		var asset = AssetSystem.RegisterFile( targetPath );
@@ -33,6 +38,36 @@ internal static class ShaderGraphPlusCreateAsset
 		MainAssetBrowser.Instance?.Local.UpdateAssetList();
 	}
 
+	static void AddShaderGraphPlusAssetOption( FolderContextMenu e, Menu menu, string shaderType, string name, string icon = "" )
+	{
+		var templatesFolderRoot = ShaderGraphPlusFileSystem.Root.GetFullPath( "templates" );
+		var templateFolder = shaderType switch
+		{
+			"Surface" => $"{templatesFolderRoot}/shadergraphplus.surface.lit",
+			"Surface Unlit" => $"{templatesFolderRoot}/shadergraphplus.surface.unlit",
+			"Sky" => $"{templatesFolderRoot}/shadergraphplus.sky",
+			"PostProcess" => $"{templatesFolderRoot}/shadergraphplus.postprocessing",
+			_ => throw new NotImplementedException(),
+		};
+	
+		menu.AddOption( name, icon, () =>
+		{
+			var fd = new FileDialog( null );
+			fd.Title = $"Create {ShaderGraphPlusGlobals.AssetTypeName}";
+			fd.Directory = e.Target.FullName;
+			fd.DefaultSuffix = $".{ShaderGraphPlusGlobals.AssetTypeExtension}";
+			fd.SelectFile( $"untitled.{ShaderGraphPlusGlobals.AssetTypeExtension}" );
+			fd.SetFindFile();
+			fd.SetModeSave();
+			fd.SetNameFilter( $"{ShaderGraphPlusGlobals.AssetTypeName} (*.{ShaderGraphPlusGlobals.AssetTypeExtension})" );
+
+			if ( !fd.Execute() )
+				return;
+
+			CreateAssetFromTemplate( fd.SelectedFile, templateFolder, ShaderGraphPlusGlobals.AssetTypeExtension, shaderType == "Sky" ? "sky" : "" );
+		} );
+	}
+
 	[Event( "folder.contextmenu", Priority = 100 )]
 	internal static void OnShaderGraphPlusAssetFolderContext( FolderContextMenu e )
 	{
@@ -44,14 +79,15 @@ internal static class ShaderGraphPlusCreateAsset
 
 		if ( e.Target != null )
 		{
+			var templatesFolder = ShaderGraphPlusFileSystem.Root.GetFullPath( "templates" );
+
 			var menu = e.Menu.FindOrCreateMenu( "New" ).FindOrCreateMenu( "Shader" );
-			menu.AddOption( $"New {ShaderGraphPlusGlobals.AssetTypeName}", "account_tree", () =>
-			{
-				var ProjectCreator = new ProjectCreator();
-				ProjectCreator.DeleteOnClose = true;
-				ProjectCreator.FolderEditPath = e.Target.FullName;
-				ProjectCreator.Show();
-			} );
+
+			AddShaderGraphPlusAssetOption( e, menu, "Surface", $"New {ShaderGraphPlusGlobals.AssetTypeName} Lit Surface Shader", "view_in_ar" );
+			AddShaderGraphPlusAssetOption( e, menu, "Surface Unlit", $"New {ShaderGraphPlusGlobals.AssetTypeName} Unlit Surface Shader", "view_in_ar" );
+			AddShaderGraphPlusAssetOption( e, menu, "Sky", $"New {ShaderGraphPlusGlobals.AssetTypeName} Sky Shader", "nights_stay" );
+			AddShaderGraphPlusAssetOption( e, menu, "PostProcess", $"New {ShaderGraphPlusGlobals.AssetTypeName} PostProcess Shader", "desktop_windows" );
+
 			menu.AddOption( $"New {ShaderGraphPlusGlobals.SubgraphAssetTypeName}", "account_tree", () =>
 			{
 				var fd = new FileDialog( null );
@@ -66,7 +102,7 @@ internal static class ShaderGraphPlusCreateAsset
 				if ( !fd.Execute() )
 					return;
 
-				CreateSubgraphAsset( fd.SelectedFile );
+				CreateAssetFromTemplate( fd.SelectedFile, templatesFolder, ShaderGraphPlusGlobals.SubgraphAssetTypeExtension );
 			} );
 			menu.AddOption( "New Shader Template", "account_tree", () =>
 			{

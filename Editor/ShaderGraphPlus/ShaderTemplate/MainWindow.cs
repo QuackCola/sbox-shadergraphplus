@@ -435,6 +435,8 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		var undoName = $"Modify {serializedProperty.Name}";
 
+		Log.Info( undoName );
+
 		if ( serializedProperty.Name == nameof( ShaderTemplateResource.ShaderDomain ) )
 		{
 			var currentShaderDomain = serializedProperty.GetValue<ShaderDomain>();
@@ -457,6 +459,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		var serializedTemplate = _template.Serialize();
 
+		// TODO : Fix when setting _textEditArea.Value the undo gets fucked.
 		if ( UndoSystem.Back.Count > 0 )
 		{
 			var lastUndo = UndoSystem.Back.Peek();
@@ -466,7 +469,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 				UndoSystem.Insert( undoName, lastUndo.Undo, () =>
 				{
 					_template.Deserialize( serializedTemplate );
-					_textEditArea.Value = _template.Code;
+					//_textEditArea.Value = _template.Code;
 					SetDirty();
 				} );
 			}
@@ -475,7 +478,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 				UndoSystem.Insert( undoName, lastUndo.Redo, () =>
 				{
 					_template.Deserialize( serializedTemplate );
-					_textEditArea.Value = _template.Code;
+					//_textEditArea.Value = _template.Code;
 					SetDirty();
 				} );
 			}
@@ -485,12 +488,12 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 			UndoSystem.Insert( undoName, () =>
 			{
 				_template.Deserialize( oldestSerialized );
-				_textEditArea.Value = _template.Code;
+				//_textEditArea.Value = _template.Code;
 				SetDirty();
 			}, () =>
 			{
 				_template.Deserialize( serializedTemplate );
-				_textEditArea.Value = _template.Code;
+				//_textEditArea.Value = _template.Code;
 				SetDirty();
 			} );
 		}

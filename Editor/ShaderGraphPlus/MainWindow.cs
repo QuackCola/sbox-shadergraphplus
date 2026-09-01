@@ -102,8 +102,6 @@ public class MainWindow : DockWindow
 	public bool CanOpenMultipleAssets => true;
 	public bool EnableNodePreview => _preview.Preview.EnableNodePreview;
 
-	private ProjectCreator ProjectCreator { get; set; }
-
 	private Dictionary<string, ShaderFeatureBase> _registeredShaderFeatures = new();
 
 	private readonly List<string> EditorErrors = new();
@@ -149,35 +147,12 @@ public class MainWindow : DockWindow
 		CreateNew();
 
 		EditorEvent.Run( ShaderGraphPlusGlobals.EditorEvents.ShaderGraphPlusEditorCreated );
-
-		OpenProjectCreationDialog();
-	}
-
-	private void OpenProjectCreationDialog()
-	{
-		ProjectCreator = new ProjectCreator();
-		ProjectCreator.DeleteOnClose = true;
-		ProjectCreator.OnProjectCreated += ( path ) => Open( path );
-
-		var initialPath = $"{Project.Current.GetAssetsPath().Replace( "\\", "/" )}/Shaders";
-		if ( !Directory.Exists( initialPath ) )
-		{
-			Directory.CreateDirectory( initialPath );
-		}
-
-		ProjectCreator.FolderEditPath = initialPath;
-		ProjectCreator.Show();
 	}
 
 	public void AssetOpen( Asset asset )
 	{
 		if ( asset == null || string.IsNullOrWhiteSpace( asset.AbsolutePath ) )
 			return;
-
-		// We dont need the project creator when opening an existing asset. So lets forceably close it.
-		ProjectCreator?.Close();
-		ProjectCreator = null;
-
 
 		Open( asset.AbsolutePath );
 	}

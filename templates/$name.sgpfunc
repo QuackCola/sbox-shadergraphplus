@@ -7,11 +7,10 @@
   "Category": "",
   "Icon": "",
   "AddToNodeLibrary": false,
+  "ShaderType": "Surface",
   "BlendMode": "Opaque",
   "ShadingModel": "Lit",
   "RenderFace": "Front",
-  "Domain": "Surface",
-  "Metadata": {},
   "PreviewSettings": {
     "ViewMode": "Perspective",
     "RenderBackfaces": false,
@@ -40,5 +39,6 @@
       "Identifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc"
     }
   ],
-  "__version": 10
+  "categoryData": [],
+  "__version": 11
 }

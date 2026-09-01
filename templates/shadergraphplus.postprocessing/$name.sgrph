@@ -7,18 +7,10 @@
   "Category": "",
   "Icon": "",
   "AddToNodeLibrary": false,
+  "ShaderType": "PostProcess",
   "BlendMode": "Opaque",
   "ShadingModel": "Lit",
   "RenderFace": "Front",
-  "Domain": "PostProcess",
-  "Metadata": {
-    "ProjectTemplate": {
-		"Icon": "camera",
-		"Order": 4,
-		"Description": "You want to make a Post Processing Shader",
-		"Hidden": false
-    }
-  },
   "PreviewSettings": {
     "ViewMode": "Perspective",
     "RenderBackfaces": false,
@@ -40,5 +32,6 @@
     }
   ],
   "parameters": [],
-  "__version": 10
+  "categoryData": [],
+  "__version": 11
 }
