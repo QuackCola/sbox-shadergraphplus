@@ -83,12 +83,12 @@ internal static class ShaderGraphPlusCreateAsset
 
 			var menu = e.Menu.FindOrCreateMenu( "New" ).FindOrCreateMenu( "Shader" );
 
-			AddShaderGraphPlusAssetOption( e, menu, "Surface", $"New {ShaderGraphPlusGlobals.AssetTypeName} Lit Surface Shader", "view_in_ar" );
-			AddShaderGraphPlusAssetOption( e, menu, "Surface Unlit", $"New {ShaderGraphPlusGlobals.AssetTypeName} Unlit Surface Shader", "view_in_ar" );
-			AddShaderGraphPlusAssetOption( e, menu, "Sky", $"New {ShaderGraphPlusGlobals.AssetTypeName} Sky Shader", "nights_stay" );
-			AddShaderGraphPlusAssetOption( e, menu, "PostProcess", $"New {ShaderGraphPlusGlobals.AssetTypeName} PostProcess Shader", "desktop_windows" );
+			AddShaderGraphPlusAssetOption( e, menu, "Surface", $"{ShaderGraphPlusGlobals.AssetTypeName} Lit Surface Shader", "account_tree" );
+			AddShaderGraphPlusAssetOption( e, menu, "Surface Unlit", $"{ShaderGraphPlusGlobals.AssetTypeName} Unlit Surface Shader", "account_tree" );
+			AddShaderGraphPlusAssetOption( e, menu, "Sky", $"{ShaderGraphPlusGlobals.AssetTypeName} Sky Shader", "account_tree" );
+			AddShaderGraphPlusAssetOption( e, menu, "PostProcess", $"{ShaderGraphPlusGlobals.AssetTypeName} PostProcess Shader", "account_tree" );
 
-			menu.AddOption( $"New {ShaderGraphPlusGlobals.SubgraphAssetTypeName}", "account_tree", () =>
+			menu.AddOption( $"{ShaderGraphPlusGlobals.SubgraphAssetTypeName}", "account_tree", () =>
 			{
 				var fd = new FileDialog( null );
 				fd.Title = $"Create {ShaderGraphPlusGlobals.SubgraphAssetTypeName}";
@@ -104,7 +104,7 @@ internal static class ShaderGraphPlusCreateAsset
 
 				CreateAssetFromTemplate( fd.SelectedFile, templatesFolder, ShaderGraphPlusGlobals.SubgraphAssetTypeExtension );
 			} );
-			menu.AddOption( "New Shader Template", "account_tree", () =>
+			menu.AddOption( $"{ShaderGraphPlusGlobals.AssetTypeName} Shader Template", "content_paste", () =>
 			{
 				var fd = new FileDialog( null );
 
