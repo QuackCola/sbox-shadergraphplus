@@ -167,7 +167,6 @@ internal sealed class BlendModeControlWidget : CustomEnumControlWidget
 			nameof( BlendMode.Opaque ) => sti.HasSupport( SupportsOpaqueBlend ),
 			nameof( BlendMode.Masked ) => sti.HasSupport( SupportsMaskedBlend ),
 			nameof( BlendMode.Translucent ) => sti.HasSupport( SupportsTranslucentBlend ),
-			//nameof( BlendMode.Dynamic ) => _graph.UserTemplateInfo.SupportsDynamicBlend,
 			_ => true
 		};
 	}

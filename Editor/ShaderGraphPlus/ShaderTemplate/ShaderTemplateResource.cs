@@ -67,13 +67,6 @@ public sealed partial class ShaderTemplateResource
 	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
 	public bool TranslucentBlend { get; set; } = true;
 
-	/*
-	[TabPage( "General" ), Group( "Supported Blend Modes" )]
-	[ShowIf( nameof( ShaderDomain ), ShaderDomain.Surface )]
-	[Hide]
-	public bool DynamicBlend { get; set; } = false;
-	*/
-
 	[TabPage( "Code" ), TextArea]
 	public string Code { get; set; } = ShaderTemplateSurface.Code;
 
