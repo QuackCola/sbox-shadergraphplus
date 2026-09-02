@@ -1,5 +1,6 @@
 ﻿using Editor;
 using Sandbox.Helpers;
+using Sandbox.Utility;
 
 namespace ShaderGraphPlus;
 
@@ -33,6 +34,8 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	private Option _redoMenuOption;
 	private Option _undoOption;
 	private Option _redoOption;
+
+	private bool _undoRedoSet = false;
 
 	private ShaderDomain _lastShaderDomain;
 
@@ -202,8 +205,21 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_textEditArea.Value = property.GetValue<string>();
 		_textEditArea.ValueChanged = ( x ) =>
 		{
-			_template.Code = x;
-			SetDirty();
+			if ( !_undoRedoSet )
+			{
+				ExecuteUndoableAction( "Modify Code", () =>
+				{
+					_template.Code = x;
+					SetDirty();
+				} );
+			}
+			else
+			{
+				_template.Code = x;
+				SetDirty();
+			}
+
+			UpdateUndoRedoOptions();
 		};
 
 		container.Layout.Add( _textEditArea );
@@ -432,6 +448,17 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_redoOption.StatusTip = redoOptionText;
 	}
 
+	private DisposeAction UndoRedoScope()
+	{
+		bool prev = _undoRedoSet;
+		_undoRedoSet = true;
+
+		return new DisposeAction( () =>
+		{
+			_undoRedoSet = prev;
+		} );
+	}
+
 	public void ExecuteUndoableAction( string undoName, Action action )
 	{
 		var preState = _template.Serialize();
@@ -443,15 +470,21 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_undoSystem.Insert( undoName,
 			() =>
 			{
-				_template.Deserialize( preState );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
+				using ( UndoRedoScope() )
+				{
+					_template.Deserialize( preState );
+					_textEditArea.Value = _template.Code;
+					SetDirty();
+				}
 			},
 			() =>
 			{
-				_template.Deserialize( postState );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
+				using ( UndoRedoScope() )
+				{
+					_template.Deserialize( postState );
+					_textEditArea.Value = _template.Code;
+					SetDirty();
+				}
 			} );
 	}
 
@@ -491,18 +524,24 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 				lastUndo = _undoSystem.Back.Pop();
 				_undoSystem.Insert( undoName, lastUndo.Undo, () =>
 				{
-					_template.Deserialize( serializedTemplate );
-					_textEditArea.Value = _template.Code;
-					SetDirty();
+					using ( UndoRedoScope() )
+					{
+						_template.Deserialize( serializedTemplate );
+						_textEditArea.Value = _template.Code;
+						SetDirty();
+					}
 				} );
 			}
 			else
 			{
 				_undoSystem.Insert( undoName, lastUndo.Redo, () =>
 				{
-					_template.Deserialize( serializedTemplate );
-					_textEditArea.Value = _template.Code;
-					SetDirty();
+					using ( UndoRedoScope() )
+					{
+						_template.Deserialize( serializedTemplate );
+						_textEditArea.Value = _template.Code;
+						SetDirty();
+					}
 				} );
 			}
 		}
@@ -510,14 +549,20 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		{
 			_undoSystem.Insert( undoName, () =>
 			{
-				_template.Deserialize( oldestSerialized );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
+				using ( UndoRedoScope() )
+				{
+					_template.Deserialize( oldestSerialized );
+					_textEditArea.Value = _template.Code;
+					SetDirty();
+				}
 			}, () =>
 			{
-				_template.Deserialize( serializedTemplate );
-				_textEditArea.Value = _template.Code;
-				SetDirty();
+				using ( UndoRedoScope() )
+				{
+					_template.Deserialize( serializedTemplate );
+					_textEditArea.Value = _template.Code;
+					SetDirty();
+				}
 			} );
 		}
 
