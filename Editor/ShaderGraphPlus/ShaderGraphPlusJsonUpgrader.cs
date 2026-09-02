@@ -34,31 +34,30 @@ internal static class ShaderGraphPlusJsonUpgrader
 
 	public static void Upgrade( int version, JsonObject json, Type targetType )
 	{
-		if ( _methods == null )
-		{
+		// This is normal, upgraders have not been initialized using UpdateUpgraders
+		// it's fine to ignore this.
+		if ( _methods is null )
 			return;
-		}
 
-		foreach ( var item2 in from x in _methods
-							   where x.Attribute.Type == targetType
-							   orderby x.Attribute.Version
-							   where x.Attribute.Version > version
-							   select x )
+		foreach ( var e in _methods
+			.Where( x => x.Attribute.Type == targetType )
+			.OrderBy( x => x.Attribute.Version )
+			.Where( x => x.Attribute.Version > version ) )
 		{
 			try
 			{
-				MethodDescription item = item2.Method;
-				object[] parameters = [json];
-				item.Invoke( null, parameters );
+				e.Method.Invoke( null, new[] { json } );
 			}
 			catch ( Exception exception )
 			{
-				Log.Warning( exception, $"A type version upgrader ( {item2.Attribute.Type}, version {item2.Attribute.Version}) threw an exception while trying to upgrade, so we halted the upgrade." );
-				break;
+				Log.Warning( exception, $"A type version upgrader ( {e.Attribute.Type}, version {e.Attribute.Version}) threw an exception while trying to upgrade, so we halted the upgrade." );
+				// Let's stop trying to upgrade because something is broken.
+				return;
 			}
 			finally
 			{
-				json[ShaderGraphPlus.JsonKeys.Version] = item2.Attribute.Version;
+				// Update our serialized version step by step.
+				json[ShaderGraphPlus.JsonKeys.Version] = e.Attribute.Version;
 			}
 		}
 

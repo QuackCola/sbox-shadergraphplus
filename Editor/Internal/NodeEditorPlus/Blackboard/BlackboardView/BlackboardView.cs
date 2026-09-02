@@ -167,7 +167,7 @@ public abstract class BlackboardView : Widget
 
 	public void DeleteParameter( IBlackboardParameter parameter, bool notifySelectionChange = false )
 	{
-		if ( parameter != null )
+		if ( parameter == null )
 			return;
 
 		using var undoScope = UndoScope( "Delete Parameter" );

@@ -40,7 +40,7 @@ public sealed class MathConstantsNode : ShaderNodePlus
 			{
 				ConstantValues.PI => "3.14159265359f",
 				ConstantValues.TWOPI => "6.28318530718f",
-				ConstantValues.FOURPI => "0.78539816339f",
+				ConstantValues.FOURPI => "12.56637061436f",
 				ConstantValues.TAU => "6.28318530717f",
 				ConstantValues.PHI => "1.6180339887f",
 				ConstantValues.E => "2.718282f",
