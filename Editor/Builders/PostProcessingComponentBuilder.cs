@@ -56,7 +56,7 @@ internal sealed class PostProcessingComponentBuilder
 	{
 		Match match = Regex.Match( paramStringValue, m_RegExPattern );
 
-		Vector2 vec2 = (Vector2)Utilities.Parse.ParseVector( match.Groups[1].Value );
+		Vector2 vec2 = Vector2.Parse( match.Groups[1].Value );
 		var result = $"Vector2({vec2.x}f,{vec2.y}f)";
 
 		AppendProperty( paramName );
@@ -71,7 +71,7 @@ internal sealed class PostProcessingComponentBuilder
 	{
 		Match match = Regex.Match( paramStringValue, m_RegExPattern );
 
-		Vector3 vec3 = (Vector3)Utilities.Parse.ParseVector( match.Groups[1].Value );
+		Vector3 vec3 = Vector3.Parse( match.Groups[1].Value );
 		var result = $"Vector3({vec3.x}f,{vec3.y}f,{vec3.z}f)";
 
 		AppendProperty( paramName );
@@ -86,7 +86,7 @@ internal sealed class PostProcessingComponentBuilder
 	{
 		Match match = Regex.Match( paramStringValue, m_RegExPattern );
 
-		Vector4 vec4 = (Vector4)Utilities.Parse.ParseVector( match.Groups[1].Value );
+		Vector4 vec4 = Vector4.Parse( match.Groups[1].Value );
 		var result = $"Vector4({vec4.x}f,{vec4.y}f,{vec4.z}f,{vec4.w}f)";
 
 		AppendProperty( paramName );
