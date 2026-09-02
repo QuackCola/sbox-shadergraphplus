@@ -1,10 +1,5 @@
 namespace ShaderGraphPlus;
 
-[System.AttributeUsage( AttributeTargets.Property )]
-internal sealed class ShaderFeatureReferenceAttribute : Attribute
-{
-}
-
 public abstract class ShaderFeatureBase : IValid
 {
 	/// <summary>
