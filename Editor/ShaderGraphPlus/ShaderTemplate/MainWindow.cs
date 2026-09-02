@@ -511,10 +511,12 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 			_undoSystem.Insert( undoName, () =>
 			{
 				_template.Deserialize( oldestSerialized );
+				_textEditArea.Value = _template.Code;
 				SetDirty();
 			}, () =>
 			{
 				_template.Deserialize( serializedTemplate );
+				_textEditArea.Value = _template.Code;
 				SetDirty();
 			} );
 		}
