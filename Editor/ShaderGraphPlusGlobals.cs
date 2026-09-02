@@ -15,7 +15,7 @@ internal static class ShaderGraphPlusGlobals
 		internal const string PortTypeChoiceEditor = "sgp.PortTypeChoiceEditor";
 		internal const string ShaderTypeDropdownEditor = "sgp.ShaderTypeDropdownEditor";
 	}
-	
+
 	internal static class EditorEvents
 	{
 		internal const string ShaderGraphPlusEditorCreated = "sgp.EditorCreatedEvent";

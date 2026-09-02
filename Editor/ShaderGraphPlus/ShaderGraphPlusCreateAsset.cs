@@ -49,7 +49,7 @@ internal static class ShaderGraphPlusCreateAsset
 			"PostProcess" => $"{templatesFolderRoot}/shadergraphplus.postprocessing",
 			_ => throw new NotImplementedException(),
 		};
-	
+
 		menu.AddOption( name, icon, () =>
 		{
 			var fd = new FileDialog( null );
