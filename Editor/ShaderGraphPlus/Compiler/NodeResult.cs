@@ -40,58 +40,25 @@ public struct NodeResult : IValid
 	{
 		get
 		{
-			if ( IsMetaDataResult )
+			if ( ResultType != ResultType.Invalid )
 			{
-				return ResultType != ResultType.Invalid && Metadata.Any();
+				return IsMetaDataResult ? Metadata.Any() : !string.IsNullOrWhiteSpace( Code );
 			}
-			else
-			{
-				return ResultType != ResultType.Invalid && !string.IsNullOrWhiteSpace( Code );
-			}
+
+			return false;
 		}
 	}
 
-	public readonly bool CanPreview
+	public readonly bool CanPreview => ResultType switch
 	{
-		get
-		{
-			switch ( ResultType )
-			{
-				case ResultType.Bool:
-					return false;
-				case ResultType.Int:
-					return true;
-				case ResultType.Float:
-					return true;
-				case ResultType.Vector2:
-					return true;
-				case ResultType.Vector3:
-					return true;
-				case ResultType.Vector4:
-					return true;
-				case ResultType.Float2x2:
-					return false;
-				case ResultType.Float3x3:
-					return false;
-				case ResultType.Float4x4:
-					return false;
-				case ResultType.Sampler:
-					return false;
-				case ResultType.Texture2D:
-					return false;
-				case ResultType.TextureCube:
-					return false;
-				case ResultType.Gradient:
-					return false;
-				case ResultType.VoidFunction:
-					return false;
-				case ResultType.Invalid:
-					throw new Exception( "Result Type Is Invalid!" );
-				default:
-					return false;
-			}
-		}
-	}
+		ResultType.Int => true,
+		ResultType.Float => true,
+		ResultType.Vector2 => true,
+		ResultType.Vector3 => true,
+		ResultType.Vector4 => true,
+		ResultType.Invalid => throw new Exception( "ResultType Is Invalid!" ),
+		_ => false,
+	};
 
 	public readonly bool CanCast => ResultType switch
 	{
