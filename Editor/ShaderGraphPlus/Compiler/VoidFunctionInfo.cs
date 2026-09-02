@@ -58,6 +58,9 @@ internal struct VoidFunctionInfo : IValid
 
 	public override readonly int GetHashCode()
 	{
+		if ( TargetResults == null ) 
+			return 0;
+
 		var hashCodeTargetResults = 0;
 		foreach ( var item in TargetResults )
 		{
