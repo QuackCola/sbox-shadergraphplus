@@ -27,7 +27,13 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 	private TextEditAreaWidget _textEditArea;
 
-	private UndoSystem UndoSystem;
+	private UndoSystem _undoSystem;
+
+	private Option _undoMenuOption;
+	private Option _redoMenuOption;
+	private Option _undoOption;
+	private Option _redoOption;
+
 	private ShaderDomain _lastShaderDomain;
 
 	public bool CanOpenMultipleAssets => false;
@@ -39,8 +45,10 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		InitUndo();
 
 		CreateToolBar();
-
 		CreateUI();
+
+		UpdateUndoRedoOptions();
+
 		Show();
 
 		StateCookie = ShaderGraphPlusGlobals.ShaderTemplateEditorStateCookieName;
@@ -63,8 +71,10 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 	private void InitUndo()
 	{
-		UndoSystem = new UndoSystem();
-		UndoSystem.Initialize();
+		_undoSystem = new UndoSystem();
+		_undoSystem.Initialize();
+		_undoSystem.OnUndo += _ => UpdateUndoRedoOptions();
+		_undoSystem.OnRedo += _ => UpdateUndoRedoOptions();
 	}
 
 	private void CreateUI()
@@ -75,6 +85,67 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		_primaryDockCanvas.Layout = Layout.Column();
 
 		DockManager.SetCentralWidget( _primaryDockCanvas );
+	}
+
+	private void BuildMenuBar()
+	{
+		var file = MenuBar.AddMenu( "File" );
+		file.AddOption( "New", "common/new.png", New, "editor.new" ).StatusTip = "New Template";
+		file.AddOption( "Open", "common/open.png", Open, "editor.open" ).StatusTip = "Open Template";
+		file.AddOption( "Save", "common/save.png", Save, "editor.save" ).StatusTip = "Save Template";
+		file.AddOption( "Save As...", "common/save.png", SaveAs, "editor.save-as" ).StatusTip = "Save Template As...";
+
+		file.AddSeparator();
+
+		file.AddOption( "Reset Template Code To Default", "common/reset.png", () => ResetTemplateCodeToDefault() ).StatusTip = "Reset Template Code To Default";
+
+		file.AddSeparator();
+
+		file.AddOption( "Quit", null, Quit, "editor.quit" ).StatusTip = "Quit";
+
+		var edit = MenuBar.AddMenu( "Edit" );
+		_undoMenuOption = edit.AddOption( "Undo", "undo", () => Undo(), "editor.undo" );
+		_redoMenuOption = edit.AddOption( "Redo", "redo", () => Redo(), "editor.redo" );
+
+		var view = MenuBar.AddMenu( "View" );
+		view.AboutToShow += () => OnViewMenu( view );
+	}
+
+	private void CreateToolBar()
+	{
+		var toolBar = new ToolBar( this, ShaderGraphPlusGlobals.ShaderTemplateEditorToolbarName );
+		AddToolBar( toolBar, ToolbarPosition.Top );
+
+		toolBar.AddOption( "New", "common/new.png", New ).StatusTip = "New Template";
+		toolBar.AddOption( "Open", "common/open.png", Open ).StatusTip = "Open Template";
+		toolBar.AddOption( "Save", "common/save.png", () => Save() ).StatusTip = "Save Template";
+
+		toolBar.AddSeparator();
+
+		_undoOption = toolBar.AddOption( new Option( "Undo", "undo", () => Undo() ) );
+		_redoOption = toolBar.AddOption( new Option( "Redo", "redo", () => Redo() ) );
+
+		toolBar.AddSeparator();
+	}
+
+	private void OnViewMenu( Menu view )
+	{
+		view.Clear();
+		view.AddOption( "Restore To Default", "settings_backup_restore", ResetLayout );
+		view.AddSeparator();
+
+		foreach ( var dock in DockManager.DockTypes )
+		{
+			var o = view.AddOption( dock.Title, dock.Icon );
+			o.Checkable = true;
+			o.Checked = DockManager.IsDockOpen( dock.Title );
+			o.Toggled += ( b ) => DockManager.SetDockState( dock.Title, b );
+		}
+	}
+
+	protected override void BuildDefaultLayout()
+	{
+
 	}
 
 	private void Rebuild()
@@ -128,10 +199,11 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		container.VerticalSizeMode = SizeMode.CanGrow;
 
 		_textEditArea = new TextEditAreaWidget( container );
-		_textEditArea.Value = _template.Code;
+		_textEditArea.Value = property.GetValue<string>();
 		_textEditArea.ValueChanged = ( x ) =>
 		{
-			property.SetValue( x );
+			_template.Code = x;
+			SetDirty();
 		};
 
 		container.Layout.Add( _textEditArea );
@@ -139,9 +211,30 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		return container;
 	}
 
-	protected override void BuildDefaultLayout()
+	private void ResetTemplateCodeToDefault()
 	{
+		if ( _template == null || _textEditArea == null )
+			return;
 
+		ExecuteUndoableAction( "Reset Template Code To Default", () =>
+		{
+			switch ( _template.ShaderDomain )
+			{
+				case ShaderDomain.Surface:
+					_template.Code = ShaderTemplateSurface.Code;
+					break;
+				case ShaderDomain.Sky:
+					_template.Code = ShaderTemplateSky.Code;
+					break;
+				case ShaderDomain.PostProcess:
+					_template.Code = ShaderTemplatePostProcess.Code;
+					break;
+			}
+
+			_textEditArea.Value = _template.Code;
+		} );
+
+		SetDirty();
 	}
 
 	private void PromptSave( Action action )
@@ -179,87 +272,9 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		WindowTitle = "untitled";
 
-		UndoSystem.Initialize();
+		_undoSystem.Initialize();
 
 		Rebuild();
-	}
-
-	private void BuildMenuBar()
-	{
-		var file = MenuBar.AddMenu( "File" );
-		file.AddOption( "New", "common/new.png", New, "editor.new" ).StatusTip = "New Template";
-		file.AddOption( "Open", "common/open.png", Open, "editor.open" ).StatusTip = "Open Template";
-		file.AddOption( "Save", "common/save.png", Save, "editor.save" ).StatusTip = "Save Template";
-		file.AddOption( "Save As...", "common/save.png", SaveAs, "editor.save-as" ).StatusTip = "Save Template As...";
-
-		file.AddSeparator();
-
-		file.AddOption( "Reset Template Code To Default", "common/reset.png", () => ResetTemplateCodeToDefault() ).StatusTip = "Reset Template Code To Default";
-
-		file.AddSeparator();
-
-		file.AddOption( "Quit", null, Quit, "editor.quit" ).StatusTip = "Quit";
-
-		var view = MenuBar.AddMenu( "View" );
-		view.AboutToShow += () => OnViewMenu( view );
-	}
-
-	private void OnViewMenu( Menu view )
-	{
-		view.Clear();
-		view.AddOption( "Restore To Default", "settings_backup_restore", ResetLayout );
-		view.AddSeparator();
-
-		foreach ( var dock in DockManager.DockTypes )
-		{
-			var o = view.AddOption( dock.Title, dock.Icon );
-			o.Checkable = true;
-			o.Checked = DockManager.IsDockOpen( dock.Title );
-			o.Toggled += ( b ) => DockManager.SetDockState( dock.Title, b );
-		}
-	}
-
-	private void CreateToolBar()
-	{
-		var toolBar = new ToolBar( this, ShaderGraphPlusGlobals.ShaderTemplateEditorToolbarName );
-		AddToolBar( toolBar, ToolbarPosition.Top );
-
-		toolBar.AddOption( "New", "common/new.png", New ).StatusTip = "New Template";
-		toolBar.AddOption( "Open", "common/open.png", Open ).StatusTip = "Open Template";
-		toolBar.AddOption( "Save", "common/save.png", () => Save() ).StatusTip = "Save Template";
-
-		toolBar.AddSeparator();
-
-		toolBar.AddOption( new Option( "Undo", "undo", () => Undo() ) { ShortcutName = "editor.undo" } );
-		toolBar.AddOption( new Option( "Redo", "redo", () => Redo() ) { ShortcutName = "editor.redo" } );
-
-		toolBar.AddSeparator();
-	}
-
-	private void ResetTemplateCodeToDefault()
-	{
-		if ( _template == null || _textEditArea == null )
-			return;
-
-		ExecuteUndoableAction( "Reset Template Code To Default", () =>
-		{
-			switch ( _template.ShaderDomain )
-			{
-				case ShaderDomain.Surface:
-					_template.Code = ShaderTemplateSurface.Code;
-					break;
-				case ShaderDomain.Sky:
-					_template.Code = ShaderTemplateSky.Code;
-					break;
-				case ShaderDomain.PostProcess:
-					_template.Code = ShaderTemplatePostProcess.Code;
-					break;
-			}
-
-			_textEditArea.Value = _template.Code;
-		} );
-
-		//SetDirty();
 	}
 
 	[Shortcut( "editor.quit", "CTRL+Q" )]
@@ -271,13 +286,13 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	[Shortcut( "editor.undo", "CTRL+Z", ShortcutType.Window )]
 	private bool Undo()
 	{
-		return UndoSystem.Undo();
+		return _undoSystem.Undo();
 	}
 
 	[Shortcut( "editor.redo", "CTRL+Y", ShortcutType.Window )]
 	private bool Redo()
 	{
-		return UndoSystem.Redo();
+		return _undoSystem.Redo();
 	}
 
 	private void Open()
@@ -319,7 +334,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		WindowTitle = _asset?.Name;
 
-		UndoSystem.Initialize();
+		_undoSystem.Initialize();
 		Rebuild();
 	}
 
@@ -393,20 +408,31 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 	public void SetDirty()
 	{
 		Update();
+		UpdateUndoRedoOptions();
 
 		_dirty = true;
 		WindowTitle = $"{_asset?.Name ?? "untitled"}*";
 	}
 
-	/*
-	[EditorEvent.Frame]
-	protected void Frame()
+	private void UpdateUndoRedoOptions()
 	{
-	
-	}
-	*/
+		var undoOptionText = $"Undo {(_undoSystem.Back.Count > 0 ? $"\"{_undoSystem.Back.Peek().Name}\"" : "")}";
+		var redoOptionText = $"Redo {(_undoSystem.Forward.Count > 0 ? $"\"{_undoSystem.Forward.Peek().Name}\"" : "")}";
 
-	public void ExecuteUndoableAction( string title, Action action )
+		_undoMenuOption.Enabled = _undoSystem.Back.Count > 0;
+		_redoMenuOption.Enabled = _undoSystem.Forward.Count > 0;
+		_undoMenuOption.Text = undoOptionText;
+		_redoMenuOption.Text = redoOptionText;
+
+		_undoOption.Enabled = _undoSystem.Back.Count > 0;
+		_redoOption.Enabled = _undoSystem.Forward.Count > 0;
+		_undoOption.ToolTip = undoOptionText;
+		_redoOption.ToolTip = redoOptionText;
+		_undoOption.StatusTip = undoOptionText;
+		_redoOption.StatusTip = redoOptionText;
+	}
+
+	public void ExecuteUndoableAction( string undoName, Action action )
 	{
 		var preState = _template.Serialize();
 
@@ -414,7 +440,7 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		var postState = _template.Serialize();
 
-		UndoSystem.Insert( title,
+		_undoSystem.Insert( undoName,
 			() =>
 			{
 				_template.Deserialize( preState );
@@ -434,8 +460,6 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 		if ( serializedProperty is null ) return;
 
 		var undoName = $"Modify {serializedProperty.Name}";
-
-		Log.Info( undoName );
 
 		if ( serializedProperty.Name == nameof( ShaderTemplateResource.ShaderDomain ) )
 		{
@@ -459,41 +483,38 @@ public sealed class ShaderTemplateEditorWindow : DockWindow, IAssetEditor
 
 		var serializedTemplate = _template.Serialize();
 
-		// TODO : Fix when setting _textEditArea.Value the undo gets fucked.
-		if ( UndoSystem.Back.Count > 0 )
+		if ( _undoSystem.Back.Count > 0 )
 		{
-			var lastUndo = UndoSystem.Back.Peek();
+			var lastUndo = _undoSystem.Back.Peek();
 			if ( lastUndo?.Name == undoName )
 			{
-				lastUndo = UndoSystem.Back.Pop();
-				UndoSystem.Insert( undoName, lastUndo.Undo, () =>
+				lastUndo = _undoSystem.Back.Pop();
+				_undoSystem.Insert( undoName, lastUndo.Undo, () =>
 				{
 					_template.Deserialize( serializedTemplate );
-					//_textEditArea.Value = _template.Code;
+					_textEditArea.Value = _template.Code;
 					SetDirty();
 				} );
 			}
 			else
 			{
-				UndoSystem.Insert( undoName, lastUndo.Redo, () =>
+				_undoSystem.Insert( undoName, lastUndo.Redo, () =>
 				{
 					_template.Deserialize( serializedTemplate );
-					//_textEditArea.Value = _template.Code;
+					_textEditArea.Value = _template.Code;
 					SetDirty();
 				} );
 			}
 		}
 		else
 		{
-			UndoSystem.Insert( undoName, () =>
+			_undoSystem.Insert( undoName, () =>
 			{
 				_template.Deserialize( oldestSerialized );
-				//_textEditArea.Value = _template.Code;
 				SetDirty();
 			}, () =>
 			{
 				_template.Deserialize( serializedTemplate );
-				//_textEditArea.Value = _template.Code;
 				SetDirty();
 			} );
 		}
