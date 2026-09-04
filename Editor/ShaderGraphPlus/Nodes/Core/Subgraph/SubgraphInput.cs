@@ -187,7 +187,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IBlackboardN
 				else
 				{
 					// Register gradient with the compiler.
-					var result = compiler.RegisterGradient( gradientValue, Name );
+					var result = compiler.RegisterGradient( Name, gradientValue );
 
 					return new NodeResult( ResultType.Gradient, result, constant: true );
 				}
@@ -213,7 +213,7 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IBlackboardN
 				else
 				{
 					// Register gradient with the compiler.
-					var result = compiler.RegisterGradient( gradientValue, Name );
+					var result = compiler.RegisterGradient( Name, gradientValue );
 
 					return new NodeResult( ResultType.Gradient, result, constant: true );
 				}

@@ -431,7 +431,7 @@ public sealed partial class GraphCompiler
 	/// <summary>
 	/// Loops through ShaderResult.Gradients to find the matching key then returns the corresponding Gradient.
 	/// </summary>
-	public Gradient GetGradient( string gradientName )
+	public Gradient GetGradient( string name )
 	{
 		var result = ShaderResult;
 
@@ -439,7 +439,7 @@ public sealed partial class GraphCompiler
 
 		foreach ( var gradient in result.Gradients )
 		{
-			if ( gradient.Key == gradientName )
+			if ( gradient.Key == name )
 			{
 				searchResult = gradient.Value;
 			}
@@ -451,11 +451,11 @@ public sealed partial class GraphCompiler
 	/// <summary>
 	/// Register a gradient and return the name of the graident. A generic name is returned instead if the gradient name is empty.
 	/// </summary>
-	public string RegisterGradient( Gradient gradient, string gradientName )
+	public string RegisterGradient( string name, Gradient gradient )
 	{
 		var result = ShaderResult;
 
-		var name = !string.IsNullOrWhiteSpace( gradientName ) ? CleanName( gradientName ) : $"Gradient_{result.Gradients.Count}";
+		name = !string.IsNullOrWhiteSpace( name ) ? CleanName( name ) : $"Gradient_{result.Gradients.Count}";
 
 		if ( !result.Gradients.ContainsKey( name ) )
 		{
