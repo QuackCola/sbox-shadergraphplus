@@ -677,9 +677,9 @@ float3 GetWorldSpaceNormal( float2 vUv )
 
 	[Function( "BoxShape" )]
 	public static string BoxShape => @"
-float BoxShape( float2 UV, float Width, float Height )
+float BoxShape( float2 vUV, float flWidth, float flHeight )
 {
-	float2 d = abs( UV * 2 - 1 ) - float2( Width, Height );
+	float2 d = abs( vUV * 2 - 1 ) - float2( flWidth, flHeight );
 	d = 1 - d / fwidth( d );
 	return saturate( min( d.x, d.y ) );
 }
@@ -688,22 +688,22 @@ float BoxShape( float2 UV, float Width, float Height )
 
 	[Function( "ElipseShape" )]
 	public static string ElipseShape => @"
-float ElipseShape( float2 UV, float Width, float Height )
+float ElipseShape( float2 vUV, float flWidth, float flHeight )
 {
-	float d = length( ( UV * 2 - 1) / float2( Width, Height ) );
+	float d = length( ( vUV * 2 - 1) / float2( flWidth, flHeight ) );
 	return saturate( ( 1 - d ) / fwidth( d ) );
 }
 ";
 
 	[Function( "PolygonShape" )]
 	public static string PolygonShape => @"
-float PolygonShape( float2 UV, int Sides, float Width, float Height )
+float PolygonShape( float2 vUV, int nSides, float flWidth, float flHeight )
 {
-	float shapeSides = (float)Sides;
-	float pi = 3.14159265359;
-	float aWidth = Width * cos( pi / shapeSides );
-	float aHeight = Height * cos( pi / shapeSides );
-	float2 uv = ( UV * 2 - 1 ) / float2( aWidth, aHeight );
+	float shapeSides = (float)nSides;
+	float pi = 3.14159265359f;
+	float aWidth = flWidth * cos( pi / shapeSides );
+	float aHeight = flHeight * cos( pi / shapeSides );
+	float2 uv = ( vUV * 2 - 1 ) / float2( aWidth, aHeight );
 	uv.y *= -1;
 	float pCoord = atan2( uv.x, uv.y );
 	float r = 2 * pi / shapeSides;
