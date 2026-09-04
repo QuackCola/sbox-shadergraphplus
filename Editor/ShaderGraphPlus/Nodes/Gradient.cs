@@ -35,10 +35,8 @@ public sealed class GradientConstantNode : ShaderNodePlus, IConstantNode
 		}
 		else
 		{
-			// Register gradient with the compiler.
-			var result = compiler.RegisterGradient( Gradient, Name );
+			var result = compiler.RegisterGradient( Name, Gradient );
 
-			// Return the gradent name that will only be used to search for it in a dictonary.
 			return new NodeResult( ResultType.Gradient, result, constant: true );
 		}
 	};
