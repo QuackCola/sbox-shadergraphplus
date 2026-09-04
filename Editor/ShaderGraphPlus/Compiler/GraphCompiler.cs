@@ -272,10 +272,10 @@ public sealed partial class GraphCompiler
 
 	internal string RegisterCustomCode( string nodeID, string functionName, string functionInputs, Dictionary<string, string> outputResults, CustomCodeNodeMode mode )
 	{
-		if ( !ShaderResult.VoidFunctionLocals.ContainsKey( nodeID ) )
+		if ( !ShaderResult.VoidFunctionData.ContainsKey( nodeID ) )
 		{
-			var outputData = new List<VoidFunctionResult>();
-			var functionOutputsSb = new StringBuilder();
+			var voidFunctionResults = new List<VoidFunctionResult>();
+			var functionOutputs = new StringBuilder();
 
 			foreach ( var output in outputResults.Index() )
 			{
@@ -283,45 +283,34 @@ public sealed partial class GraphCompiler
 				var id = VoidLocalCount++;
 				var compilerName = $"ol_{id}";
 
-				functionOutputsSb.Append( (output.Index + 1) == outputResults.Count ? $"{compilerName}" : $" {compilerName}, " );
+				functionOutputs.Append( (output.Index + 1) == outputResults.Count ? $"{compilerName}" : $" {compilerName}, " );
 
-				VoidFunctionResult data = new(
+				voidFunctionResults.Add( new VoidFunctionResult(
 					userAssignedname,
 					compilerName,
 					GetResultTypeFromHLSLDataType( output.Item.Value )
-				);
-
-				outputData.Add( data );
+				) );
 			}
 
 			// Assemble the function call
-			var funcCall = "";
-			if ( mode == CustomCodeNodeMode.Generate )
+			var funcCall = mode switch
 			{
-				funcCall = ResultHLSLFunction( functionName, $"{functionInputs}, {functionOutputsSb}" );
-			}
-			else if ( mode == CustomCodeNodeMode.File )
-			{
-				funcCall = $"{functionName}( {string.Join( ", ", $"{functionInputs}, {functionOutputsSb}" )} )";
-			}
-			else
-			{
-				throw new NotImplementedException( $"Unknown CustomFunction mode '{mode}'" );
-			}
+				CustomCodeNodeMode.Generate => ResultHLSLFunction( functionName, $"{functionInputs}, {functionOutputs}" ),
+				CustomCodeNodeMode.File => $"{functionName}( {string.Join( ", ", $"{functionInputs}, {functionOutputs}" )} )",
+				_ => throw new NotImplementedException( $"Unknown CustomFunction mode '{mode}'" ),
+			};
 
-			var voidData = new VoidFunctionInfo(
-				outputData,
+			ShaderResult.VoidFunctionData.Add( nodeID, new VoidFunctionInfo(
+				voidFunctionResults,
 				funcCall,
 				SubgraphNode == null ? nodeID : SubgraphNode.Identifier,
 				mode == CustomCodeNodeMode.File
-			);
-
-			ShaderResult.VoidFunctionLocals.Add( nodeID, voidData );
+			) );
 
 			return funcCall;
 		}
 
-		return ShaderResult.VoidFunctionLocals[nodeID].FunctionCall;
+		return ShaderResult.VoidFunctionData[nodeID].FunctionCall;
 	}
 
 	/// <summary>
@@ -708,7 +697,7 @@ public sealed partial class GraphCompiler
 					return default;
 				}
 
-				if ( ShaderResult.VoidFunctionLocals.TryGetValue( node.Identifier, out VoidFunctionInfo data ) ) //&& !data.IsAlreadyPostProcessed )
+				if ( ShaderResult.VoidFunctionData.TryGetValue( node.Identifier, out VoidFunctionInfo data ) ) //&& !data.IsAlreadyPostProcessed )
 				{
 					funcResult.SetVoidLocalTargetID( node.Identifier );
 
@@ -742,7 +731,7 @@ public sealed partial class GraphCompiler
 
 					ShaderResult.InputResults.Add( input, localResult );
 					ShaderResult.Results.Add( (localResult, funcResult) );
-					ShaderResult.VoidFunctionLocals[node.Identifier] = data with { IsAlreadyPostProcessed = true };
+					ShaderResult.VoidFunctionData[node.Identifier] = data with { IsAlreadyPostProcessed = true };
 
 					InputStack.Remove( input );
 
@@ -1997,9 +1986,9 @@ public sealed partial class GraphCompiler
 			}
 
 			// CustomFunction node uses this primarly.
-			if ( ShaderResult.VoidFunctionLocals.Any() && ShaderResult.VoidFunctionLocals.ContainsKey( result.funcResult.VoidLocalTargetID ) )
+			if ( ShaderResult.VoidFunctionData.Any() && ShaderResult.VoidFunctionData.ContainsKey( result.funcResult.VoidLocalTargetID ) )
 			{
-				var data = ShaderResult.VoidFunctionLocals[result.funcResult.VoidLocalTargetID];
+				var data = ShaderResult.VoidFunctionData[result.funcResult.VoidLocalTargetID];
 				sb.AppendLine();
 
 				if ( !VoidDataHashes.Contains( data.GetHashCode() ) )
