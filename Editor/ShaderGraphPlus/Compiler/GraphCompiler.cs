@@ -396,14 +396,14 @@ public sealed partial class GraphCompiler
 	}
 
 	/// <summary>
-	/// Emit a scalar <c>float</c> expression. If <paramref name="r"/> is float2/float3/float4, uses swizzle
+	/// Emit a scalar <c>float</c> expression. If <paramref name="result"/> is float2/float3/float4, uses swizzle
 	/// so wiring a vector into a <c>float</c> HLSL parameter does not rely on implicit truncation (-Wconversion).
 	/// </summary>
-	public static string EmitScalarFloat( NodeResult r, float fallback )
+	public static string EmitScalarFloat( NodeResult result, float fallback )
 	{
-		if ( !r.IsValid || !r.IsFloatTypeResult() )
+		if ( !result.IsValid || !result.IsFloatTypeResult() )
 			return $"{fallback}";
-		return r.Components > 1 ? r.Cast( 1 ) : r.Code;
+		return result.Components > 1 ? result.Cast( 1 ) : result.Code;
 	}
 
 	public string ResultHLSLFunction( string name, params string[] args )
