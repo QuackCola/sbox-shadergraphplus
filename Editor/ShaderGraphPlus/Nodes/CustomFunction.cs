@@ -320,7 +320,7 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 			}
 			*/
 
-			string funcCall = compiler.RegisterCustomCode( Identifier, Name, functionInputs, outputResults, Mode );
+			var funcCall = compiler.RegisterCustomCode( Identifier, Name, functionInputs, outputResults, Mode );
 
 			return new NodeResult( ResultType.VoidFunction, funcCall, true );
 		}
