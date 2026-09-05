@@ -1379,11 +1379,11 @@ public class MainWindow : DockWindow
 
 		_asset = asset;
 		_graph = graph;
-		_dirty = false;
-		_graphView.Graph = _graph;
 
 		LoadShaderTemplate();
 
+		_dirty = false;
+		_graphView.Graph = _graph;
 		_blackboardView.Graph = _graph;
 
 		UpdateTitle();
