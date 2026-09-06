@@ -44,7 +44,7 @@ public enum CompatableShaderStage
 /// Inject your own custom HLSL code into ShaderGraphPlus
 /// </summary>
 [Title( "Custom Function" ), Category( "Utility" ), Icon( "code" )]
-public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarningNode, BaseNodePlus.IInitializeNode
+public sealed class CustomFunctionNode : ShaderNodePlus, BaseNodePlus.IInitializeNode, IErroringNode, IWarningNode
 {
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.FunctionNode;
@@ -150,11 +150,6 @@ public sealed class CustomFunctionNode : ShaderNodePlus, IErroringNode, IWarning
 	}
 
 	public void InitializeNode()
-	{
-		OnNodeCreated();
-	}
-
-	private void OnNodeCreated()
 	{
 		CreateInputs();
 		CreateOutputs();
