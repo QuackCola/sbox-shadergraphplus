@@ -1,7 +1,4 @@
-﻿
-using Facepunch.ActionGraphs;
-
-namespace ShaderGraphPlus.Nodes;
+﻿namespace ShaderGraphPlus.Nodes;
 
 /// <summary>
 /// Get the dimensions of a Texture2D.
