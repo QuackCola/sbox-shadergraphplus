@@ -1117,7 +1117,7 @@ public class MainWindow : DockWindow
 
 		file.AddOption( "Reload Shader Template", "common/reload.png", () =>
 		{
-			LoadShaderTemplate();
+			LoadShaderTypeInfo();
 			SetDirty();
 		} );
 
@@ -1291,7 +1291,7 @@ public class MainWindow : DockWindow
 		_output.ClearErrors();
 		_output.ClearWarnings();
 
-		LoadShaderTemplate();
+		LoadShaderTypeInfo();
 
 		if ( !IsSubgraph )
 		{
@@ -1380,7 +1380,7 @@ public class MainWindow : DockWindow
 		_asset = asset;
 		_graph = graph;
 
-		LoadShaderTemplate();
+		LoadShaderTypeInfo();
 
 		_dirty = false;
 		_graphView.Graph = _graph;
@@ -1436,7 +1436,7 @@ public class MainWindow : DockWindow
 
 	}
 
-	private void LoadShaderTemplate()
+	private void LoadShaderTypeInfo()
 	{
 		if ( _graph is null ) return;
 
@@ -1889,7 +1889,7 @@ public class MainWindow : DockWindow
 		// Reload shader template
 		if ( _properties.Target is ShaderGraphPlus && serializedProperty.IsPropertyName( nameof( ShaderGraphPlus.ShaderType ) ) )
 		{
-			LoadShaderTemplate();
+			LoadShaderTypeInfo();
 		}
 
 		var shouldEvaluate = _properties.Target is not CommentNode;
@@ -1952,7 +1952,7 @@ public class MainWindow : DockWindow
 	{
 		if ( _graph.HasTemplate && _graph.ShaderType == templatePath )
 		{
-			LoadShaderTemplate();
+			LoadShaderTypeInfo();
 			SetDirty();
 		}
 	}
