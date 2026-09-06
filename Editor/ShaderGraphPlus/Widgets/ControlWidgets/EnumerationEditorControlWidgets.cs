@@ -157,11 +157,6 @@ internal sealed class BlendModeControlWidget : CustomEnumControlWidget
 
 		var sti = _graph.ShaderTypeInfo;
 
-		if ( sti.HasSupport( SupportsAllBlend ) )
-		{
-			return true;
-		}
-
 		return entry.Name switch
 		{
 			nameof( BlendMode.Opaque ) => sti.HasSupport( SupportsOpaqueBlend ),

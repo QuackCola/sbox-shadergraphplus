@@ -123,7 +123,9 @@ m.TextureCoords = i.vTextureCoords.xy;
 
 	internal static List<string> DefaultSupportStrings => new()
 	{
-		{ SupportsAllBlend },
+		{ SupportsOpaqueBlend },
+		{ SupportsMaskedBlend },
+		{ SupportsTranslucentBlend },
 
 		{ SupportsLitShading },
 		{ SupportsUnlitShading },

@@ -60,24 +60,17 @@ public static partial class ShaderTemplate
 							templatePlugs.Remove( "PositionOffset" );
 						}
 
-						if ( userTemplate.OpaqueBlend && userTemplate.MaskedBlend && userTemplate.TranslucentBlend )
+						if ( userTemplate.OpaqueBlend )
 						{
-							supportStrings.Add( SupportsAllBlend );
+							supportStrings.Add( SupportsOpaqueBlend );
 						}
-						else
+						if ( userTemplate.MaskedBlend )
 						{
-							if ( userTemplate.OpaqueBlend )
-							{
-								supportStrings.Add( SupportsOpaqueBlend );
-							}
-							if ( userTemplate.MaskedBlend )
-							{
-								supportStrings.Add( SupportsMaskedBlend );
-							}
-							if ( userTemplate.TranslucentBlend )
-							{
-								supportStrings.Add( SupportsTranslucentBlend );
-							}
+							supportStrings.Add( SupportsMaskedBlend );
+						}
+						if ( userTemplate.TranslucentBlend )
+						{
+							supportStrings.Add( SupportsTranslucentBlend );
 						}
 
 						break;
