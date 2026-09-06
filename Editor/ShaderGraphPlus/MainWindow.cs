@@ -1272,9 +1272,16 @@ public class MainWindow : DockWindow
 		Selection.Clear();
 
 		_asset = null;
-		_graph = new();
-		_graph.Title = "untitled";
+		_graph = new()
+		{
+			Title = "untitled"
+		};
 		_dirty = false;
+
+		// Must be done before setting _graphView.Graph and _blackboardView.Graph
+		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized.
+		LoadShaderTypeInfo();
+
 		_graphView.Graph = _graph;
 		_blackboardView.Graph = _graph;
 
@@ -1290,8 +1297,6 @@ public class MainWindow : DockWindow
 
 		_output.ClearErrors();
 		_output.ClearWarnings();
-
-		LoadShaderTypeInfo();
 
 		if ( !IsSubgraph )
 		{
@@ -1379,10 +1384,12 @@ public class MainWindow : DockWindow
 
 		_asset = asset;
 		_graph = graph;
+		_dirty = false;
 
+		// Must be done before setting _graphView.Graph and _blackboardView.Graph
+		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized.
 		LoadShaderTypeInfo();
 
-		_dirty = false;
 		_graphView.Graph = _graph;
 		_blackboardView.Graph = _graph;
 
