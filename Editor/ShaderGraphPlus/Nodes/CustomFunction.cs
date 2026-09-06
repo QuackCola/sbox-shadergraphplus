@@ -487,19 +487,19 @@ public sealed class CustomFunctionNode : ShaderNodePlus, BaseNodePlus.IInitializ
 		var errors = new List<string>();
 
 		var inputTypeInputError = $"Input{{0}}must have a Type.";
-		var missingInputNameError = $"Input of type '{{0}}' must have a name.";
-		var duplicateInputNameError = $"Duplicate input '{{0}}'.";
-		var conflictingNameInputError = $"Input '{{0}}' already exists as an output.";
+		var missingInputNameError = $"Input of type \"{{0}}\" must have a name.";
+		var duplicateInputNameError = $"Duplicate input \"{{0}}\".";
+		var conflictingNameInputError = $"Input \"{{0}}\" already exists as an output.";
 
 		var noOutputsOutputError = $"must have atleast 1 output.";
 		var outputTypeOutputError = $"Output{{0}}must have a Type.";
-		var missingOutputNameError = $"Output of type '{{0}}' must have a name.";
-		var duplicateOutputNameError = $"Duplicate output '{{0}}'.";
-		var conflictingNameOutputError = $"Output '{{0}}' already exists as an input.";
+		var missingOutputNameError = $"Output of type \"{{0}}\" must have a name.";
+		var duplicateOutputNameError = $"Duplicate output \"{{0}}\".";
+		var conflictingNameOutputError = $"Output \"{{0}}\" already exists as an input.";
 
 		var missingFunctionNameError = $"Must have a function name.";
 		var missingSourceFilePathError = $"Source path is empty.";
-		var missingSourceFileError = $"Include file `shaders/{Source}` does not exist.";
+		var missingSourceFileError = $"Include file \"shaders/{Source}\" does not exist.";
 
 		if ( !FunctionOutputs.Any() )
 		{

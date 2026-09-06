@@ -158,7 +158,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				SubgraphPortType.SamplerState => typeof( Sampler ),
 				SubgraphPortType.Texture2DObject => typeof( Texture ),
 				SubgraphPortType.TextureCubeObject => typeof( Texture ),
-				_ => throw new NotImplementedException( $"Unknown PortType \'{subgraphOutput.PortType}\'" )
+				_ => throw new NotImplementedException( $"Unknown PortType \"{subgraphOutput.PortType}\"" )
 			};
 
 			if ( outputType is null ) continue;

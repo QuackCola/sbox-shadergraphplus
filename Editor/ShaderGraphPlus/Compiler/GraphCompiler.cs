@@ -743,7 +743,7 @@ public sealed partial class GraphCompiler
 			}
 			else
 			{
-				throw new NotImplementedException( $"Unknown mode '{customFunctionNode.Mode}'" );
+				throw new NotImplementedException( $"Unknown CustomFunctionMode \"{customFunctionNode.Mode}\"" );
 			}
 
 		}
@@ -820,7 +820,7 @@ public sealed partial class GraphCompiler
 
 				if ( value == null )
 				{
-					NodeError( ref node, $"Missing internal input \'{resultInput.DisplayInfo.Name}\' in node \'{Subgraph.Path}\'" );
+					NodeError( ref node, $"Missing internal input \"{resultInput.DisplayInfo.Name}\" in node \"{Subgraph.Path}\"" );
 
 					SGPLogger.Error( subgraphNode.ErrorMessage );
 
@@ -828,7 +828,7 @@ public sealed partial class GraphCompiler
 				}
 				else
 				{
-					SGPLogger.Error( $"Missing Internal Input \'{resultInput.DisplayInfo.Name}\' in node \'{Subgraph.Path}\' falling back to default value \'{value}\'" );
+					SGPLogger.Error( $"Missing Internal Input \"{resultInput.DisplayInfo.Name}\" in node \"{Subgraph.Path}\" falling back to default value \"{value}\'" );
 				}
 
 				SubgraphStack.RemoveAt( SubgraphStack.Count - 1 );

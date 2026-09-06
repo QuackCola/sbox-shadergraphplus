@@ -11,10 +11,10 @@ public partial class ShaderGraphPlus
 	internal static void Upgrader_v7( JsonObject obj )
 	{
 		if ( obj[JsonKeys.ParameterArray] is not JsonArray oldParameterArray )
-			throw new Exception( $"Cannot find jsonArray \'{JsonKeys.ParameterArray}\'" );
+			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.ParameterArray}\"" );
 
 		if ( obj[JsonKeys.NodeArray] is not JsonArray oldNodeArray )
-			throw new Exception( $"Cannot find jsonArray \'{JsonKeys.NodeArray}\'" );
+			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.NodeArray}\"" );
 
 		//
 		// Upgrade Parameters
@@ -122,7 +122,7 @@ public partial class ShaderGraphPlus
 					SubgraphPortType.SamplerState => "SamplerStateSubgraphOutputParameter",
 					SubgraphPortType.Texture2DObject => "Texture2DSubgraphOutputParameter",
 					SubgraphPortType.TextureCubeObject => "TextureCubeSubgraphOutputParameter",
-					_ => throw new NotImplementedException( $"Unknown OutputType \'{outputType}\'" ),
+					_ => throw new NotImplementedException( $"Unknown OutputType \"{outputType}\"" ),
 				};
 
 				var parameterObject = new JsonObject
