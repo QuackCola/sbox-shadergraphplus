@@ -13,35 +13,36 @@ public sealed class SceneColorNode : ShaderNodePlus
 
 	[Hide]
 	public string MapSceneColorCoords => @"
-float2 MapSceneColorCoords( float2 vInput, float2 modes )
+float2 MapSceneColorCoords( float2 vInput, float2 vModes )
 {
 	float2 result;
 
 	// X
-	if ( modes.x == 1 ) // Mirror
+	if ( vModes.x == 1 ) // Mirror
 	{
 		float xx = abs( vInput.x );
-		result.x = (fmod( floor( xx ), 2.0 ) == 0.0) ? frac( xx ) : 1.0 - frac( xx );
+		result.x = ( fmod( floor( xx ), 2.0f ) == 0.0f ) ? frac( xx ) : 1.0f - frac( xx );
 	}
-	else if ( modes.x == 2 ) // Clamp
+	else if ( vModes.x == 2 ) // Clamp
 	{
-		result.x = clamp( vInput.x, 0.0, 1.0 );
+		result.x = clamp( vInput.x, 0.0f, 1.0f );
 	}
-	else if ( modes.x == 3 ) // Border
+	else if ( vModes.x == 3 ) // Border
 	{
-		result.x = (vInput.x < 0.0 || vInput.x > 1.0) ? 0.5 : vInput.x;
+		result.x = ( vInput.x < 0.0f || vInput.x > 1.0f ) ? 0.5f : vInput.x;
 	}
-	else if ( modes.x == 4 ) // MirrorOnce
+	else if ( vModes.x == 4 ) // MirrorOnce
 	{
 		float xx = abs( vInput.x );
 		float floorX = floor( xx );
-		if ( floorX < 1.0 )
+		
+		if ( floorX < 1.0f )
 		{
 			result.x = frac( xx );
 		}
-		else if ( floorX < 2.0 )
+		else if ( floorX < 2.0f )
 		{
-			result.x = 1.0 - frac( xx );
+			result.x = 1.0f - frac( xx );
 		}
 		else
 		{
@@ -54,30 +55,31 @@ float2 MapSceneColorCoords( float2 vInput, float2 modes )
 	}
 
 	// Y
-	if ( modes.y == 1 ) // Mirror
+	if ( vModes.y == 1 ) // Mirror
 	{
 		float yy = abs( vInput.y );
-		result.y = (fmod( floor( yy ), 2.0 ) == 0.0) ? frac( yy ) : 1.0 - frac( yy );
+		result.y = ( fmod( floor( yy ), 2.0f ) == 0.0f ) ? frac( yy ) : 1.0f - frac( yy );
 	}
-	else if ( modes.y == 2 ) // Clamp
+	else if ( vModes.y == 2 ) // Clamp
 	{
-		result.y = clamp( vInput.y, 0.0, 1.0 );
+		result.y = clamp( vInput.y, 0.0f, 1.0f );
 	}
-	else if ( modes.y == 3 ) // Border
+	else if ( vModes.y == 3 ) // Border
 	{
-		result.y = (vInput.y < 0.0 || vInput.y > 1.0) ? 0.5 : vInput.y;
+		result.y = ( vInput.y < 0.0f || vInput.y > 1.0f ) ? 0.5f : vInput.y;
 	}
-	else if ( modes.y == 4 ) // MirrorOnce
+	else if ( vModes.y == 4 ) // MirrorOnce
 	{
 		float yy = abs( vInput.y );
 		float floorY = floor( yy );
-		if ( floorY < 1.0 )
+
+		if ( floorY < 1.0f )
 		{
 			result.y = frac( yy );
 		}
-		else if ( floorY < 2.0 )
+		else if ( floorY < 2.0f )
 		{
-			result.y = 1.0 - frac( yy );
+			result.y = 1.0f - frac( yy );
 		}
 		else
 		{
