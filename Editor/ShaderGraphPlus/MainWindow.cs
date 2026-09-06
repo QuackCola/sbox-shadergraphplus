@@ -574,7 +574,7 @@ public class MainWindow : DockWindow
 		DockManager.RaiseDock( "Output" );
 
 		_generatedCode = null;
-		_generatedCodeTextView.Value = "" ;
+		_generatedCodeTextView.Value = "";
 
 		RestoreShader();
 	}
