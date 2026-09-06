@@ -57,7 +57,7 @@ public class MainWindow : DockWindow
 	private Output _output;
 	private UndoHistory _undoHistory;
 	private PaletteWidget _palette;
-	private TextView _generatedCodeTextView;
+	private TextEditAreaWidget _generatedCodeTextView;
 
 	private readonly UndoStack _undoStack = new();
 	public UndoStack UndoStack => _undoStack;
@@ -574,7 +574,7 @@ public class MainWindow : DockWindow
 		DockManager.RaiseDock( "Output" );
 
 		_generatedCode = null;
-		_generatedCodeTextView.SetTextContents( "" );
+		_generatedCodeTextView.Value = "" ;
 
 		RestoreShader();
 	}
@@ -1292,7 +1292,7 @@ public class MainWindow : DockWindow
 		_undoStack.Clear();
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
-		_generatedCodeTextView.SetTextContents( "" );
+		_generatedCodeTextView.Value = "";
 		Selection.Set( _graph );
 
 		_output.ClearErrors();
@@ -1398,7 +1398,7 @@ public class MainWindow : DockWindow
 		_undoStack.Clear();
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
-		_generatedCodeTextView.SetTextContents( "" );
+		_generatedCodeTextView.Value = "";
 		Selection.Set( _graph );
 
 		_blackboardView.RebuildTreeView();
@@ -1434,7 +1434,7 @@ public class MainWindow : DockWindow
 
 		if ( System.IO.Path.Exists( generatedShaderPath ) )
 		{
-			_generatedCodeTextView.SetTextContents( System.IO.File.ReadAllText( generatedShaderPath ) );
+			_generatedCodeTextView.Value = System.IO.File.ReadAllText( generatedShaderPath );
 		}
 		else
 		{
@@ -1591,7 +1591,7 @@ public class MainWindow : DockWindow
 		{
 			Compile();
 
-			_generatedCodeTextView.SetTextContents( _generatedCode );
+			_generatedCodeTextView.Value = _generatedCode;
 		}
 		else
 		{
@@ -1602,7 +1602,7 @@ public class MainWindow : DockWindow
 			if ( string.IsNullOrWhiteSpace( code ) )
 				return false;
 
-			_generatedCodeTextView.SetTextContents( code );
+			_generatedCodeTextView.Value = code;
 
 			// Write generated shader to file
 			if ( System.IO.File.Exists( shaderPath ) )
@@ -1834,7 +1834,7 @@ public class MainWindow : DockWindow
 		_undoHistory.OnHistorySelected = SetUndoLevel;
 
 		_palette = new PaletteWidget( this, IsSubgraph );
-		_generatedCodeTextView = new TextView( this, "Generated Code", "" );
+		_generatedCodeTextView = new TextEditAreaWidget( this, "Generated Code", "" );
 
 		var graph = DockManager.AddDock( "Graph", "account_tree", _graphCanvas, DockArea.Center );
 		var preview = DockManager.AddDock( "Preview", "photo", _preview, DockArea.Left );
