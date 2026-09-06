@@ -104,35 +104,28 @@ float2 MapSceneColorCoords( float2 vInput, float2 modes )
 	[Hide]
 	public NodeResult.Func SceneColor => ( GraphCompiler compiler ) =>
 	{
-		var coords = compiler.Result( Coords );
+		var inputCoords = compiler.Result( Coords );
 		var graph = compiler.Graph;
 
 		if ( graph.Domain != ShaderDomain.PostProcess && graph.BlendMode != BlendMode.Translucent )
 		{
-			return NodeResult.Error( $"Graph `{nameof( BlendMode )}` must be set to `{nameof( BlendMode.Translucent )}` in order to use `{DisplayInfo.Name}`" );
+			return NodeResult.Error( $"Graph \"{nameof( BlendMode )}\" must be set to \"{nameof( BlendMode.Translucent )}\" in order to use \"{DisplayInfo.Name}\"" );
 		}
 
-		var uvModes = $"float2({(int)AddressU},{(int)AddressV})";
+		var uvModes = $"float2( {(int)AddressU}, {(int)AddressV} )";
 		var func = compiler.RegisterHLSLFunction( MapSceneColorCoords, "MapSceneColorCoords" );
+
+		var coords = inputCoords.IsValid ? compiler.ResultHLSLFunction( func, inputCoords.Cast( 2 ), uvModes ) : $"CalculateViewportUv( {compiler.ResultHLSLFunction( func, "i.vPositionSs.xy", uvModes )} )";
 
 		if ( graph.Domain is ShaderDomain.PostProcess )
 		{
-			return new NodeResult( ResultType.Vector3, $"g_tColorBuffer.Sample( g_sAniso, {(
-				coords.IsValid
-				? $"{compiler.ResultHLSLFunction( func, coords.Cast( 2 ), uvModes )}"
-				: $"CalculateViewportUv( {compiler.ResultHLSLFunction( func, "i.vPositionSs.xy", uvModes )} )"
-			)} ).rgb" );
+			return new NodeResult( ResultType.Vector3, $"g_tColorBuffer.Sample( g_sAniso, {coords} ).rgb" );
 		}
 
 		compiler.RegisterGlobal( "bWantsFBCopyTexture", "BoolAttribute( bWantsFBCopyTexture, true );" );
 		compiler.RegisterGlobal( "g_tFrameBufferCopyTexture", "Texture2D g_tFrameBufferCopyTexture < Attribute( \"FrameBufferCopyTexture\"); SrgbRead( false ); >;" );
 
-		var sample = $"g_tFrameBufferCopyTexture.Sample( g_sAniso, {(coords.IsValid
-			? $"{compiler.ResultHLSLFunction( func, coords.Cast( 2 ), uvModes )}"
-			: $"CalculateViewportUv( {compiler.ResultHLSLFunction( func, "i.vPositionSs.xy", uvModes )} )")}" +
-			$"{(compiler.IsPreview ? "* g_vFrameBufferCopyInvSizeAndUvScale.zw" : "")}).rgb";
-
-		return new NodeResult( ResultType.Vector3, sample );
+		return new NodeResult( ResultType.Vector3, $"g_tFrameBufferCopyTexture.Sample( g_sAniso, {coords}{(compiler.IsPreview ? " * g_vFrameBufferCopyInvSizeAndUvScale.zw" : "")} ).rgb" );
 	};
 }
 
@@ -146,7 +139,6 @@ public sealed class FrameBufferCopyInvSizeAndUvScaleNode : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		return new NodeResult( ResultType.Vector2, $"g_vFrameBufferCopyInvSizeAndUvScale.zw" );
+		return new NodeResult( ResultType.Vector2, $"g_vFrameBufferCopyInvSizeAndUvScale.zw", true );
 	};
-
 }
