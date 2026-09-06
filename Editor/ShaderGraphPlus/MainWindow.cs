@@ -1279,7 +1279,7 @@ public class MainWindow : DockWindow
 		_dirty = false;
 
 		// Must be done before setting _graphView.Graph and _blackboardView.Graph
-		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized.
+		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized via GraphView.RebuildFromGraph().
 		LoadShaderTypeInfo();
 
 		_graphView.Graph = _graph;
@@ -1387,7 +1387,7 @@ public class MainWindow : DockWindow
 		_dirty = false;
 
 		// Must be done before setting _graphView.Graph and _blackboardView.Graph
-		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized.
+		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized via GraphView.RebuildFromGraph().
 		LoadShaderTypeInfo();
 
 		_graphView.Graph = _graph;
