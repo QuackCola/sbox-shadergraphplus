@@ -11,7 +11,6 @@ public enum ParameterAvailableIn
 [AttributeUsage( AttributeTargets.Class )]
 internal sealed class ParameterAvailableInAttribute : Attribute
 {
-
 	public ParameterAvailableIn Availability { get; private set; }
 
 	public ParameterAvailableInAttribute( ParameterAvailableIn availability )
@@ -127,6 +126,16 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 		}
 
 		var cleanedName = Name.Replace( " ", "" );
+		//var prefix = GetParameterPrefix( this.GetType() );
+
+		// Check if parameter name conflicts with an existing Global or potential Globals included by an .hlsl include 
+		if ( GraphCompiler.ReservedGlobalParameters.ContainsKey( cleanedName ) )
+		{
+			var reservedEntry = GraphCompiler.ReservedGlobalParameters.FirstOrDefault( x => x.Key == cleanedName );
+			var reservedName = $"{reservedEntry.Value}{reservedEntry.Key}";
+
+			issues.Add( $"Parameter name \"{Name}\" is reserved by internal global \"{reservedName}\"" );
+		}
 
 		foreach ( var parameter in graph.Parameters )
 		{
@@ -142,6 +151,11 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 
 				return false;
 			}
+		}
+
+		if ( issues.Any() )
+		{
+			return false;
 		}
 
 		return true;
@@ -173,6 +187,27 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 
 			return true;
 		} );
+	}
+
+	internal static string GetParameterPrefix( Type parameterType )
+	{
+		if ( !parameterType.IsAssignableTo( typeof( IBlackboardParameter ) ) )
+			return "";
+
+		return parameterType switch
+		{
+			Type t when t == typeof( BoolParameter ) => "g_b",
+			Type t when t == typeof( IntParameter ) => "g_n",
+			Type t when t == typeof( FloatParameter ) => "g_fl",
+			Type t when t == typeof( Float2Parameter )
+					|| t == typeof( Float3Parameter )
+					|| t == typeof( Float4Parameter )
+					|| t == typeof( ColorParameter ) => "g_v",
+			Type t when t == typeof( Texture2DParameter )
+					|| t == typeof( TextureCubeParameter ) => "g_t",
+			Type t when t == typeof( SamplerStateParameter ) => "g_s",
+			_ => throw new NotImplementedException(),
+		};
 	}
 }
 

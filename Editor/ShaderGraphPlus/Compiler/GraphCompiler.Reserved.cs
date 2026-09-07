@@ -9,58 +9,118 @@
 
 public sealed partial class GraphCompiler
 {
-	public static List<string> ReservedGlobalParameters => new()
+	/// <summary>
+	/// From https://sbox.game/dev/doc/rendering/shaders/reference/global-variables
+	/// </summary>
+	public static Dictionary<string, string> ReservedGlobalParameters => new()
 	{
-		// Floats
-		"g_flPreviewTime",
-		"g_flTime",
+		// Time
+		{ "PreviewTime", "g_fl" }, // Used internally for the ShaderGraphPlus Preview
+		{ "Time", "g_fl" },
 
-		// Vectors
-		"g_vFrameBufferCopyInvSizeAndUvScale",
-		"g_vInvProjRow3",
-		"g_vRandomFloats",
-		"g_vRenderTargetSize",
+		// Projections
+		{ "WorldToProjection", "g_mat" },
+		{ "ProjectionToWorld", "g_mat" },
+		{ "WorldToView", "g_mat" },
+		{ "ViewToProjection", "g_mat" },
+		{ "ProjectionToView", "g_mat" },
+		{ "CurrFrameViewToPrevFrameProj", "g_mat" },
+		{ "InvProjRow3", "g_v" },
 
-		"g_vViewportSize",
-		"g_vInvViewportSize",
-		"g_vViewportOffset",
-		"g_flViewportMinZ",
-		"g_flViewportMaxZ",
+		// Camera
+		{ "CameraPositionWs", "g_v" },
+		{ "CameraDirWs", "g_v" },
+		{ "CameraUpDirWs", "g_v" },
+		{ "CameraAngles", "g_v" },
+		{ "CameraFOV", "g_fl" },
+		{ "NearPlane", "g_fl" },
+		{ "FarPlane", "g_fl" },
 
-		"g_vCameraPositionWs",
-		"g_vCameraDirWs",
-		"g_vCameraUpDirWs",
-		"g_flCameraFOV",
-		"g_flNearPlane",
-		"g_flFarPlane",
+		// Viewport
+		{ "ViewportMinZ", "g_fl" },
+		{ "ViewportMaxZ", "g_fl" },
+		{ "ViewportSize", "g_v" },
+		{ "ViewportOffset", "g_v" },
+		{ "RenderTargetSize", "g_v" },
+		{ "InvViewportSize", "g_v" },
+		{ "FrameBufferCopyInvSizeAndUvScale", "g_v" },
 
-		// Matrices
-		"g_matViewToProjection",
-		"g_matWorldToProjection",
-		"g_matProjectionToView",
-		"g_matProjectionToWorld",
-		"g_matWorldToView",
+		// Other 
+		{ "RandomFloats", "g_v" },
 
 		// Textures
-		"g_tFrameBufferCopyTexture",
-		"g_tColorBuffer",
+		{ "FrameBufferCopyTexture", "g_t" },
+		{ "ColorBuffer", "g_t" },
+	};
 
-		// Attributes
+	public static List<string> ReservedAttributeNames => new()
+	{
 		"bWantsFBCopyTexture",
 	};
 
+	// TODO
 	public static List<string> ReservedFeatureNames => new()
 	{
-
 	};
 
+	// TODO
 	public static List<string> ReservedComboNames => new()
 	{
-
 	};
 
+	/// <summary>
+	/// Functions from https://sbox.game/dev/doc/rendering/shaders/reference/global-functions
+	/// </summary>
 	public static List<string> ReservedFunctionNames => new()
 	{
+		// Normal Transformations
+		"DecodeNormal",
+		"TransformNormal",
+		"NormalWorldToTangent",
+		"ComputeNormalFromXY",
+		"ComputeNormalFromRGTexture",
+		
+		// Value Remapping
+		"RemapVal",
+		"RemapValClamped",
 
+		// Camera Helpers
+		"CalculateCameraToPositionRayWs",
+		"CalculateCameraToPositionDirWs",
+		"CalculateCameraToPositionRayTs",
+		"CalculateCameraToPositionDirTs",
+		"CalculateCameraReflectionDirWs",
+		"CalculateDistanceToCamera",
+
+		// Projection Transforms
+		"Position4WsToVs",
+		"Position3WsToVs",
+		"Vector3WsToVs",
+		"Vector3VsToWs",
+		"Position4VsToPs",
+		"Position3VsToPs",
+		"Position4WsToPs",
+		"Position3WsToPs",
+
+		// Viewport UV helpers
+		"CalculateViewportUvFromInvSize",
+		"CalculateViewportUv",
+
+		// sRGB Gamma Conversions
+		"SrgbGammaToLinear",
+		"SrgbLinearToGamma",
+
+		// Color Manipulations
+		"Luminance",
+		"SaturateColor",
+
+		// RGB <-> HSV conversions
+		"RgbToHsv",
+		"HsvToRgb",
+
+		// Rotation Matrix Helpers
+		"MatrixBuildRotationAboutAxisRadians",
+		"MatrixBuildRotationAboutAxis",
+		"RotationMatrixFromAngles",
 	};
 }
