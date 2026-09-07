@@ -56,14 +56,15 @@ public sealed partial class GraphCompiler
 	};
 
 	// TODO
+	/*
 	public static List<string> ReservedFeatureNames => new()
 	{
 	};
 
-	// TODO
 	public static List<string> ReservedComboNames => new()
 	{
 	};
+	*/
 
 	/// <summary>
 	/// Functions from https://sbox.game/dev/doc/rendering/shaders/reference/global-functions
