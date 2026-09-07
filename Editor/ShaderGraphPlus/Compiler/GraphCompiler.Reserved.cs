@@ -4,9 +4,6 @@
 // when they try to name a parameter, Feature or Combo to any name
 // below.
 
-// TODO : Hookup this stuff to the Blackboard, GraphCompiler and the
-// ShaderGraphPlus editor window.
-
 public sealed partial class GraphCompiler
 {
 	/// <summary>
