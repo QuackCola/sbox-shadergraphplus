@@ -10,7 +10,7 @@
 
 #define SAMPLE_STARTING_INDEX 1
 
-class Gradient
+struct Gradient
 {
     float4 colors[MAX_COLOR_KEYS]; 
     float time;
