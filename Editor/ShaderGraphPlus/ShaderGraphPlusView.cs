@@ -544,12 +544,12 @@ public class ShaderGraphPlusView : GraphView
 
 	private IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "" )
 	{
-		return default;//_blackboard.CreateNewParameter( type, name );
+		return _blackboard.CreateNewParameter( type, name );
 	}
 
 	private T CreatenNewParameter<T>( ShaderGraphPlus graph ) where T : IBlackboardParameter
 	{
-		return default;//(T)_blackboard.CreateNewParameter( FindParameterType( typeof( T ) ) );
+		return (T)_blackboard.CreateNewParameter( FindParameterType( typeof( T ) ) );
 	}
 
 	private BaseNodePlus CreateNewParameterNode( IBlackboardParameter parameter, Vector2 position )

@@ -124,6 +124,88 @@ public class NewBlackboard : Widget
 		_availableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
 
+	public void RebuildFromGraph( bool preserveSelection = false )
+	{
+		if ( Graph is not null )
+			BuildFromParameters( Graph.Parameters, preserveSelection );
+	}
+
+	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
+	{
+		Rebuild();
+	}
+
+	public void Rebuild()
+	{
+		// Only the rows, so a filter being typed into isn't hidden along with them and loses focus
+		using var _ = SuspendUpdates.For( _rowsCanvas );
+
+		_rows.Clear( true );
+		_rowWidgets.Clear();
+		var groups = FilteredGroups().ToList();
+		_hasVisibleParameters = groups.Any();
+		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
+
+		foreach ( var group in groups )
+		{
+			var collapsed = !filtering && _collapsedGroups.Contains( group.Key );
+			_rows.Add( new ParameterGroupHeader( this, group.Key, group.Count(), collapsed, !filtering ) );
+
+			if ( collapsed )
+				continue;
+
+			var body = new Widget
+			{
+				Layout = Layout.Column(),
+				HorizontalSizeMode = SizeMode.Flexible,
+				VerticalSizeMode = SizeMode.CanShrink
+			};
+			body.Layout.Margin = new Sandbox.UI.Margin( 4, 4, 12, 4 );
+			body.Layout.Spacing = 2;
+			body.OnPaintOverride = () =>
+			{
+				Paint.ClearPen();
+				Paint.SetBrush( Theme.WidgetBackground.Darken( 0.1f ) );
+				Paint.DrawRect( body.LocalRect );
+				return true;
+			};
+			_rows.Add( body, 0 );
+
+			foreach ( var parameter in group )
+			{
+				IParameterRow row = parameter switch
+				{
+					BlackboardParameter bpParameter => new ParameterRow( _window, this, bpParameter ),
+					_ => throw new NotSupportedException()
+				};
+				_rowWidgets.Add( row );
+				body.Layout.Add( (Widget)row );
+			}
+		}
+
+		_rows.AddStretchCell();
+	}
+
+	internal IDisposable UndoScope( string name )
+	{
+		PushUndo( name );
+		return new Sandbox.Utility.DisposeAction( () => PushRedo() );
+	}
+
+	public void PushUndo( string name )
+	{
+		SGPLogger.Info( $"Push Undo ({name})" );
+		_undoStack.PushUndo( name, Graph.UndoStackSerialize() );
+		_window.OnUndoPushed();
+	}
+
+	public void PushRedo()
+	{
+		SGPLogger.Info( "Push Redo" );
+		_undoStack.PushRedo( Graph.UndoStackSerialize() );
+		_window.SetDirty();
+	}
+
 	/// <summary>
 	/// Repaint rows so selection highlights stay in sync with the properties target.
 	/// </summary>
@@ -202,57 +284,6 @@ public class NewBlackboard : Widget
 	
 	internal static string GroupTitle( string group ) => string.IsNullOrEmpty( group ) ? "General" : group;
 
-	public void Rebuild()
-	{
-		// Only the rows, so a filter being typed into isn't hidden along with them and loses focus
-		using var _ = SuspendUpdates.For( _rowsCanvas );
-
-		_rows.Clear( true );
-		_rowWidgets.Clear();
-		var groups = FilteredGroups().ToList();
-		_hasVisibleParameters = groups.Any();
-		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
-
-		foreach ( var group in groups )
-		{
-			var collapsed = !filtering && _collapsedGroups.Contains( group.Key );
-			_rows.Add( new ParameterGroupHeader( this, group.Key, group.Count(), collapsed, !filtering ) );
-
-			if ( collapsed )
-				continue;
-
-			var body = new Widget
-			{
-				Layout = Layout.Column(),
-				HorizontalSizeMode = SizeMode.Flexible,
-				VerticalSizeMode = SizeMode.CanShrink
-			};
-			body.Layout.Margin = new Sandbox.UI.Margin( 4, 4, 12, 4 );
-			body.Layout.Spacing = 2;
-			body.OnPaintOverride = () =>
-			{
-				Paint.ClearPen();
-				Paint.SetBrush( Theme.WidgetBackground.Darken( 0.1f ) );
-				Paint.DrawRect( body.LocalRect );
-				return true;
-			};
-			_rows.Add( body, 0 );
-
-			foreach ( var parameter in group )
-			{
-				IParameterRow row = parameter switch
-				{
-					BlackboardParameter bpParameter => new ParameterRow( _window, this, bpParameter ),
-					_ => throw new NotSupportedException()
-				};
-				_rowWidgets.Add( row );
-				body.Layout.Add( (Widget)row );
-			}
-		}
-
-		_rows.AddStretchCell();
-	}
-
 	internal void Remove( BlackboardParameter parameter )
 	{
 		var parameterNodes = Graph.Nodes.OfType<BlackboardNode>()
@@ -261,20 +292,15 @@ public class NewBlackboard : Widget
 
 		void Delete()
 		{
-			// TODO
-			// _window.PushGraphUndo( "Remove Parameter" );
+			using var undoScope = UndoScope( "Remove Parameter" );
 
 			foreach ( var node in parameterNodes )
 			{
 				node.ParameterIdentifier = default;
-	
 				node.Update();
 			}
 
 			Graph.RemoveParameter( parameter );
-
-			// TODO
-			//_window.PushGraphRedo();
 		}
 
 		var referenceCount = parameterNodes.Length;
@@ -315,13 +341,9 @@ public class NewBlackboard : Widget
 		if ( Graph.Parameters.Any( p => p != parameter && p.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
 			return;
 
-		// TODO
-		//_window.PushGraphUndo( "Rename Parameter" );
+		using var undoScope = UndoScope( "Rename Parameter" );
 
 		Graph.RenameParameter( parameter, name );
-
-		// TODO
-		//_window.PushGraphRedo();
 
 		_window.OnParameterSelected( parameter );
 	}
@@ -347,15 +369,11 @@ public class NewBlackboard : Widget
 		if ( GroupName( parameter ).Equals( group, StringComparison.OrdinalIgnoreCase ) )
 			return;
 
-		// TODO
-		//_window.PushGraphUndo( "Move Parameter" );
+		using var undoScope = UndoScope( "Move Parameter" );
 
 		parameter.Group = group;
 		ExpandGroup( group );
 		PruneCollapsedGroups();
-
-		// TODO
-		//_window.PushGraphRedo();
 
 		_window.OnParameterSelected( parameter );
 	}
@@ -370,19 +388,18 @@ public class NewBlackboard : Widget
 			newName = NormalizeGroup( newName );
 			if ( newName.Equals( group, StringComparison.OrdinalIgnoreCase ) )
 				return;
-			
-			// TODO
-			//_window.PushGraphUndo( "Rename Parameter Group" );
+
+			using var undoScope = UndoScope( "Rename Parameter Group" );
 
 			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
+			{
 				parameter.Group = newName;
-
+			}
+				
 			if ( _collapsedGroups.Remove( group ) && !string.IsNullOrEmpty( newName ) )
 				_collapsedGroups.Add( newName );
-			PruneCollapsedGroups();
 
-			// TODO
-			//_window.PushGraphRedo();
+			PruneCollapsedGroups();
 		} );
 	}
 
@@ -391,15 +408,15 @@ public class NewBlackboard : Widget
 		if ( string.IsNullOrEmpty( group ) )
 			return;
 
-		// TODO
-		//_window.PushGraphUndo( "Remove Parameter Group" );
+		using var undoScope = UndoScope( "Remove Parameter Group" );
+
 		foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
+		{
 			parameter.Group = "";
+		}
+			
 		_collapsedGroups.Remove( group );
 		SaveCollapsedGroups();
-
-		// TODO
-		//_window.PushGraphRedo();
 	}
 
 	internal void AddGroupOptions( Menu menu, INewGroupableBlackboardParameter parameter )
@@ -408,7 +425,9 @@ public class NewBlackboard : Widget
 		groups.AddOption( "General", string.IsNullOrEmpty( GroupName( parameter ) ) ? "check" : "", () => MoveToGroup( parameter, "" ) );
 
 		foreach ( var group in ExistingGroups() )
+		{
 			groups.AddOption( group, GroupName( parameter ).Equals( group, StringComparison.OrdinalIgnoreCase ) ? "check" : "", () => MoveToGroup( parameter, group ) );
+		}
 
 		groups.AddSeparator();
 		groups.AddOption( "New Group…", "create_new_folder", () => OpenGroupDialog( "New Parameter Group", "", group => MoveToGroup( parameter, group ) ) );
@@ -455,17 +474,6 @@ public class NewBlackboard : Widget
 		}
 	}
 
-	public void RebuildFromGraph( bool preserveSelection = false )
-	{
-		if ( Graph is not null )
-			BuildFromParameters( Graph.Parameters, preserveSelection );
-	}
-
-	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
-	{
-		Rebuild();
-	}
-
 	private void CreateNewParameter( IBlackboardParameterType type, string group = "" )
 	{
 		group = NormalizeGroup( group );
@@ -491,25 +499,31 @@ public class NewBlackboard : Widget
 		RebuildFromGraph( true );
 	}
 
-	internal IDisposable UndoScope( string name )
+	public IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "", Action onCreated = null )
 	{
-		PushUndo( name );
-		return new Sandbox.Utility.DisposeAction( () => PushRedo() );
-	}
+		if ( type == null )
+			return null;
 
+		var group = NormalizeGroup( "" );
 
-	public void PushUndo( string name )
-	{
-		SGPLogger.Info( $"Push Undo ({name})" );
-		_undoStack.PushUndo( name, Graph.UndoStackSerialize() );
-		_window.OnUndoPushed();
-	}
+		_filter.Text = "";
+		ExpandGroup( group );
 
-	public void PushRedo()
-	{
-		SGPLogger.Info( "Push Redo" );
-		_undoStack.PushRedo( Graph.UndoStackSerialize() );
-		_window.SetDirty();
+		var parameter = type.CreateParameter( Graph, name );
+
+		if ( parameter == null )
+			return null;
+
+		if ( parameter is INewGroupableBlackboardParameter groupable )
+		{
+			groupable.Group = group;
+		}
+
+		onCreated?.Invoke();
+
+		Graph.AddParameter( parameter );
+
+		return parameter;
 	}
 
 	internal void AddParameterOptions( Menu menu, string group )
@@ -518,7 +532,7 @@ public class NewBlackboard : Widget
 		{
 			var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
 			{
-				CreateNewParameter( parameterType );
+				CreateNewParameter( parameterType, "" );
 			} );
 
 			option.ToolTip = description;
@@ -526,29 +540,23 @@ public class NewBlackboard : Widget
 
 		IBlackboardParameterType[] avalibleTypes = BlackboardParameter.GetRelevantParameters( _availableParameters, Graph.IsSubgraph ).ToArray();
 
-		var materialParametersMenu = menu.AddMenu( "Parameter" );
-		materialParametersMenu.Icon = "edit_attributes";
-
-		var attributesMenu = menu.AddMenu( "Attribute" );
-		attributesMenu.Icon = "edit_attributes";
-
-		var materialCombosMenu = menu.AddMenu( "Combo" );
-		materialCombosMenu.Icon = "alt_route";
-
-		var subgraphInputsMenu = menu.AddMenu( "Input" );
-		subgraphInputsMenu.Icon = "input";
-
-		var subgraphOutputsMenu = menu.AddMenu( "Output" );
-		subgraphOutputsMenu.Icon = "output";
-
-		foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
+		if ( !Graph.IsSubgraph )
 		{
-			var targetType = parameterType.Type.TargetType;
-			var icon = parameterType.DisplayInfo.Icon;
-			var description = parameterType.DisplayInfo.Description;
+			var materialParametersMenu = menu.AddMenu( "Parameter" );
+			materialParametersMenu.Icon = "edit_attributes";
 
-			if ( !Graph.IsSubgraph )
+			var attributesMenu = menu.AddMenu( "Attribute" );
+			attributesMenu.Icon = "edit_attributes";
+
+			var materialCombosMenu = menu.AddMenu( "Combo" );
+			materialCombosMenu.Icon = "alt_route";
+
+			foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
 			{
+				var targetType = parameterType.Type.TargetType;
+				var icon = parameterType.DisplayInfo.Icon;
+				var description = parameterType.DisplayInfo.Description;
+
 				if ( targetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) || targetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) )
 				{
 					menu = materialParametersMenu;
@@ -564,8 +572,21 @@ public class NewBlackboard : Widget
 
 				AddOption( menu, parameterType, icon, description );
 			}
-			else
+		}
+		else
+		{
+			var subgraphInputsMenu = menu.AddMenu( "Input" );
+			subgraphInputsMenu.Icon = "input";
+
+			var subgraphOutputsMenu = menu.AddMenu( "Output" );
+			subgraphOutputsMenu.Icon = "output";
+
+			foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
 			{
+				var targetType = parameterType.Type.TargetType;
+				var icon = parameterType.DisplayInfo.Icon;
+				var description = parameterType.DisplayInfo.Description;
+
 				if ( targetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) )
 				{
 					menu = subgraphInputsMenu;
@@ -578,24 +599,6 @@ public class NewBlackboard : Widget
 				AddOption( menu, parameterType, icon, description );
 			}
 		}
-	}
-
-	internal void Add( string type, string group = "" )
-	{
-		// TODO
-
-		//group = NormalizeGroup( group );
-		//var parameter = new Parameter { Name = UniqueName( type.ToString() ), Type = type, Group = group };
-		//
-		//_filter.Text = "";
-		//ExpandGroup( group );
-		//
-		//_window.PushGraphUndo( "Add Parameter" );
-		//Graph.Parameters.Add( parameter );
-		//_window.PushGraphRedo();
-		//
-		//_window.OnParameterSelected( parameter );
-		//BeginRename( parameter );
 	}
 
 	private string UniqueName( string baseName ) => Graph.UniqueParameterName( baseName );
@@ -786,16 +789,14 @@ internal class ParameterRow : Widget, IParameterRow
 	INewGroupableBlackboardParameter IParameterRow.Parameter => Parameter;
 	public string BuiltGroup { get; }
 
-	//public AnimParameterType BuiltType { get; }
-
 	private readonly MainWindow _window;
-	private readonly NewBlackboard _list;
+	private readonly NewBlackboard _blackboard;
 	private readonly Widget _nameCell;
 	private float _headerHeight = Theme.RowHeight;
 	private Vector2? _dragStart;
 	private LineEdit _renameEdit;
 
-	private const float NameX = 49;
+	private const float NameX = 3;
 
 	private Rect PillRect
 	{
@@ -813,27 +814,22 @@ internal class ParameterRow : Widget, IParameterRow
 	public ParameterRow( MainWindow window, NewBlackboard list, BlackboardParameter parameter ) : base( list )
 	{
 		_window = window;
-		_list = list;
+		_blackboard = list;
 		Parameter = parameter;
 		parameter.Graph = list.Graph;
 		BuiltGroup = NewBlackboard.GroupName( parameter );
-
-		// TODO
-		//BuiltType = parameter.Type;
 
 		FixedHeight = Theme.RowHeight + 6;
 		Cursor = CursorShape.None;
 		MouseTracking = true;
 		FocusMode = FocusMode.Click;
-		
-		// TODO
-		//ToolTip = $"{parameter.Type} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename\nClick the usage count to find references";
+
+		ToolTip = $"{Parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename\nClick the usage count to find references";
 
 		Layout = Layout.Row();
-		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, 0, 3 );
-		
-		// TODO
-		//Layout.Spacing = AnimParameterUI.RowSpacing;
+		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, NameX, 3 );
+
+		Layout.Spacing = 4f;
 		Layout.Alignment = TextFlag.LeftTop;
 
 		_renameEdit = new LineEdit( this ) { Visible = false, FixedHeight = Theme.RowHeight };
@@ -877,7 +873,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private void AddActions( Layout actions )
 	{
-		actions.Add( new IconButton( "delete", () => _list.Remove( Parameter ), this )
+		actions.Add( new IconButton( "delete", () => _blackboard.Remove( Parameter ), this )
 		{
 			ToolTip = "Delete parameter",
 			IconSize = 16,
@@ -904,48 +900,103 @@ internal class ParameterRow : Widget, IParameterRow
 
 		_renameEdit.Visible = false;
 		_nameCell.TransparentForMouseEvents = true;
-		_list.Rename( Parameter, _renameEdit.Text );
+		_blackboard.Rename( Parameter, _renameEdit.Text );
 		Update();
+	}
+
+	protected static void PaintTypeLabel( Rect row, string typeName, Color typeColor )
+	{
+		Color tint = "#48494c";
+
+		var c = tint.ToHsv();
+		var bg = c;
+
+		if ( Paint.HasMouseOver )
+		{
+			bg = c with { Value = (c.Value + 0.1f) };
+		}
+		else
+		{
+			bg = c = Theme.SurfaceLightBackground;
+		}
+
+		if ( bg.Alpha > 0 )
+		{
+			float radius = 3;
+			Paint.Antialiasing = true;
+
+			Paint.ClearPen();
+			Paint.SetBrush( bg with { Value = (bg.Value + 0.04f), Saturation = (c.Saturation * 0.8f) } );
+			Paint.DrawRect( row, radius );
+
+			Paint.SetBrushLinear( row.TopLeft, row.BottomRight, bg, bg with { Value = (bg.Value - 0.03f) } );
+			Paint.DrawRect( row.Shrink( 1, 1, 1, 1 ), radius );
+			Paint.SetPen( typeColor, 1 );
+			Paint.DrawRect( row.Shrink( 1, 1, 1, 1 ), radius );
+
+			var r2 = row.Grow( 1.25f );
+
+			Paint.DrawRect( r2.Grow( 12, 0, 0, 0 ), radius );
+		}
+		else
+		{
+			c = Color.White.WithAlpha( 0.5f );
+		}
+
+		Paint.SetDefaultFont();
+		Paint.SetPen( c with { Value = 0.99f, Saturation = c.Saturation * 0.20f } );
+		Paint.DrawText( row, typeName );
+
+		var iconRect = row;
+		iconRect.Left -= 10;
+
+		Paint.Pen = typeColor;
+		Paint.DrawIcon( iconRect, "circle", 12, TextFlag.LeftCenter );
 	}
 
 	protected override void OnPaint()
 	{
 		var selected = _window.IsSelected( Parameter );
 		var hovered = PillRect.IsInside( FromScreen( Editor.Application.CursorPosition ) );
-		var color = Color.Green;
+		var typeColor = Color.White;
+		//Color pen = Theme.TextControl;
+		//float opacity = 0.9f;
+
+		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( Parameter.GetType(), out var blackboardConfig ) )
+		{
+			typeColor = blackboardConfig.Color;
+		}
 
 		var chip = PillRect;
+		
 
 		Paint.Antialiasing = true;
 		Paint.ClearPen();
-		Paint.SetBrush( color.WithAlpha( selected ? 0.25f : hovered ? 0.18f : 0.1f ) );
+		Paint.SetBrush( blackboardConfig.Color.WithAlpha( selected ? 0.25f : hovered ? 0.18f : 0.1f ) );
 		Paint.DrawRect( chip, Theme.ControlRadius );
 
 		if ( selected )
 		{
 			Paint.ClearBrush();
-			Paint.SetPen( color.WithAlpha( 0.8f ) );
+			Paint.SetPen( blackboardConfig.Color.WithAlpha( 0.8f ) );
 			Paint.DrawRect( chip.Shrink( 0.5f ), Theme.ControlRadius );
 		}
-
-		// TODO
-		//AnimParameterUI.PaintIcon( chip, Parameter.Type, false );
 
 		if ( _renameEdit.Visible )
 			return;
 
-		// TODO
-		var typeRect = new Rect();//AnimParameterUI.PaintTypeLabel( chip, Parameter.Type );
 		var r = chip;
-		r.Left += NameX;
-		r.Right = typeRect.Left - 6;
+		r.Left += 24;
+		
+		var typeName = Parameter.DisplayInfo.Name;
+		var typeRect = Paint.MeasureText( r, typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
-		Paint.SetPen( Theme.TextControl.WithAlpha( hovered ? 0.45f : 0.25f ) );
-		Paint.DrawIcon( chip.Shrink( 4, 0 ), "drag_indicator", 14, TextFlag.RightCenter );
+		PaintTypeLabel( typeRect, typeName, typeColor );
 
-		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
-		Paint.SetDefaultFont();
-		Paint.DrawText( r, Parameter.Name, TextFlag.LeftCenter | TextFlag.SingleLine );
+		// TODO : Get the name to draw to the right of the TypeLabel
+		//Paint.Pen = pen.WithAlphaMultiplied( opacity );
+		//Paint.SetDefaultFont();
+		//Paint.DrawText( r, Name, TextFlag.LeftCenter | TextFlag.SingleLine );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
@@ -1010,7 +1061,7 @@ internal class ParameterRow : Widget, IParameterRow
 				StartRename();
 				break;
 			case KeyCode.Delete:
-				_list.Remove( Parameter );
+				_blackboard.Remove( Parameter );
 				break;
 			case KeyCode.Escape when _renameEdit.Visible:
 				_renameEdit.Text = Parameter.Name;
@@ -1024,12 +1075,12 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private void OpenContextMenu()
 	{
-		var menu = _list.CreateMenu();
+		var menu = _blackboard.CreateMenu();
 		menu.AddOption( "Rename", "edit", StartRename, "F2" );
-		_list.AddGroupOptions( menu, Parameter );
+		_blackboard.AddGroupOptions( menu, Parameter );
 
 		menu.AddSeparator();
-		menu.AddOption( "Delete", "delete", () => _list.Remove( Parameter ), "Del" );
+		menu.AddOption( "Delete", "delete", () => _blackboard.Remove( Parameter ), "Del" );
 		menu.OpenAtCursor();
 	}
 }
