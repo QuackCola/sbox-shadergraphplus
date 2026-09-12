@@ -4,12 +4,16 @@ namespace ShaderGraphPlus;
 
 public class NewBlackboard : Widget
 {
+	private readonly UndoStack _undoStack;
 	private readonly MainWindow _window;
 	private readonly LineEdit _filter;
 	private readonly Widget _rowsCanvas;
 	private readonly Layout _rows;
 
 	private readonly List<IParameterRow> _rowWidgets = new();
+
+	private readonly Dictionary<string, IBlackboardParameterType> _availableParameters = new( StringComparer.OrdinalIgnoreCase );
+
 	//private readonly ToolButton _deleteUnusedButton;
 	private readonly HashSet<string> _collapsedGroups;
 	private bool? _sortAscending = true;
@@ -17,10 +21,25 @@ public class NewBlackboard : Widget
 
 	private const string CollapsedGroupsCookie = "shadergraphplus.parameter-groups.collapsed";
 
+	public ShaderGraphPlus Graph
+	{
+		get => field;
+		set
+		{
+			if ( field == value ) return;
+
+			field = value;
+
+			RebuildFromGraph();
+		}
+	}
+
+	public Action<bool> OnDirty { get; set; }
 
 	public NewBlackboard( MainWindow window ) : base( null )
 	{
 		_window = window;
+		_undoStack = window.UndoStack;
 		_collapsedGroups = EditorCookie.Get<List<string>>( CollapsedGroupsCookie, [] ).ToHashSet( StringComparer.OrdinalIgnoreCase );
 
 		Name = "Blackboard";
@@ -93,6 +112,18 @@ public class NewBlackboard : Widget
 		_rows = scroll.Canvas.Layout;
 	}
 
+	public void AddParameterType<T>() where T : BlackboardParameter
+	{
+		AddParameterType( EditorTypeLibrary.GetType<T>() );
+	}
+
+	public void AddParameterType( TypeDescription type )
+	{
+		var parameterType = ClassBlackboardParameterType.HookupParameterType( type );
+
+		_availableParameters.TryAdd( parameterType.Identifier, parameterType );
+	}
+
 	/// <summary>
 	/// Repaint rows so selection highlights stay in sync with the properties target.
 	/// </summary>
@@ -128,13 +159,13 @@ public class NewBlackboard : Widget
 		return button;
 	}
 
-	private string EmptyHint => (_window.Graph?.Parameters.Count() ?? 0) > 0
+	private string EmptyHint => (Graph?.Parameters.Count() ?? 0) > 0
 	? "No matching parameters"
 	: "No parameters\nClick + to add one";
 
 	private IEnumerable<IGrouping<string, INewGroupableBlackboardParameter>> FilteredGroups()
 	{
-		var parameters = (_window.Graph?.Parameters.Cast<INewGroupableBlackboardParameter>() ?? []);
+		var parameters = (Graph?.Parameters.Cast<INewGroupableBlackboardParameter>() ?? []);
 		var filter = _filter.Text?.Trim() ?? "";
 
 		var result = parameters.Where( p => string.IsNullOrEmpty( filter )
@@ -224,7 +255,7 @@ public class NewBlackboard : Widget
 
 	internal void Remove( BlackboardParameter parameter )
 	{
-		var parameterNodes = _window.Graph.Nodes.OfType<BlackboardNode>()
+		var parameterNodes = Graph.Nodes.OfType<BlackboardNode>()
 			.Where( node => node.ParameterIdentifier == parameter.Identifier )
 			.ToArray();
 
@@ -240,7 +271,7 @@ public class NewBlackboard : Widget
 				node.Update();
 			}
 
-			_window.Graph.RemoveParameter( parameter );
+			Graph.RemoveParameter( parameter );
 
 			// TODO
 			//_window.PushGraphRedo();
@@ -281,13 +312,13 @@ public class NewBlackboard : Widget
 		if ( string.IsNullOrEmpty( name ) || name == parameter.Name )
 			return;
 
-		if ( _window.Graph.Parameters.Any( p => p != parameter && p.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
+		if ( Graph.Parameters.Any( p => p != parameter && p.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
 			return;
 
 		// TODO
 		//_window.PushGraphUndo( "Rename Parameter" );
 
-		_window.Graph.RenameParameter( parameter, name );
+		Graph.RenameParameter( parameter, name );
 
 		// TODO
 		//_window.PushGraphRedo();
@@ -343,7 +374,7 @@ public class NewBlackboard : Widget
 			// TODO
 			//_window.PushGraphUndo( "Rename Parameter Group" );
 
-			foreach ( var parameter in _window.Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
+			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
 				parameter.Group = newName;
 
 			if ( _collapsedGroups.Remove( group ) && !string.IsNullOrEmpty( newName ) )
@@ -362,7 +393,7 @@ public class NewBlackboard : Widget
 
 		// TODO
 		//_window.PushGraphUndo( "Remove Parameter Group" );
-		foreach ( var parameter in _window.Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
+		foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
 			parameter.Group = "";
 		_collapsedGroups.Remove( group );
 		SaveCollapsedGroups();
@@ -383,7 +414,7 @@ public class NewBlackboard : Widget
 		groups.AddOption( "New Group…", "create_new_folder", () => OpenGroupDialog( "New Parameter Group", "", group => MoveToGroup( parameter, group ) ) );
 	}
 
-	private IEnumerable<string> ExistingGroups() => _window.Graph.Parameters.OfType<INewGroupableBlackboardParameter>()
+	private IEnumerable<string> ExistingGroups() => Graph.Parameters.OfType<INewGroupableBlackboardParameter>()
 	.Select( GroupName )
 	.Where( group => !string.IsNullOrEmpty( group ) )
 	.Distinct( StringComparer.OrdinalIgnoreCase )
@@ -424,12 +455,129 @@ public class NewBlackboard : Widget
 		}
 	}
 
+	public void RebuildFromGraph( bool preserveSelection = false )
+	{
+		if ( Graph is not null )
+			BuildFromParameters( Graph.Parameters, preserveSelection );
+	}
+
+	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
+	{
+		Rebuild();
+	}
+
+	private void CreateNewParameter( IBlackboardParameterType type, string group = "" )
+	{
+		group = NormalizeGroup( group );
+
+		_filter.Text = "";
+		ExpandGroup( group );
+
+		using var undoScope = UndoScope( "Add Parameter" );
+
+		var parameter = (BlackboardParameter)type.CreateParameter( Graph );
+
+		if ( parameter is INewGroupableBlackboardParameter newGroupable )
+		{
+			newGroupable.Group = group;
+		}
+
+		Graph.AddParameter( parameter );
+
+		OnDirty?.Invoke( true );
+
+		_window.OnParameterSelected( parameter );
+
+		RebuildFromGraph( true );
+	}
+
+	internal IDisposable UndoScope( string name )
+	{
+		PushUndo( name );
+		return new Sandbox.Utility.DisposeAction( () => PushRedo() );
+	}
+
+
+	public void PushUndo( string name )
+	{
+		SGPLogger.Info( $"Push Undo ({name})" );
+		_undoStack.PushUndo( name, Graph.UndoStackSerialize() );
+		_window.OnUndoPushed();
+	}
+
+	public void PushRedo()
+	{
+		SGPLogger.Info( "Push Redo" );
+		_undoStack.PushRedo( Graph.UndoStackSerialize() );
+		_window.SetDirty();
+	}
+
 	internal void AddParameterOptions( Menu menu, string group )
 	{
-		// TODO
+		void AddOption( Menu menu, IBlackboardParameterType parameterType, string icon, string description )
+		{
+			var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
+			{
+				CreateNewParameter( parameterType );
+			} );
 
-		//foreach ( var type in AnimParameterUI.ControlTypes )
-		//	menu.AddOption( AnimParameterUI.TypeName( type ), AnimParameterUI.Icon( type ), () => Add( type, group ) );
+			option.ToolTip = description;
+		}
+
+		IBlackboardParameterType[] avalibleTypes = BlackboardParameter.GetRelevantParameters( _availableParameters, Graph.IsSubgraph ).ToArray();
+
+		var materialParametersMenu = menu.AddMenu( "Parameter" );
+		materialParametersMenu.Icon = "edit_attributes";
+
+		var attributesMenu = menu.AddMenu( "Attribute" );
+		attributesMenu.Icon = "edit_attributes";
+
+		var materialCombosMenu = menu.AddMenu( "Combo" );
+		materialCombosMenu.Icon = "alt_route";
+
+		var subgraphInputsMenu = menu.AddMenu( "Input" );
+		subgraphInputsMenu.Icon = "input";
+
+		var subgraphOutputsMenu = menu.AddMenu( "Output" );
+		subgraphOutputsMenu.Icon = "output";
+
+		foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
+		{
+			var targetType = parameterType.Type.TargetType;
+			var icon = parameterType.DisplayInfo.Icon;
+			var description = parameterType.DisplayInfo.Description;
+
+			if ( !Graph.IsSubgraph )
+			{
+				if ( targetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) || targetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) )
+				{
+					menu = materialParametersMenu;
+				}
+				else if ( targetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+				{
+					menu = materialCombosMenu;
+				}
+				else if ( targetType == typeof( SamplerStateParameter ) )
+				{
+					menu = attributesMenu;
+				}
+
+				AddOption( menu, parameterType, icon, description );
+			}
+			else
+			{
+				if ( targetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) )
+				{
+					menu = subgraphInputsMenu;
+				}
+				else if ( targetType.IsAssignableTo( typeof( IBlackboardSubgraphOutputParameter ) ) )
+				{
+					menu = subgraphOutputsMenu;
+				}
+
+				AddOption( menu, parameterType, icon, description );
+			}
+		}
 	}
 
 	internal void Add( string type, string group = "" )
@@ -443,14 +591,14 @@ public class NewBlackboard : Widget
 		//ExpandGroup( group );
 		//
 		//_window.PushGraphUndo( "Add Parameter" );
-		//_window.Graph.Parameters.Add( parameter );
+		//Graph.Parameters.Add( parameter );
 		//_window.PushGraphRedo();
 		//
 		//_window.OnParameterSelected( parameter );
 		//BeginRename( parameter );
 	}
 
-	private string UniqueName( string baseName ) => _window.Graph.UniqueParameterName( baseName );
+	private string UniqueName( string baseName ) => Graph.UniqueParameterName( baseName );
 
 	private static string NormalizeGroup( string group )
 	{
@@ -466,7 +614,7 @@ public class NewBlackboard : Widget
 
 	private void PruneCollapsedGroups()
 	{
-		var groups = _window.Graph.Parameters.OfType<INewGroupableBlackboardParameter>().Select( GroupName ).ToHashSet( StringComparer.OrdinalIgnoreCase );
+		var groups = Graph.Parameters.OfType<INewGroupableBlackboardParameter>().Select( GroupName ).ToHashSet( StringComparer.OrdinalIgnoreCase );
 		_collapsedGroups.RemoveWhere( group => !groups.Contains( group ) );
 		SaveCollapsedGroups();
 	}
@@ -476,7 +624,7 @@ public class NewBlackboard : Widget
 
 	internal void OnGraphEdited()
 	{
-		if ( _window.Graph is null )
+		if ( Graph is null )
 			return;
 
 		var parameters = DisplayedParameters().ToList();
@@ -667,7 +815,7 @@ internal class ParameterRow : Widget, IParameterRow
 		_window = window;
 		_list = list;
 		Parameter = parameter;
-		parameter.Graph = window.Graph;
+		parameter.Graph = list.Graph;
 		BuiltGroup = NewBlackboard.GroupName( parameter );
 
 		// TODO

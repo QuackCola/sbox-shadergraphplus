@@ -41,7 +41,7 @@ public class MainWindow : DockWindow
 	public virtual string FileType => ShaderGraphPlusGlobals.AssetTypeName;
 	public virtual string FileExtension => ShaderGraphPlusGlobals.AssetTypeExtension;
 
-	public ShaderGraphPlus Graph;
+	private ShaderGraphPlus _graph;
 	private ShaderGraphPlusView _graphView;
 	private NewBlackboard _blackboardView;
 	private Asset _asset;
@@ -130,7 +130,7 @@ public class MainWindow : DockWindow
 
 		Selection = new SelectionSystem();
 
-		Graph = new ShaderGraphPlus()
+		_graph = new ShaderGraphPlus()
 		{
 			Title = "untitled",
 			IsSubgraph = IsSubgraph
@@ -184,7 +184,7 @@ public class MainWindow : DockWindow
 	{
 		void SetDefaultSelection()
 		{
-			Selection.Set( Graph );
+			Selection.Set( _graph );
 		}
 
 		if ( selection != null )
@@ -199,7 +199,7 @@ public class MainWindow : DockWindow
 					{
 						if ( blackboardNode.ParameterIdentifier != default )
 						{
-							var blackboardParameter = Graph.FindParameter( blackboardNode.ParameterIdentifier );
+							var blackboardParameter = _graph.FindParameter( blackboardNode.ParameterIdentifier );
 
 							if ( blackboardParameter != null )
 							{
@@ -454,7 +454,7 @@ public class MainWindow : DockWindow
 		}
 
 		_preview.IsCompiling = _isCompiling;
-		_preview.PostProcessing = Graph.Domain == ShaderDomain.PostProcess;
+		_preview.PostProcessing = _graph.Domain == ShaderDomain.PostProcess;
 
 		_shaderCompileErrors.Clear();
 	}
@@ -542,7 +542,7 @@ public class MainWindow : DockWindow
 		_registeredShaderFeatures.Clear();
 		registrationIssues = new();
 
-		var features = Graph.Parameters.OfType<IBlackboardShaderFeatureParameter>();
+		var features = _graph.Parameters.OfType<IBlackboardShaderFeatureParameter>();
 
 		foreach ( var feature in features )
 		{
@@ -598,26 +598,26 @@ public class MainWindow : DockWindow
 		EditorErrors.Clear();
 
 		// SkyBox2D.SkyMaterial requires that the shader name contains the substring 'sky' in the name.
-		if ( Graph.Domain == ShaderDomain.Sky && (_asset == null || !_asset.Name.Contains( "sky" )) )
+		if ( _graph.Domain == ShaderDomain.Sky && (_asset == null || !_asset.Name.Contains( "sky" )) )
 		{
 			EditorErrors.Add( "The graph name must contain the string 'sky'" );
 		}
 
-		if ( Graph.HasTemplate )
+		if ( _graph.HasTemplate )
 		{
-			if ( !Graph.ShaderTypeInfo.IsValid )
+			if ( !_graph.ShaderTypeInfo.IsValid )
 			{
 				// Template shat the bed when trying to load.
-				EditorErrors.Add( $"Shader Template \"{Graph.ShaderType}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." );
+				EditorErrors.Add( $"Shader Template \"{_graph.ShaderType}\" failed to load. Template may be incompatable with the current version and will need to be upgraded." );
 			}
-			else if ( !_shaderTemplate.Validate( Graph.ShaderType, out var tagErrors ) )
+			else if ( !_shaderTemplate.Validate( _graph.ShaderType, out var tagErrors ) )
 			{
 				// Template loaded but there are issues with the template code.
 				EditorErrors.AddRange( tagErrors );
 			}
 		}
 
-		foreach ( var parameter in Graph.Parameters )
+		foreach ( var parameter in _graph.Parameters )
 		{
 			if ( !parameter.CheckParameter( out var parameterErrors ) )
 			{
@@ -645,8 +645,8 @@ public class MainWindow : DockWindow
 			ClearAttributes();
 		}
 
-		var resultNode = Graph.Nodes.OfType<BaseResult>().FirstOrDefault();
-		var compiler = new GraphCompiler( Graph, _shaderTemplate, _registeredShaderFeatures, true );
+		var resultNode = _graph.Nodes.OfType<BaseResult>().FirstOrDefault();
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, _registeredShaderFeatures, true );
 		var nodeErrors = new List<GraphCompiler.GraphIssue>();
 		var nodeWarnings = new List<GraphCompiler.GraphIssue>();
 		var evaluatedCustomFunctions = new List<string>();
@@ -656,7 +656,7 @@ public class MainWindow : DockWindow
 			compiler.OnAttribute = OnAttribute;
 		}
 
-		foreach ( var node in Graph.Nodes.OfType<BaseNodePlus>() )
+		foreach ( var node in _graph.Nodes.OfType<BaseNodePlus>() )
 		{
 			node.ClearError();
 
@@ -815,7 +815,7 @@ public class MainWindow : DockWindow
 		}
 		else if ( IsSubgraph )
 		{
-			foreach ( var subgraphOutput in Graph.Nodes.OfType<SubgraphOutput>() )
+			foreach ( var subgraphOutput in _graph.Nodes.OfType<SubgraphOutput>() )
 			{
 				UpdateNodeUI( subgraphOutput );
 			}
@@ -892,7 +892,7 @@ public class MainWindow : DockWindow
 		// Go ahead preregister anything before iterating over all the nodes in the graph.
 		RegisterShaderFeatures( out _ );
 
-		var compiler = new GraphCompiler( Graph, _shaderTemplate, _registeredShaderFeatures, false );
+		var compiler = new GraphCompiler( _graph, _shaderTemplate, _registeredShaderFeatures, false );
 		return compiler.Generate();
 	}
 
@@ -942,7 +942,7 @@ public class MainWindow : DockWindow
 	private void CheckForChanges()
 	{
 		bool wasDirty = false;
-		foreach ( var node in Graph.Nodes )
+		foreach ( var node in _graph.Nodes )
 		{
 			if ( node is ShaderNodePlus shaderNode && shaderNode.IsDirty )
 			{
@@ -965,13 +965,13 @@ public class MainWindow : DockWindow
 
 			_redoOption.Enabled = _undoStack.CanUndo;
 
-			Graph.ClearNodes();
-			Graph.ClearCategoryData();
-			Graph.ClearParameters();
+			_graph.ClearNodes();
+			_graph.ClearCategoryData();
+			_graph.ClearParameters();
 
-			Graph.DeserializeNodes( op.undoBuffer, true );
-			Graph.DeserializeCategoryData( op.undoBuffer );
-			Graph.DeserializeParameters( op.undoBuffer );
+			_graph.DeserializeNodes( op.undoBuffer, true );
+			_graph.DeserializeCategoryData( op.undoBuffer );
+			_graph.DeserializeParameters( op.undoBuffer );
 
 			_graphView.RebuildFromGraph();
 			//_blackboardView.RebuildFromGraph();
@@ -989,13 +989,13 @@ public class MainWindow : DockWindow
 
 			_redoOption.Enabled = _undoStack.CanRedo;
 
-			Graph.ClearNodes();
-			Graph.ClearCategoryData();
-			Graph.ClearParameters();
+			_graph.ClearNodes();
+			_graph.ClearCategoryData();
+			_graph.ClearParameters();
 
-			Graph.DeserializeNodes( op.redoBuffer, true );
-			Graph.DeserializeCategoryData( op.redoBuffer );
-			Graph.DeserializeParameters( op.redoBuffer );
+			_graph.DeserializeNodes( op.redoBuffer, true );
+			_graph.DeserializeCategoryData( op.redoBuffer );
+			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
 			//_blackboardView.RebuildFromGraph();
@@ -1010,13 +1010,13 @@ public class MainWindow : DockWindow
 		{
 			SGPLogger.Info( $"SetUndoLevel ({op.name})" );
 
-			Graph.ClearNodes();
-			Graph.ClearCategoryData();
-			Graph.ClearParameters();
+			_graph.ClearNodes();
+			_graph.ClearCategoryData();
+			_graph.ClearParameters();
 
-			Graph.DeserializeNodes( op.redoBuffer, true );
-			Graph.DeserializeCategoryData( op.redoBuffer );
-			Graph.DeserializeParameters( op.redoBuffer );
+			_graph.DeserializeNodes( op.redoBuffer, true );
+			_graph.DeserializeCategoryData( op.redoBuffer );
+			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
 			//_blackboardView.RebuildFromGraph();
@@ -1279,7 +1279,7 @@ public class MainWindow : DockWindow
 		Selection.Clear();
 
 		_asset = null;
-		Graph = new()
+		_graph = new()
 		{
 			Title = "untitled"
 		};
@@ -1289,8 +1289,8 @@ public class MainWindow : DockWindow
 		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized via GraphView.RebuildFromGraph().
 		LoadShaderTypeInfo();
 
-		_graphView.Graph = Graph;
-		//_blackboardView.Graph = Graph;
+		_graphView.Graph = _graph;
+		_blackboardView.Graph = _graph;
 
 		UpdateTitle();
 
@@ -1300,7 +1300,7 @@ public class MainWindow : DockWindow
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeTextView.Value = "";
-		Selection.Set( Graph );
+		Selection.Set( _graph );
 
 		_output.ClearErrors();
 		_output.ClearWarnings();
@@ -1390,15 +1390,15 @@ public class MainWindow : DockWindow
 		Selection.Clear();
 
 		_asset = asset;
-		Graph = graph;
+		_graph = graph;
 		_dirty = false;
 
 		// Must be done before setting _graphView.Graph and _blackboardView.Graph
 		// or else some nodes, namely the 'Result' node may break valid inputs upon it getting initialized via GraphView.RebuildFromGraph().
 		LoadShaderTypeInfo();
 
-		_graphView.Graph = Graph;
-		//_blackboardView.Graph = Graph;
+		_graphView.Graph = _graph;
+		_blackboardView.Graph = _graph;
 
 		UpdateTitle();
 
@@ -1406,7 +1406,7 @@ public class MainWindow : DockWindow
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeTextView.Value = "";
-		Selection.Set( Graph );
+		Selection.Set( _graph );
 
 		//_blackboardView.RebuildTreeView();
 
@@ -1452,30 +1452,30 @@ public class MainWindow : DockWindow
 
 	private void LoadShaderTypeInfo()
 	{
-		if ( Graph is null ) return;
+		if ( _graph is null ) return;
 
-		if ( Graph.HasTemplate )
+		if ( _graph.HasTemplate )
 		{
-			var templateAsset = AssetSystem.FindByPath( Graph.ShaderType );
+			var templateAsset = AssetSystem.FindByPath( _graph.ShaderType );
 
 			_shaderTemplate = new ShaderTemplateResource();
 
 			if ( _shaderTemplate.Deserialize( System.IO.File.ReadAllText( templateAsset.AbsolutePath ), System.IO.Path.GetFileName( templateAsset.AbsolutePath ) ) )
 			{
-				Graph.ShaderTypeInfo = _shaderTemplate;
-				Graph.ValidateShaderTypeInfo();
+				_graph.ShaderTypeInfo = _shaderTemplate;
+				_graph.ValidateShaderTypeInfo();
 			}
 			else
 			{
 				_shaderTemplate = null;
-				Graph.ShaderTypeInfo = new ShaderTemplate.ShaderTypeInfo();
+				_graph.ShaderTypeInfo = new ShaderTemplate.ShaderTypeInfo();
 			}
 		}
 		else
 		{
 			_shaderTemplate = null;
 
-			Graph.ShaderTypeInfo = Graph.ShaderType switch
+			_graph.ShaderTypeInfo = _graph.ShaderType switch
 			{
 				"Surface" => ShaderTemplateSurface.ShaderTypeInfo,
 				"Sky" => ShaderTemplateSky.ShaderTypeInfo,
@@ -1483,7 +1483,7 @@ public class MainWindow : DockWindow
 				_ => ShaderTemplateSurface.ShaderTypeInfo,
 			};
 
-			Graph.ValidateShaderTypeInfo();
+			_graph.ValidateShaderTypeInfo();
 		}
 	}
 
@@ -1562,15 +1562,15 @@ public class MainWindow : DockWindow
 		if ( string.IsNullOrWhiteSpace( savePath ) )
 			return false;
 
-		_preview.SaveSettings( Graph.PreviewSettings );
+		_preview.SaveSettings( _graph.PreviewSettings );
 
 		if ( !IsSubgraph )
 		{
-			Graph.Title = Path.GetFileNameWithoutExtension( savePath );
+			_graph.Title = Path.GetFileNameWithoutExtension( savePath );
 		}
 
 		// Write serialized graph to asset file
-		System.IO.File.WriteAllText( savePath, Graph.Serialize() );
+		System.IO.File.WriteAllText( savePath, _graph.Serialize() );
 
 		if ( saveAs )
 		{
@@ -1748,7 +1748,7 @@ public class MainWindow : DockWindow
 		foreach ( var type in blackboardParameterTypes )
 		{
 			_graphView.AddParameterType( type );
-			//_blackboardView.AddParameterType( type );
+			_blackboardView.AddParameterType( type );
 		}
 
 		var subgraphs = AssetSystem.All.Where( x => x.Path.EndsWith( $".{ShaderGraphPlusGlobals.SubgraphAssetTypeExtension}", StringComparison.OrdinalIgnoreCase ) );
@@ -1761,7 +1761,7 @@ public class MainWindow : DockWindow
 			}
 		}
 
-		_graphView.Graph = Graph;
+		_graphView.Graph = _graph;
 		_graphView.OnChildValuesChanged += ( w ) => SetDirty();
 		_graphCanvas.Layout.Add( _graphView, 1 );
 
@@ -1774,9 +1774,9 @@ public class MainWindow : DockWindow
 			_graphView.CenterOn( nodeUI.Center );
 		};
 
-		_preview = new PreviewPanel( this, Graph.Model )
+		_preview = new PreviewPanel( this, _graph.Model )
 		{
-			OnModelChanged = ( model ) => Graph.Model = model?.Name
+			OnModelChanged = ( model ) => _graph.Model = model?.Name
 		};
 
 		foreach ( var value in _samplerStateAttributes )
@@ -1832,7 +1832,7 @@ public class MainWindow : DockWindow
 		Selection.OnItemRemoved += OnDeselected;
 
 		_properties = new Properties( this );
-		_properties.Target = Graph;
+		_properties.Target = _graph;
 		_properties.PropertyUpdated += OnPropertyUpdated;
 
 		_undoHistory = new UndoHistory( this, _undoStack );
@@ -1893,7 +1893,7 @@ public class MainWindow : DockWindow
 
 	private void OnPropertyUpdated( SerializedProperty serializedProperty )
 	{
-		_preview.PostProcessing = Graph.Domain == ShaderDomain.PostProcess;
+		_preview.PostProcessing = _graph.Domain == ShaderDomain.PostProcess;
 
 		if ( _properties.Target is BaseNodePlus node )
 		{
@@ -1949,7 +1949,7 @@ public class MainWindow : DockWindow
 	[Event( ShaderGraphPlusGlobals.EditorEvents.SubgraphUpdate )]
 	internal void OnSubgraphUpdate( string updatedPath )
 	{
-		foreach ( var node in Graph.Nodes )
+		foreach ( var node in _graph.Nodes )
 		{
 			if ( node is SubgraphNode subgraphNode )
 			{
@@ -1964,7 +1964,7 @@ public class MainWindow : DockWindow
 	[Event( ShaderGraphPlusGlobals.EditorEvents.ShaderTemplateUpdate )]
 	internal void OnShaderTemplateUpdate( string templatePath )
 	{
-		if ( Graph.HasTemplate && Graph.ShaderType == templatePath )
+		if ( _graph.HasTemplate && _graph.ShaderType == templatePath )
 		{
 			LoadShaderTypeInfo();
 			SetDirty();
