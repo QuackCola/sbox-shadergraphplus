@@ -19,30 +19,12 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 			DisplayInfo = new DisplayInfo();
 	}
 
-	private string CheckName( ShaderGraphPlus graph, string name )
-	{
-		if ( string.IsNullOrWhiteSpace( name ) )
-		{
-			var id = 0;
-			while ( graph.HasParameterWithName( $"{DefaultBaseName}{id}" ) )
-			{
-				id++;
-			}
-
-			return $"{DefaultBaseName}{id}";
-		}
-		else
-		{
-			return name;
-		}
-	}
-
 	public virtual IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" )
 	{
 		var sg = graph as ShaderGraphPlus;
 
 		var parameter = Type.Create<BlackboardParameter>();
-		parameter.Name = CheckName( sg, name );
+		parameter.Name = string.IsNullOrWhiteSpace( name ) ? sg.UniqueParameterName( DefaultBaseName ) : sg.UniqueParameterName( name );
 		parameter.Graph = sg;
 
 		return parameter;
