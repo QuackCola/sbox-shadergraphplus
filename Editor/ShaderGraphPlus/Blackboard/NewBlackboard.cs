@@ -622,7 +622,7 @@ public class NewBlackboard : Widget
 	private void SaveCollapsedGroups()
 	=> EditorCookie.Set( CollapsedGroupsCookie, _collapsedGroups.OrderBy( x => x ).ToList() );
 
-	internal void OnGraphEdited()
+	internal void OnGraphDirty()
 	{
 		if ( Graph is null )
 			return;

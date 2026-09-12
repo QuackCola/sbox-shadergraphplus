@@ -906,6 +906,7 @@ public class MainWindow : DockWindow
 		Update();
 
 		_dirty = true;
+		_blackboardView.OnGraphDirty();
 
 		UpdateTitle();
 
