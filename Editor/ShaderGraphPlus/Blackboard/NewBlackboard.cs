@@ -852,54 +852,6 @@ internal class ParameterRow : Widget, IParameterRow
 		AddActions();
 	}
 
-	private void AddActions()
-	{
-		var actionsWidget = Layout.Add( new Widget( this ) { Layout = Layout.Row(), FixedHeight = _headerHeight } );
-		var actions = actionsWidget.Layout;
-		actions.Alignment = TextFlag.LeftTop;
-		AddActions( actions );
-	}
-
-	private void AddActionColumn()
-	{
-		var column = Layout.AddColumn();
-		AddActions( column.AddRow() );
-		column.AddStretchCell();
-	}
-
-	private void AddActions( Layout actions )
-	{
-		actions.Add( new IconButton( "delete", () => _blackboard.Remove( Parameter ), this )
-		{
-			ToolTip = "Delete parameter",
-			IconSize = 16,
-			Foreground = Theme.Red
-		} );
-	}
-
-	public void StartRename()
-	{
-		if ( _renameEdit.Visible )
-			return;
-
-		_nameCell.TransparentForMouseEvents = false;
-		_renameEdit.Text = Parameter.Name;
-		_renameEdit.Visible = true;
-		_renameEdit.SelectAll();
-		_renameEdit.Focus();
-	}
-
-	private void FinishRename()
-	{
-		if ( !_renameEdit.Visible )
-			return;
-
-		_renameEdit.Visible = false;
-		_nameCell.TransparentForMouseEvents = true;
-		_blackboard.Rename( Parameter, _renameEdit.Text );
-		Update();
-	}
-
 	protected static void PaintTypeLabel( Rect row, string typeName, Color typeColor )
 	{
 		Color tint = "#48494c";
@@ -1067,6 +1019,54 @@ internal class ParameterRow : Widget, IParameterRow
 				base.OnKeyPress( e );
 				break;
 		}
+	}
+
+	private void AddActions()
+	{
+		var actionsWidget = Layout.Add( new Widget( this ) { Layout = Layout.Row(), FixedHeight = _headerHeight } );
+		var actions = actionsWidget.Layout;
+		actions.Alignment = TextFlag.LeftTop;
+		AddActions( actions );
+	}
+
+	private void AddActionColumn()
+	{
+		var column = Layout.AddColumn();
+		AddActions( column.AddRow() );
+		column.AddStretchCell();
+	}
+
+	private void AddActions( Layout actions )
+	{
+		actions.Add( new IconButton( "delete", () => _blackboard.Remove( Parameter ), this )
+		{
+			ToolTip = "Delete parameter",
+			IconSize = 16,
+			Foreground = Theme.Red
+		} );
+	}
+
+	public void StartRename()
+	{
+		if ( _renameEdit.Visible )
+			return;
+
+		_nameCell.TransparentForMouseEvents = false;
+		_renameEdit.Text = Parameter.Name;
+		_renameEdit.Visible = true;
+		_renameEdit.SelectAll();
+		_renameEdit.Focus();
+	}
+
+	private void FinishRename()
+	{
+		if ( !_renameEdit.Visible )
+			return;
+
+		_renameEdit.Visible = false;
+		_nameCell.TransparentForMouseEvents = true;
+		_blackboard.Rename( Parameter, _renameEdit.Text );
+		Update();
 	}
 
 	private void OpenContextMenu()
