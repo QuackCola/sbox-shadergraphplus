@@ -64,7 +64,7 @@ public class NewBlackboard : Widget
 		Layout.Add( bar );
 
 		_filter = toolbar.Add( new LineEdit() { PlaceholderText = "⌕  Filter..", ClearButtonEnabled = true, FixedHeight = Theme.RowHeight }, 1 );
-		_filter.TextEdited += _ => Rebuild();
+		_filter.TextEdited += _ => BuildFromParameters( Graph.Parameters );
 
 		ToolButton addButton = null;
 		addButton = toolbar.Add( HeaderButton( "add",
@@ -132,17 +132,12 @@ public class NewBlackboard : Widget
 
 	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
 	{
-		Rebuild();
-	}
-
-	public void Rebuild()
-	{
 		// Only the rows, so a filter being typed into isn't hidden along with them and loses focus
 		using var _ = SuspendUpdates.For( _rowsCanvas );
 
 		_rows.Clear( true );
 		_rowWidgets.Clear();
-		var groups = FilteredGroups().ToList();
+		var groups = FilteredGroups( parameters ).ToList();
 		_hasVisibleParameters = groups.Any();
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
 
@@ -184,6 +179,11 @@ public class NewBlackboard : Widget
 		}
 
 		_rows.AddStretchCell();
+	}
+
+	public void Rebuild()
+	{
+		BuildFromParameters( Graph.Parameters );
 	}
 
 	internal IDisposable UndoScope( string name )
@@ -245,12 +245,12 @@ public class NewBlackboard : Widget
 	? "No matching parameters"
 	: "No parameters\nClick + to add one";
 
-	private IEnumerable<IGrouping<string, INewGroupableBlackboardParameter>> FilteredGroups()
+	private IEnumerable<IGrouping<string, INewGroupableBlackboardParameter>> FilteredGroups( IEnumerable<IBlackboardParameter> parameters )
 	{
-		var parameters = (Graph?.Parameters.Cast<INewGroupableBlackboardParameter>() ?? []);
+		var bpParameters = (parameters.Cast<INewGroupableBlackboardParameter>() ?? []);
 		var filter = _filter.Text?.Trim() ?? "";
 
-		var result = parameters.Where( p => string.IsNullOrEmpty( filter )
+		var result = bpParameters.Where( p => string.IsNullOrEmpty( filter )
 			|| p.Name.Contains( filter, StringComparison.OrdinalIgnoreCase )
 			|| GroupTitle( GroupName( p ) ).Contains( filter, StringComparison.OrdinalIgnoreCase ) );
 
@@ -267,10 +267,10 @@ public class NewBlackboard : Widget
 			.ThenBy( group => group.Key, StringComparer.OrdinalIgnoreCase );
 	}
 
-	private IEnumerable<INewGroupableBlackboardParameter> DisplayedParameters()
+	private IEnumerable<INewGroupableBlackboardParameter> DisplayedParameters( IEnumerable<IBlackboardParameter> parameters )
 	{
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
-		foreach ( var group in FilteredGroups() )
+		foreach ( var group in FilteredGroups( parameters ) )
 		{
 			if ( !filtering && _collapsedGroups.Contains( group.Key ) )
 				continue;
@@ -360,7 +360,7 @@ public class NewBlackboard : Widget
 			_collapsedGroups.Remove( group );
 
 		SaveCollapsedGroups();
-		Rebuild();
+		BuildFromParameters( Graph.Parameters );
 	}
 
 	internal void MoveToGroup( INewGroupableBlackboardParameter parameter, string group )
@@ -630,7 +630,7 @@ public class NewBlackboard : Widget
 		if ( Graph is null )
 			return;
 
-		var parameters = DisplayedParameters().ToList();
+		var parameters = DisplayedParameters( Graph.Parameters ).ToList();
 		var stale = _rowWidgets.Count != parameters.Count;
 
 		for ( var i = 0; !stale && i < _rowWidgets.Count; i++ )
@@ -641,7 +641,7 @@ public class NewBlackboard : Widget
 
 		if ( stale )
 		{
-			Rebuild();
+			BuildFromParameters( Graph.Parameters );
 			return;
 		}
 
