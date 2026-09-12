@@ -439,7 +439,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		if ( !names.Contains( baseName ) )
 			return baseName;
 
-		for ( var i = 2; ; i++ )
+		for ( var i = 1; ; i++ )
 		{
 			if ( !names.Contains( $"{baseName} {i}" ) )
 				return $"{baseName} {i}";
