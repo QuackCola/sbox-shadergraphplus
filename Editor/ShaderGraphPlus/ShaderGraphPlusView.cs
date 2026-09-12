@@ -1,6 +1,7 @@
 ﻿using Editor;
 using NodeEditorPlus;
 using ShaderGraphPlus.Nodes;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -29,8 +30,8 @@ public class ShaderGraphPlusView : GraphView
 
 	public static bool EnableGridAlignedWires
 	{
-		get => _cachedConnectionStyle ??= EditorCookie.Get( "shadergraphplus.gridwires", false );
-		set => EditorCookie.Set( "shadergraphplus.gridwires", _cachedConnectionStyle = value );
+		get => _cachedConnectionStyle ??= EditorCookie.Get( EditorCookieNames.ShaderGraphPlusGridWires, false );
+		set => EditorCookie.Set( EditorCookieNames.ShaderGraphPlusGridWires, _cachedConnectionStyle = value );
 	}
 
 	private ConnectionStyle _oldConnectionStyle;

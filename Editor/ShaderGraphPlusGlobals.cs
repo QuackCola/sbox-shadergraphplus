@@ -23,6 +23,12 @@ internal static class ShaderGraphPlusGlobals
 		internal const string ShaderTemplateUpdate = "sgp.ShaderTemplateUpdateEvent";
 	}
 
+	internal static class EditorCookieNames
+	{
+		internal const string ShaderGraphPlusBlackboardCollapsedGroupsCookie = "sgp.Blackboard.ParameterGroups.Collapsed";
+		internal const string ShaderGraphPlusGridWires = "sgp.GraphView.Gridwires";
+	}
+
 	internal const string CleanName = "ShaderGraphPlus";
 
 	internal const string AssetTypeName = "Shader Graph Plus";

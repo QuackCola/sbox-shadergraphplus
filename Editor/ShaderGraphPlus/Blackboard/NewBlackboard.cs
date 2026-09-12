@@ -1,4 +1,5 @@
 ﻿using Editor;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -19,7 +20,11 @@ public class NewBlackboard : Widget
 	private bool? _sortAscending = true;
 	private bool _hasVisibleParameters;
 
-	private const string CollapsedGroupsCookie = "shadergraphplus.parameter-groups.collapsed";
+	private string EmptyHint => (Graph?.Parameters.Count() ?? 0) > 0
+	? "No matching parameters"
+	: "No parameters\nClick + to add one";
+
+	protected virtual string CollapsedGroupsCookie => EditorCookieNames.ShaderGraphPlusBlackboardCollapsedGroupsCookie;
 
 	public ShaderGraphPlus Graph
 	{
@@ -124,12 +129,6 @@ public class NewBlackboard : Widget
 		_availableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
 
-	public void RebuildFromGraph( bool preserveSelection = false )
-	{
-		if ( Graph is not null )
-			BuildFromParameters( Graph.Parameters, preserveSelection );
-	}
-
 	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
 	{
 		// Only the rows, so a filter being typed into isn't hidden along with them and loses focus
@@ -181,6 +180,12 @@ public class NewBlackboard : Widget
 		_rows.AddStretchCell();
 	}
 
+	public void RebuildFromGraph( bool preserveSelection = false )
+	{
+		if ( Graph is not null )
+			BuildFromParameters( Graph.Parameters, preserveSelection );
+	}
+
 	internal IDisposable UndoScope( string name )
 	{
 		PushUndo( name );
@@ -209,36 +214,6 @@ public class NewBlackboard : Widget
 		foreach ( var row in _rowWidgets )
 			((Widget)row).Update();
 	}
-
-	internal Menu CreateMenu() => new( _window );
-
-	private static void AddDivider( Layout row )
-	{
-		row.AddSpacingCell( 2 );
-		row.Add( new Separator( 1 ) { FixedWidth = 1, FixedHeight = Theme.RowHeight - 8, Color = Color.White.WithAlpha( 0.1f ) } );
-		row.AddSpacingCell( 2 );
-	}
-
-	private ToolButton HeaderButton( string icon, string toolTip, Action onClick )
-	{
-		var button = new ToolButton( "", icon, this ) { ToolTip = toolTip, MouseLeftPress = onClick };
-		button.OnPaintOverride = () =>
-		{
-			Paint.ClearPen();
-			Paint.SetBrush( button.Enabled && Paint.HasMouseOver ? Theme.ControlBackground.Lighten( 0.1f ) : Theme.ControlBackground );
-			Paint.DrawRect( button.LocalRect, Theme.ControlRadius );
-
-			Paint.ClearBrush();
-			Paint.SetPen( button.Enabled ? Theme.Primary : Theme.TextControl.WithAlpha( 0.25f ) );
-			Paint.DrawIcon( button.LocalRect, icon, 14, TextFlag.Center );
-			return true;
-		};
-		return button;
-	}
-
-	private string EmptyHint => (Graph?.Parameters.Count() ?? 0) > 0
-	? "No matching parameters"
-	: "No parameters\nClick + to add one";
 
 	private IEnumerable<IGrouping<string, INewGroupableBlackboardParameter>> FilteredGroups( IEnumerable<IBlackboardParameter> parameters )
 	{
@@ -642,6 +617,32 @@ public class NewBlackboard : Widget
 
 		//UpdateUnusedButton();
 		UpdateSelection();
+	}
+
+	internal Menu CreateMenu() => new( _window );
+
+	private static void AddDivider( Layout row )
+	{
+		row.AddSpacingCell( 2 );
+		row.Add( new Separator( 1 ) { FixedWidth = 1, FixedHeight = Theme.RowHeight - 8, Color = Color.White.WithAlpha( 0.1f ) } );
+		row.AddSpacingCell( 2 );
+	}
+
+	private ToolButton HeaderButton( string icon, string toolTip, Action onClick )
+	{
+		var button = new ToolButton( "", icon, this ) { ToolTip = toolTip, MouseLeftPress = onClick };
+		button.OnPaintOverride = () =>
+		{
+			Paint.ClearPen();
+			Paint.SetBrush( button.Enabled && Paint.HasMouseOver ? Theme.ControlBackground.Lighten( 0.1f ) : Theme.ControlBackground );
+			Paint.DrawRect( button.LocalRect, Theme.ControlRadius );
+
+			Paint.ClearBrush();
+			Paint.SetPen( button.Enabled ? Theme.Primary : Theme.TextControl.WithAlpha( 0.25f ) );
+			Paint.DrawIcon( button.LocalRect, icon, 14, TextFlag.Center );
+			return true;
+		};
+		return button;
 	}
 }
 
