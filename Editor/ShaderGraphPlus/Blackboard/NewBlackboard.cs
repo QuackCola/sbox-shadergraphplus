@@ -181,11 +181,6 @@ public class NewBlackboard : Widget
 		_rows.AddStretchCell();
 	}
 
-	public void Rebuild()
-	{
-		BuildFromParameters( Graph.Parameters );
-	}
-
 	internal IDisposable UndoScope( string name )
 	{
 		PushUndo( name );

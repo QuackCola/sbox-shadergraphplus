@@ -129,7 +129,7 @@ public class ShaderGraphPlusView : GraphView
 
 						return new ParameterNodeType( EditorTypeLibrary.GetType<Texture2DParameterNode>(), asset.AssetPath, () =>
 						{
-							_blackboard.Rebuild();
+							_blackboard.RebuildFromGraph();
 						}
 						);
 					}
@@ -566,7 +566,7 @@ public class ShaderGraphPlusView : GraphView
 
 		Add( nodeUI );
 
-		_blackboard.Rebuild();
+		_blackboard.RebuildFromGraph();
 
 		return node;
 	}
@@ -851,7 +851,7 @@ public class ShaderGraphPlusView : GraphView
 			{
 				Graph.RemoveParameter( parameterNode.ParameterIdentifier );
 
-				_blackboard.Rebuild();
+				_blackboard.RebuildFromGraph();
 			}
 		}
 
