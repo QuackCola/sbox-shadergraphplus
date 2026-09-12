@@ -138,7 +138,7 @@ public class ShaderGraphPlusView : GraphView
 			}
 		}
 
-		if ( ev.Data.Object is not BlackboardGroupTreeNode && ev.Data.Object is ShaderGraphPlusParameterTreeNode parameterTreeNode && parameterTreeNode.Value is BlackboardParameter parameter )
+		if ( ev.Data.Object is ParameterDragData parameterDragData && parameterDragData.Parameter is BlackboardParameter parameter )
 		{
 			_currentDragEventSource = DragEventSource.Blackboard;
 
