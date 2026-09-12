@@ -429,7 +429,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	}
 
 	/// <summary>
-	/// A parameter name not taken yet - the name itself, or "name 2", "name 3"...
+	/// A parameter name not taken yet - the name itself, or "name 1", "name 2"...
 	/// </summary>
 	public string UniqueParameterName( string baseName )
 	{
