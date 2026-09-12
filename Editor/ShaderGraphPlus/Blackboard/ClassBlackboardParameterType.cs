@@ -21,11 +21,11 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 
 	public virtual IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" )
 	{
-		var sg = graph as ShaderGraphPlus;
+		var sgp = graph as ShaderGraphPlus;
 
 		var parameter = Type.Create<BlackboardParameter>();
-		parameter.Name = string.IsNullOrWhiteSpace( name ) ? sg.UniqueParameterName( DefaultBaseName ) : sg.UniqueParameterName( name );
-		parameter.Graph = sg;
+		parameter.Name = string.IsNullOrWhiteSpace( name ) ? sgp.UniqueParameterName( DefaultBaseName ) : sgp.UniqueParameterName( name );
+		parameter.Graph = sgp;
 
 		return parameter;
 	}
