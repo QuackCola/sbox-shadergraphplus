@@ -93,7 +93,7 @@ public class NewBlackboard : Widget
 		scroll.HorizontalScrollbarMode = ScrollbarMode.Off;
 		scroll.TranslucentBackground = true;
 		scroll.NoSystemBackground = true;
-		
+
 		// Scope to the scroll area itself, otherwise the rules cascade into every
 		// descendant - including the QToolTip popups shown for the rows inside it.
 		scroll.Name = "ShaderGraphPlusParameterScroll";
@@ -281,7 +281,7 @@ public class NewBlackboard : Widget
 	}
 
 	internal static string GroupName( INewGroupableBlackboardParameter parameter ) => NormalizeGroup( parameter.Group );
-	
+
 	internal static string GroupTitle( string group ) => string.IsNullOrEmpty( group ) ? "General" : group;
 
 	internal void Remove( BlackboardParameter parameter )
@@ -395,7 +395,7 @@ public class NewBlackboard : Widget
 			{
 				parameter.Group = newName;
 			}
-				
+
 			if ( _collapsedGroups.Remove( group ) && !string.IsNullOrEmpty( newName ) )
 				_collapsedGroups.Add( newName );
 
@@ -414,7 +414,7 @@ public class NewBlackboard : Widget
 		{
 			parameter.Group = "";
 		}
-			
+
 		_collapsedGroups.Remove( group );
 		SaveCollapsedGroups();
 	}
@@ -968,7 +968,7 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 
 		var chip = PillRect;
-		
+
 
 		Paint.Antialiasing = true;
 		Paint.ClearPen();
@@ -987,7 +987,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 		var r = chip;
 		r.Left += 24;
-		
+
 		var typeName = Parameter.DisplayInfo.Name;
 		var typeRect = Paint.MeasureText( r, typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
