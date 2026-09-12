@@ -146,10 +146,10 @@ public class NewBlackboard : Widget
 		_hasVisibleParameters = groups.Any();
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
 
-		foreach ( var group in groups )
+		foreach ( var grouping in groups )
 		{
-			var collapsed = !filtering && _collapsedGroups.Contains( group.Key );
-			_rows.Add( new ParameterGroupHeader( this, group.Key, group.Count(), collapsed, !filtering ) );
+			var collapsed = !filtering && _collapsedGroups.Contains( grouping.Key );
+			_rows.Add( new ParameterGroupHeader( this, grouping.Key, grouping.Count(), collapsed, !filtering ) );
 
 			if ( collapsed )
 				continue;
@@ -171,7 +171,7 @@ public class NewBlackboard : Widget
 			};
 			_rows.Add( body, 0 );
 
-			foreach ( var parameter in group )
+			foreach ( var parameter in grouping )
 			{
 				IParameterRow row = parameter switch
 				{
