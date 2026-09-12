@@ -19,6 +19,11 @@ internal sealed class ParameterAvailableInAttribute : Attribute
 	}
 }
 
+public interface INewGroupableBlackboardParameter : IBlackboardParameter
+{
+	string Group { get; set; }
+}
+
 public interface IGroupableBlackboardParameter : IBlackboardParameter
 {
 	Guid GroupReference { get; set; }
@@ -64,7 +69,7 @@ public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParamet
 	bool CannotPreviewOutputType { get; }
 }
 
-public abstract class BlackboardParameter : IBlackboardParameter, IValid
+public abstract class BlackboardParameter : INewGroupableBlackboardParameter, IValid
 {
 	[Hide, Browsable( false )]
 	public Guid Identifier { get; set; }
@@ -80,6 +85,7 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 	public virtual bool IsValid => true;
 
 	public virtual string Name { get; set; }
+	public string Group { get; set; }
 
 	public BlackboardParameter()
 	{

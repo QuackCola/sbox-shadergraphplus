@@ -428,6 +428,24 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_categoryData.Add( categoryData.Identifier, categoryData );
 	}
 
+	/// <summary>
+	/// A parameter name not taken yet - the name itself, or "name 2", "name 3"...
+	/// </summary>
+	public string UniqueParameterName( string baseName )
+	{
+		var names = Parameters.Select( p => p.Name )
+			.ToHashSet( StringComparer.OrdinalIgnoreCase );
+
+		if ( !names.Contains( baseName ) )
+			return baseName;
+
+		for ( var i = 2; ; i++ )
+		{
+			if ( !names.Contains( $"{baseName} {i}" ) )
+				return $"{baseName} {i}";
+		}
+	}
+
 	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
 	{
 		if ( parameter.Graph != this )
@@ -454,6 +472,15 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// Rename a parameter.
+	/// </summary>
+	public void RenameParameter( IBlackboardParameter parameter, string name )
+	{
+		var oldName = parameter.Name;
+		parameter.Name = name;
 	}
 
 	public void UpdateParameter( IBlackboardParameter parameter )

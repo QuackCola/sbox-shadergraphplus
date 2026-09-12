@@ -16,7 +16,7 @@ public class ShaderGraphPlusView : GraphView
 	}
 
 	private readonly MainWindow _window;
-	private readonly ShaderGraphPlusBlackboardView _blackboard;
+	private readonly NewBlackboard _blackboard;
 	private readonly UndoStack _undoStack;
 
 	private DragEventSource _currentDragEventSource = DragEventSource.None;
@@ -50,7 +50,7 @@ public class ShaderGraphPlusView : GraphView
 	? GridConnectionStyle.Instance
 	: ConnectionStyle.Default;
 
-	public ShaderGraphPlusView( Widget parent, MainWindow window, ShaderGraphPlusBlackboardView blackboard ) : base( parent )
+	public ShaderGraphPlusView( Widget parent, MainWindow window, NewBlackboard blackboard ) : base( parent )
 	{
 		_window = window;
 		_blackboard = blackboard;
@@ -129,7 +129,7 @@ public class ShaderGraphPlusView : GraphView
 
 						return new ParameterNodeType( EditorTypeLibrary.GetType<Texture2DParameterNode>(), asset.AssetPath, () =>
 						{
-							_blackboard.RebuildFromGraph( true );
+							_blackboard.Rebuild();
 						}
 						);
 					}
@@ -544,12 +544,12 @@ public class ShaderGraphPlusView : GraphView
 
 	private IBlackboardParameter CreateNewParameter( IBlackboardParameterType type, string name = "" )
 	{
-		return _blackboard.CreateNewParameter( type, name );
+		return default;//_blackboard.CreateNewParameter( type, name );
 	}
 
 	private T CreatenNewParameter<T>( ShaderGraphPlus graph ) where T : IBlackboardParameter
 	{
-		return (T)_blackboard.CreateNewParameter( FindParameterType( typeof( T ) ) );
+		return default;//(T)_blackboard.CreateNewParameter( FindParameterType( typeof( T ) ) );
 	}
 
 	private BaseNodePlus CreateNewParameterNode( IBlackboardParameter parameter, Vector2 position )
@@ -566,7 +566,7 @@ public class ShaderGraphPlusView : GraphView
 
 		Add( nodeUI );
 
-		_blackboard.RebuildFromGraph( true );
+		_blackboard.Rebuild();
 
 		return node;
 	}
@@ -851,7 +851,7 @@ public class ShaderGraphPlusView : GraphView
 			{
 				Graph.RemoveParameter( parameterNode.ParameterIdentifier );
 
-				_blackboard.RebuildFromGraph( true );
+				_blackboard.Rebuild();
 			}
 		}
 
