@@ -1231,6 +1231,8 @@ internal class ParameterRow : Widget, IParameterRow
 		{
 			using var undoScope = _blackboardView.UndoScope( "Reorder Parameter" );
 
+			// TODO : Fix dragging a parameter onto another thats in a different group.
+			// Resulting in the parameter being placed at the wrong index. 
 			if ( sourceGroup != targetGroup && targetCategory != null )
 			{
 				var targetIndex = targetCategory.ParameterReferences.IndexOf( targetParameter.Identifier );
