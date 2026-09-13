@@ -502,7 +502,7 @@ public class NewBlackboard : Widget
 		{
 			var option = menu.AddOption( parameterType.Type.Title, !string.IsNullOrWhiteSpace( icon ) ? icon : null, () =>
 			{
-				CreateNewParameter( parameterType, "" );
+				CreateNewParameter( parameterType, group );
 			} );
 
 			option.ToolTip = description;
