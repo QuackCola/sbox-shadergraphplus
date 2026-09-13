@@ -129,6 +129,26 @@ public class NewBlackboardView : Widget
 		_availableParameters.TryAdd( parameterType.Identifier, parameterType );
 	}
 
+	internal IDisposable UndoScope( string name )
+	{
+		PushUndo( name );
+		return new Sandbox.Utility.DisposeAction( () => PushRedo() );
+	}
+
+	public void PushUndo( string name )
+	{
+		SGPLogger.Info( $"Push Undo ({name})" );
+		_undoStack.PushUndo( name, Graph.UndoStackSerialize() );
+		_window.OnUndoPushed();
+	}
+
+	public void PushRedo()
+	{
+		SGPLogger.Info( "Push Redo" );
+		_undoStack.PushRedo( Graph.UndoStackSerialize() );
+		_window.SetDirty();
+	}
+
 	private void BuildFromParameters( IEnumerable<IBlackboardParameter> parameters, bool preserveSelection = false )
 	{
 		// Only the rows, so a filter being typed into isn't hidden along with them and loses focus
@@ -184,26 +204,6 @@ public class NewBlackboardView : Widget
 	{
 		if ( Graph is not null )
 			BuildFromParameters( Graph.Parameters, preserveSelection );
-	}
-
-	internal IDisposable UndoScope( string name )
-	{
-		PushUndo( name );
-		return new Sandbox.Utility.DisposeAction( () => PushRedo() );
-	}
-
-	public void PushUndo( string name )
-	{
-		SGPLogger.Info( $"Push Undo ({name})" );
-		_undoStack.PushUndo( name, Graph.UndoStackSerialize() );
-		_window.OnUndoPushed();
-	}
-
-	public void PushRedo()
-	{
-		SGPLogger.Info( "Push Redo" );
-		_undoStack.PushRedo( Graph.UndoStackSerialize() );
-		_window.SetDirty();
 	}
 
 	/// <summary>
