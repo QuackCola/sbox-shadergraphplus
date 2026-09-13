@@ -41,6 +41,8 @@ public class NewBlackboardView : Widget
 
 	public Action<bool> OnDirty { get; set; }
 
+	public Action OnParameterNodesDeleted { get; set; }
+
 	public NewBlackboardView( MainWindow window ) : base( null )
 	{
 		_window = window;
@@ -267,11 +269,19 @@ public class NewBlackboardView : Widget
 
 			foreach ( var node in parameterNodes )
 			{
-				node.ParameterIdentifier = default;
-				node.Update();
+				Graph.RemoveNode( node );
+			}
+
+			if ( parameterNodes.Any() )
+			{
+				OnParameterNodesDeleted?.Invoke();
 			}
 
 			Graph.RemoveParameter( parameter );
+
+			RemoveParameterFromCategoryData( parameter );
+
+			//OnDirty?.Invoke( true );
 		}
 
 		var referenceCount = parameterNodes.Length;
@@ -342,9 +352,12 @@ public class NewBlackboardView : Widget
 
 		using var undoScope = UndoScope( "Move Parameter" );
 
+		var oldGroup = parameter.Group;
 		parameter.Group = group;
 		ExpandGroup( group );
 		PruneCollapsedGroups();
+
+		SetCategoryData( group, oldGroup, parameter );
 
 		_window.OnParameterSelected( parameter );
 	}
@@ -367,6 +380,8 @@ public class NewBlackboardView : Widget
 				parameter.Group = newName;
 			}
 
+			RenameCategoryData( group, newName );
+
 			if ( _collapsedGroups.Remove( group ) && !string.IsNullOrEmpty( newName ) )
 				_collapsedGroups.Add( newName );
 
@@ -383,6 +398,8 @@ public class NewBlackboardView : Widget
 
 		foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
 		{
+			// Migrate each parameter to the 'General' category.
+			SetCategoryData( "", parameter.Group, parameter );
 			parameter.Group = "";
 		}
 
@@ -445,6 +462,69 @@ public class NewBlackboardView : Widget
 		}
 	}
 
+	private void RenameCategoryData( string oldName, string newName )
+	{
+		if ( Graph is null )
+			return;
+
+		if ( Graph.TryFindCategoryData( oldName, out var existingCategory ) )
+		{
+			existingCategory.Name = newName;
+		}
+	}
+
+	private void RemoveParameterFromCategoryData( BlackboardParameter parameter )
+	{
+		if ( Graph is null )
+			return;
+
+		var group = string.IsNullOrWhiteSpace( parameter.Group ) ? "General" : parameter.Group;
+
+		if ( Graph.TryFindCategoryData( group, out var category ) )
+		{
+			category.ParameterReferences.Remove( parameter.Identifier );
+
+			if ( category.ParameterReferences.Count == 0 )
+			{
+				Graph.RemoveCategoryData( category );
+			}
+		}
+	}
+
+	private void SetCategoryData( string group, string oldGroup, IBlackboardParameter parameter )
+	{
+		if ( Graph is null )
+			return;
+
+		oldGroup = string.IsNullOrWhiteSpace( oldGroup ) ? "General" : oldGroup;
+		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
+
+		//SGPLogger.Info( $"Moving Parameter \"{parameter.Name}\" from group \"{oldGroup}\" to group \"{group}\"" );
+
+		if ( oldGroup != group && Graph.TryFindCategoryData( oldGroup, out var oldCategory ) )
+		{
+			oldCategory.ParameterReferences.Remove( parameter.Identifier );
+
+			if ( oldCategory.ParameterReferences.Count == 0 )
+			{
+				Graph.RemoveCategoryData( oldCategory );
+			}
+		}
+
+		if ( !Graph.HasCategoryDataWithName( group ) )
+		{
+			var categoryData = new CategoryData();
+			categoryData.Name = group;
+			categoryData.ParameterReferences.Add( parameter.Identifier );
+
+			Graph.AddCategoryData( categoryData );
+		}
+		else if ( Graph.TryFindCategoryData( group, out var existingCategory ) )
+		{
+			existingCategory.ParameterReferences.Add( parameter.Identifier );
+		}
+	}
+
 	private void CreateNewParameter( IBlackboardParameterType type, string group = "" )
 	{
 		group = NormalizeGroup( group );
@@ -459,6 +539,8 @@ public class NewBlackboardView : Widget
 		if ( parameter is INewGroupableBlackboardParameter newGroupable )
 		{
 			newGroupable.Group = group;
+
+			SetCategoryData( group, group, newGroupable );
 		}
 
 		Graph.AddParameter( parameter );

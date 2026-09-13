@@ -1723,13 +1723,12 @@ public class MainWindow : DockWindow
 		_blackboardCanvas.Layout.Margin = 4;
 
 		_blackboardView = new NewBlackboardView( this );
-		//_blackboardView.Graph = Graph;
-		//_blackboardView.OnDirty += ( evaluate ) => SetDirty( evaluate );
-		//_blackboardView.OnParameterNodeDeleted += () =>
-		//{
-		//	_graphView.RebuildFromGraph();
-		//};
-
+		_blackboardView.Graph = _graph;
+		_blackboardView.OnDirty += ( evaluate ) => SetDirty( evaluate );
+		_blackboardView.OnParameterNodesDeleted += () =>
+		{
+			_graphView.RebuildFromGraph();
+		};
 		_blackboardCanvas.Layout.Add( _blackboardView, 1 );
 
 		_graphView = new ShaderGraphPlusView( _graphCanvas, this, _blackboardView );

@@ -304,7 +304,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		if ( node.Graph != this )
 			return;
 
-		//SGPLog.Info( $"Removing node with id : {node.Identifier}");
+		//SGPLogger.Info( $"Removing node with id : {node.Identifier}");
 
 		_nodes.Remove( node.Identifier );
 	}
@@ -392,6 +392,18 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		{
 			categoryData = foundCategoryData;
 
+			return true;
+		}
+
+		return false;
+	}
+
+	public bool TryFindCategoryData(string name, out CategoryData categoryData )
+	{
+		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+
+		if ( categoryData != null )
+		{
 			return true;
 		}
 
