@@ -1010,17 +1010,15 @@ internal class ParameterRow : Widget, IParameterRow
 
 		if ( _renameEdit.Visible )
 			return;
-
-		var r = chip;
-		r.Left += 24;
-
+		
 		var typeName = Parameter.DisplayInfo.Name;
-		var typeRect = Paint.MeasureText( r, typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
+		var typeRectOffset = 24;
+		var typeRect = Paint.MeasureText( chip.Shrink( chip.Left + typeRectOffset, 0, 0, 0 ), typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
 		PaintTypeLabel( typeRect, typeName, typeColor );
 		
-		var nameOffset = 8;
-		var nameRect = PillRect.Shrink( typeRect.Right + nameOffset, 0, 0, 0 );
+		var nameRectOffset = 8;
+		var nameRect = chip.Shrink( typeRect.Right + nameRectOffset, 0, 0, 0 );
 
 		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
 		Paint.SetDefaultFont();
