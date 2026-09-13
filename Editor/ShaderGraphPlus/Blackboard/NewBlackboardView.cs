@@ -660,7 +660,7 @@ internal interface IParameterRow
 
 internal sealed class ParameterGroupHeader : InspectorHeader
 {
-	private readonly NewBlackboardView _parameterList;
+	private readonly NewBlackboardView _blackboardView;
 	private readonly string _group;
 	private readonly string _title;
 	private readonly int _count;
@@ -668,7 +668,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	public ParameterGroupHeader( NewBlackboardView list, string group, int count, bool collapsed, bool collapsible )
 	{
-		_parameterList = list;
+		_blackboardView = list;
 		_group = group;
 		_title = NewBlackboardView.GroupTitle( group );
 		_count = count;
@@ -727,7 +727,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	protected override void OnExpandChanged()
 	{
-		_parameterList.ToggleGroup( _group );
+		_blackboardView.ToggleGroup( _group );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
@@ -759,20 +759,20 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Update();
 
 		if ( ev.Data.Object is ParameterDragData data )
-			_parameterList.MoveToGroup( data.Parameter, _group );
+			_blackboardView.MoveToGroup( data.Parameter, _group );
 	}
 
 	private void OpenContextMenu()
 	{
-		var menu = _parameterList.CreateMenu();
+		var menu = _blackboardView.CreateMenu();
 		var parameters = menu.AddMenu( "Add Parameter", "add" );
-		_parameterList.AddParameterOptions( parameters, _group );
+		_blackboardView.AddParameterOptions( parameters, _group );
 
 		if ( !string.IsNullOrEmpty( _group ) )
 		{
 			menu.AddSeparator();
-			menu.AddOption( "Rename Group", "edit", () => _parameterList.RenameGroup( _group ) );
-			menu.AddOption( "Remove Group", "folder_off", () => _parameterList.ClearGroup( _group ) );
+			menu.AddOption( "Rename Group", "edit", () => _blackboardView.RenameGroup( _group ) );
+			menu.AddOption( "Remove Group", "folder_off", () => _blackboardView.ClearGroup( _group ) );
 		}
 
 		menu.OpenAtCursor();
@@ -786,7 +786,7 @@ internal class ParameterRow : Widget, IParameterRow
 	public string BuiltGroup { get; }
 
 	private readonly MainWindow _window;
-	private readonly NewBlackboardView _parameterList;
+	private readonly NewBlackboardView _blackboardView;
 	private readonly Widget _nameCell;
 	private float _headerHeight = Theme.RowHeight;
 	private Vector2? _dragStart;
@@ -810,7 +810,7 @@ internal class ParameterRow : Widget, IParameterRow
 	public ParameterRow( MainWindow window, NewBlackboardView list, BlackboardParameter parameter ) : base( list )
 	{
 		_window = window;
-		_parameterList = list;
+		_blackboardView = list;
 		Parameter = parameter;
 		parameter.Graph = list.Graph;
 		BuiltGroup = NewBlackboardView.GroupName( parameter );
@@ -1009,7 +1009,7 @@ internal class ParameterRow : Widget, IParameterRow
 				StartRename();
 				break;
 			case KeyCode.Delete:
-				_parameterList.Remove( Parameter );
+				_blackboardView.Remove( Parameter );
 				break;
 			case KeyCode.Escape when _renameEdit.Visible:
 				_renameEdit.Text = Parameter.Name;
@@ -1038,7 +1038,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private void AddActions( Layout actions )
 	{
-		actions.Add( new IconButton( "delete", () => _parameterList.Remove( Parameter ), this )
+		actions.Add( new IconButton( "delete", () => _blackboardView.Remove( Parameter ), this )
 		{
 			ToolTip = "Delete parameter",
 			IconSize = 16,
@@ -1065,18 +1065,18 @@ internal class ParameterRow : Widget, IParameterRow
 
 		_renameEdit.Visible = false;
 		_nameCell.TransparentForMouseEvents = true;
-		_parameterList.Rename( Parameter, _renameEdit.Text );
+		_blackboardView.Rename( Parameter, _renameEdit.Text );
 		Update();
 	}
 
 	private void OpenContextMenu()
 	{
-		var menu = _parameterList.CreateMenu();
+		var menu = _blackboardView.CreateMenu();
 		menu.AddOption( "Rename", "edit", StartRename, "F2" );
-		_parameterList.AddGroupOptions( menu, Parameter );
+		_blackboardView.AddGroupOptions( menu, Parameter );
 
 		menu.AddSeparator();
-		menu.AddOption( "Delete", "delete", () => _parameterList.Remove( Parameter ), "Del" );
+		menu.AddOption( "Delete", "delete", () => _blackboardView.Remove( Parameter ), "Del" );
 		menu.OpenAtCursor();
 	}
 }
