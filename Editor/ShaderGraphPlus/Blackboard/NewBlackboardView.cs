@@ -571,8 +571,6 @@ public class NewBlackboardView : Widget
 		}
 	}
 
-	private string UniqueName( string baseName ) => Graph.UniqueParameterName( baseName );
-
 	private static string NormalizeGroup( string group )
 	{
 		group = group?.Trim() ?? "";
