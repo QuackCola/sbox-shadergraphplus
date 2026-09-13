@@ -905,8 +905,6 @@ internal class ParameterRow : Widget, IParameterRow
 		var selected = _window.IsSelected( Parameter );
 		var hovered = PillRect.IsInside( FromScreen( Editor.Application.CursorPosition ) );
 		var typeColor = Color.White;
-		//Color pen = Theme.TextControl;
-		//float opacity = 0.9f;
 
 		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( Parameter.GetType(), out var blackboardConfig ) )
 		{
@@ -914,7 +912,6 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 
 		var chip = PillRect;
-
 
 		Paint.Antialiasing = true;
 		Paint.ClearPen();
@@ -939,10 +936,11 @@ internal class ParameterRow : Widget, IParameterRow
 
 		PaintTypeLabel( typeRect, typeName, typeColor );
 
-		// TODO : Get the name to draw to the right of the TypeLabel
-		//Paint.Pen = pen.WithAlphaMultiplied( opacity );
-		//Paint.SetDefaultFont();
-		//Paint.DrawText( r, Name, TextFlag.LeftCenter | TextFlag.SingleLine );
+		var nameRect = PillRect.Shrink( typeRect.Right + 8, 0, 0, 0);
+
+		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
+		Paint.SetDefaultFont();
+		Paint.DrawText( nameRect, Parameter.Name, TextFlag.LeftCenter | TextFlag.SingleLine );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
