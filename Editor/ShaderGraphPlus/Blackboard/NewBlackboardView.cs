@@ -1019,7 +1019,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 		PaintTypeLabel( typeRect, typeName, typeColor );
 
-		var nameRect = PillRect.Shrink( typeRect.Right + 8, 0, 0, 0);
+		var nameRect = PillRect.Shrink( typeRect.Right + 8, 0, 0, 0 );
 
 		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
 		Paint.SetDefaultFont();

@@ -398,7 +398,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
-	public bool TryFindCategoryData(string name, out CategoryData categoryData )
+	public bool TryFindCategoryData( string name, out CategoryData categoryData )
 	{
 		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
 
