@@ -1018,8 +1018,9 @@ internal class ParameterRow : Widget, IParameterRow
 		var typeRect = Paint.MeasureText( r, typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
 		PaintTypeLabel( typeRect, typeName, typeColor );
-
-		var nameRect = PillRect.Shrink( typeRect.Right + 8, 0, 0, 0 );
+		
+		var nameOffset = 8;
+		var nameRect = PillRect.Shrink( typeRect.Right + nameOffset, 0, 0, 0 );
 
 		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
 		Paint.SetDefaultFont();
