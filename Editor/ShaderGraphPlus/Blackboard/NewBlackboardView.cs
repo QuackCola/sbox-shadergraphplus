@@ -221,6 +221,7 @@ public class NewBlackboardView : Widget
 		var filter = _filter.Text?.Trim() ?? "";
 
 		var result = bpParameters.Where( p => string.IsNullOrEmpty( filter )
+			|| p.DisplayInfo.Name.Contains( filter, StringComparison.OrdinalIgnoreCase )
 			|| p.Name.Contains( filter, StringComparison.OrdinalIgnoreCase )
 			|| GroupTitle( GroupName( p ) ).Contains( filter, StringComparison.OrdinalIgnoreCase ) );
 
