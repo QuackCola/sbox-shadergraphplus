@@ -3,7 +3,7 @@ using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
-public class NewBlackboard : Widget
+public class NewBlackboardView : Widget
 {
 	private readonly UndoStack _undoStack;
 	private readonly MainWindow _window;
@@ -41,7 +41,7 @@ public class NewBlackboard : Widget
 
 	public Action<bool> OnDirty { get; set; }
 
-	public NewBlackboard( MainWindow window ) : base( null )
+	public NewBlackboardView( MainWindow window ) : base( null )
 	{
 		_window = window;
 		_undoStack = window.UndoStack;
@@ -660,17 +660,17 @@ internal interface IParameterRow
 
 internal sealed class ParameterGroupHeader : InspectorHeader
 {
-	private readonly NewBlackboard _list;
+	private readonly NewBlackboardView _parameterList;
 	private readonly string _group;
 	private readonly string _title;
 	private readonly int _count;
 	private bool _dragOver;
 
-	public ParameterGroupHeader( NewBlackboard list, string group, int count, bool collapsed, bool collapsible )
+	public ParameterGroupHeader( NewBlackboardView list, string group, int count, bool collapsed, bool collapsible )
 	{
-		_list = list;
+		_parameterList = list;
 		_group = group;
-		_title = NewBlackboard.GroupTitle( group );
+		_title = NewBlackboardView.GroupTitle( group );
 		_count = count;
 
 		Title = "";
@@ -727,7 +727,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	protected override void OnExpandChanged()
 	{
-		_list.ToggleGroup( _group );
+		_parameterList.ToggleGroup( _group );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
@@ -741,7 +741,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	public override void OnDragHover( DragEvent ev )
 	{
 		var valid = ev.Data.Object is ParameterDragData data
-			&& !NewBlackboard.GroupName( data.Parameter ).Equals( _group, StringComparison.OrdinalIgnoreCase );
+			&& !NewBlackboardView.GroupName( data.Parameter ).Equals( _group, StringComparison.OrdinalIgnoreCase );
 		ev.Action = valid ? DropAction.Move : DropAction.Ignore;
 		_dragOver = valid;
 		Update();
@@ -759,20 +759,20 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Update();
 
 		if ( ev.Data.Object is ParameterDragData data )
-			_list.MoveToGroup( data.Parameter, _group );
+			_parameterList.MoveToGroup( data.Parameter, _group );
 	}
 
 	private void OpenContextMenu()
 	{
-		var menu = _list.CreateMenu();
+		var menu = _parameterList.CreateMenu();
 		var parameters = menu.AddMenu( "Add Parameter", "add" );
-		_list.AddParameterOptions( parameters, _group );
+		_parameterList.AddParameterOptions( parameters, _group );
 
 		if ( !string.IsNullOrEmpty( _group ) )
 		{
 			menu.AddSeparator();
-			menu.AddOption( "Rename Group", "edit", () => _list.RenameGroup( _group ) );
-			menu.AddOption( "Remove Group", "folder_off", () => _list.ClearGroup( _group ) );
+			menu.AddOption( "Rename Group", "edit", () => _parameterList.RenameGroup( _group ) );
+			menu.AddOption( "Remove Group", "folder_off", () => _parameterList.ClearGroup( _group ) );
 		}
 
 		menu.OpenAtCursor();
@@ -786,7 +786,7 @@ internal class ParameterRow : Widget, IParameterRow
 	public string BuiltGroup { get; }
 
 	private readonly MainWindow _window;
-	private readonly NewBlackboard _blackboard;
+	private readonly NewBlackboardView _parameterList;
 	private readonly Widget _nameCell;
 	private float _headerHeight = Theme.RowHeight;
 	private Vector2? _dragStart;
@@ -807,13 +807,13 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 	}
 
-	public ParameterRow( MainWindow window, NewBlackboard list, BlackboardParameter parameter ) : base( list )
+	public ParameterRow( MainWindow window, NewBlackboardView list, BlackboardParameter parameter ) : base( list )
 	{
 		_window = window;
-		_blackboard = list;
+		_parameterList = list;
 		Parameter = parameter;
 		parameter.Graph = list.Graph;
-		BuiltGroup = NewBlackboard.GroupName( parameter );
+		BuiltGroup = NewBlackboardView.GroupName( parameter );
 
 		FixedHeight = Theme.RowHeight + 6;
 		Cursor = CursorShape.None;
@@ -842,7 +842,7 @@ internal class ParameterRow : Widget, IParameterRow
 		var so = parameter.GetSerialized();
 		so.OnPropertyChanged += p =>
 		{
-			p = NewBlackboard.ResolveParameterProperty( p );
+			p = NewBlackboardView.ResolveParameterProperty( p );
 
 			// Transient preview scrubs don't touch the document
 			if ( p?.HasAttribute<JsonIgnoreAttribute>() != true )
@@ -1009,7 +1009,7 @@ internal class ParameterRow : Widget, IParameterRow
 				StartRename();
 				break;
 			case KeyCode.Delete:
-				_blackboard.Remove( Parameter );
+				_parameterList.Remove( Parameter );
 				break;
 			case KeyCode.Escape when _renameEdit.Visible:
 				_renameEdit.Text = Parameter.Name;
@@ -1038,7 +1038,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private void AddActions( Layout actions )
 	{
-		actions.Add( new IconButton( "delete", () => _blackboard.Remove( Parameter ), this )
+		actions.Add( new IconButton( "delete", () => _parameterList.Remove( Parameter ), this )
 		{
 			ToolTip = "Delete parameter",
 			IconSize = 16,
@@ -1065,18 +1065,18 @@ internal class ParameterRow : Widget, IParameterRow
 
 		_renameEdit.Visible = false;
 		_nameCell.TransparentForMouseEvents = true;
-		_blackboard.Rename( Parameter, _renameEdit.Text );
+		_parameterList.Rename( Parameter, _renameEdit.Text );
 		Update();
 	}
 
 	private void OpenContextMenu()
 	{
-		var menu = _blackboard.CreateMenu();
+		var menu = _parameterList.CreateMenu();
 		menu.AddOption( "Rename", "edit", StartRename, "F2" );
-		_blackboard.AddGroupOptions( menu, Parameter );
+		_parameterList.AddGroupOptions( menu, Parameter );
 
 		menu.AddSeparator();
-		menu.AddOption( "Delete", "delete", () => _blackboard.Remove( Parameter ), "Del" );
+		menu.AddOption( "Delete", "delete", () => _parameterList.Remove( Parameter ), "Del" );
 		menu.OpenAtCursor();
 	}
 }

@@ -43,7 +43,7 @@ public class MainWindow : DockWindow
 
 	private ShaderGraphPlus _graph;
 	private ShaderGraphPlusView _graphView;
-	private NewBlackboard _blackboardView;
+	private NewBlackboardView _blackboardView;
 	private Asset _asset;
 
 	private ShaderTemplateResource _shaderTemplate;
@@ -1722,7 +1722,7 @@ public class MainWindow : DockWindow
 		_blackboardCanvas.Layout.Spacing = 8;
 		_blackboardCanvas.Layout.Margin = 4;
 
-		_blackboardView = new NewBlackboard( this );
+		_blackboardView = new NewBlackboardView( this );
 		//_blackboardView.Graph = Graph;
 		//_blackboardView.OnDirty += ( evaluate ) => SetDirty( evaluate );
 		//_blackboardView.OnParameterNodeDeleted += () =>

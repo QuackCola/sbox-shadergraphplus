@@ -17,7 +17,7 @@ public class ShaderGraphPlusView : GraphView
 	}
 
 	private readonly MainWindow _window;
-	private readonly NewBlackboard _blackboard;
+	private readonly NewBlackboardView _blackboard;
 	private readonly UndoStack _undoStack;
 
 	private DragEventSource _currentDragEventSource = DragEventSource.None;
@@ -51,7 +51,7 @@ public class ShaderGraphPlusView : GraphView
 	? GridConnectionStyle.Instance
 	: ConnectionStyle.Default;
 
-	public ShaderGraphPlusView( Widget parent, MainWindow window, NewBlackboard blackboard ) : base( parent )
+	public ShaderGraphPlusView( Widget parent, MainWindow window, NewBlackboardView blackboard ) : base( parent )
 	{
 		_window = window;
 		_blackboard = blackboard;
