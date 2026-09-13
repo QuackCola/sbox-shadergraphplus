@@ -420,7 +420,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			return category.ParameterReferences.IndexOf( refernce );
 		}
 
-		return 0; 
+		return 0;
 	}
 
 	public bool HasParameterWithName( string name )

@@ -1025,13 +1025,13 @@ internal class ParameterRow : Widget, IParameterRow
 
 		if ( _renameEdit.Visible )
 			return;
-		
+
 		var typeName = Parameter.DisplayInfo.Name;
 		var typeRectOffset = 24;
 		var typeRect = Paint.MeasureText( chip.Shrink( chip.Left + typeRectOffset, 0, 0, 0 ), typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
 		PaintTypeLabel( typeRect, typeName, typeColor );
-		
+
 		var nameRectOffset = 8;
 		var nameRect = chip.Shrink( typeRect.Right + nameRectOffset, 0, 0, 0 );
 
@@ -1132,7 +1132,7 @@ internal class ParameterRow : Widget, IParameterRow
 		sourceCategory = null;
 		targetCategory = null;
 		delta = 0;
-		
+
 		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
 
 		if ( sourceParameter is null || Parameter is null || sourceParameter == Parameter )
@@ -1174,7 +1174,7 @@ internal class ParameterRow : Widget, IParameterRow
 				{
 					return false;
 				}
-			
+
 				delta = sourceIndex - targetIndex;
 				return true;
 			}
