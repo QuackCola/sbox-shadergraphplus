@@ -410,6 +410,19 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
+	public int GetParameterIndexInCategory( string group, Guid refernce )
+	{
+		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
+		var category = _categoryData.FirstOrDefault( x => x.Value.Name == group ).Value;
+
+		if ( category != null )
+		{
+			return category.ParameterReferences.IndexOf( refernce );
+		}
+
+		return 0; 
+	}
+
 	public bool HasParameterWithName( string name )
 	{
 		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
