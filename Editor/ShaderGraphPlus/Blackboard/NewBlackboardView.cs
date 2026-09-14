@@ -1,5 +1,4 @@
 ﻿using Editor;
-using static Sandbox.Sprite;
 using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
@@ -737,9 +736,9 @@ public class NewBlackboardView : Widget
 }
 
 /// <summary>
-/// Carried in drag data when dragging a parameter onto the graph.
+/// Carried in drag data when dragging a parameter onto the graph or when reordering it in the blackboard.
 /// </summary>
-public record ParameterDragData( INewGroupableBlackboardParameter Parameter );
+public record ParameterDragData( BlackboardParameter Parameter );
 
 internal interface IParameterRow
 {
@@ -1127,63 +1126,25 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 	}
 
-	bool TryDragOperation( DragEvent ev, CategoryData sourceCategory, CategoryData targetCategory, out int delta )
+	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
 	{
-		sourceCategory = null;
-		targetCategory = null;
-		delta = 0;
-
 		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
 
 		if ( sourceParameter is null || Parameter is null || sourceParameter == Parameter )
 			return false;
 
-		var sourceGroup = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
-		var targetGroup = string.IsNullOrWhiteSpace( Parameter.Group ) ? "General" : Parameter.Group;
-
-		if ( _blackboardView.Graph.TryFindCategoryData( sourceGroup, out sourceCategory ) )
+		if ( sourceParameterIndex <= targetParameterIndex )
 		{
-			if ( sourceGroup != targetGroup )
-			{
-				//Log.Error( $"Moving parameter \"{sourceParameter.Name}\" from group \"{sourceGroup}\" to group \"{targetGroup}\"" );
-
-				if ( _blackboardView.Graph.TryFindCategoryData( targetGroup, out targetCategory ) )
-				{
-					var sourceIndex = sourceCategory.ParameterReferences.IndexOf( sourceParameter.Identifier );
-					var targetIndex = targetCategory.ParameterReferences.IndexOf( Parameter.Identifier );
-
-					//Log.Info( $"sourceIndex \"{sourceIndex}\" targetIndex \"{targetIndex}\"" );
-
-					if ( targetIndex < 0 || sourceIndex < 0 )
-					{
-						return false;
-					}
-
-					delta = sourceIndex - targetIndex;
-					return true;
-				}
-
-				return false;
-			}
-			else
-			{
-				var targetIndex = sourceCategory.ParameterReferences.IndexOf( Parameter.Identifier );
-				var sourceIndex = sourceCategory.ParameterReferences.IndexOf( sourceParameter.Identifier );
-
-				if ( targetIndex < 0 || sourceIndex < 0 || targetIndex == sourceIndex )
-				{
-					return false;
-				}
-
-				delta = sourceIndex - targetIndex;
-				return true;
-			}
-
+			//SGPLogger.Info( $"Dragging \"{sourceParameter.Name}\" below \"{targetParameter.Name}\"" );
+			_draggingBelow = true;
 		}
 		else
 		{
-			return false;
+			//SGPLogger.Info( $"Dragging \"{sourceParameter.Name}\" Above \"{targetParameter.Name}\"" );
+			_draggingAbove = true;
 		}
+
+		return true;
 	}
 
 	public override void OnDragHover( DragEvent ev )
@@ -1192,21 +1153,15 @@ internal class ParameterRow : Widget, IParameterRow
 
 		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
 
-		var sourceGroup = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
-		var targetGroup = string.IsNullOrWhiteSpace( Parameter.Group ) ? "General" : Parameter.Group;
+		var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
+		var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( Parameter );
 
-		_blackboardView.Graph.TryFindCategoryData( sourceGroup, out var sourceCategory );
-		_blackboardView.Graph.TryFindCategoryData( targetGroup, out var targetCategory );
-
-		if ( !TryDragOperation( ev, sourceCategory, targetCategory, out var dragDelta ) )
+		if ( !TryDragOperation( ev, globalSourceParameterIndex, globalTargetParameterIndex ) )
 		{
 			_draggingAbove = false;
 			_draggingBelow = false;
 			return;
 		}
-
-		_draggingAbove = dragDelta > 0;
-		_draggingBelow = dragDelta < 0;
 	}
 
 	public override void OnDragDrop( DragEvent ev )
@@ -1219,49 +1174,43 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceGroup = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
 		var targetGroup = string.IsNullOrWhiteSpace( Parameter.Group ) ? "General" : Parameter.Group;
 
+		var globalSourceIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
+		var globalTargetIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
+
 		_blackboardView.Graph.TryFindCategoryData( sourceGroup, out var sourceCategory );
 		_blackboardView.Graph.TryFindCategoryData( targetGroup, out var targetCategory );
 
-		if ( !TryDragOperation( ev, sourceCategory, targetCategory, out var delta ) )
+		if ( !TryDragOperation( ev, globalSourceIndex, globalTargetIndex ) )
 			return;
-
-		//Log.Info( $"sourceGroup \"{sourceGroup}\" targetGroup \"{targetGroup}\"" );
 
 		if ( sourceCategory != null )
 		{
 			using var undoScope = _blackboardView.UndoScope( "Reorder Parameter" );
 
-			// TODO : Fix dragging a parameter onto another thats in a different group.
-			// Resulting in the parameter being placed at the wrong index. 
 			if ( sourceGroup != targetGroup && targetCategory != null )
 			{
 				var targetIndex = targetCategory.ParameterReferences.IndexOf( targetParameter.Identifier );
-				var movingIndex = targetIndex + delta;
-				var parameterReference = sourceCategory.ParameterReferences[movingIndex];
-
-				if ( movingIndex > (targetCategory.ParameterReferences.Count() - 1) )
+	
+				if ( _draggingBelow )
 				{
-					movingIndex = targetCategory.ParameterReferences.Count() - 1;
+					targetIndex++;
 				}
+	
+				sourceCategory.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				Log.Info( $"AMoving parameter \"{sourceParameter.Name}\" from group \"{sourceGroup}\" to group \"{targetGroup}\" at index \"{targetIndex}\" when movingIndex is \"{movingIndex}\"" );
-
-				sourceCategory.ParameterReferences.RemoveAt( movingIndex );
-				targetCategory.ParameterReferences.Insert( targetIndex, parameterReference );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
+				targetCategory.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
+				
 				sourceParameter.Group = targetGroup == "General" ? "" : targetGroup;
 			}
 			else
 			{
-				var parameterList = sourceCategory.ParameterReferences;
+				var targetIndex = sourceCategory.ParameterReferences.IndexOf( Parameter.Identifier );
+		
+				sourceCategory.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				var index = parameterList.IndexOf( Parameter.Identifier );
-				var movingIndex = index + delta;
-				var parameterReference = parameterList[movingIndex];
-
-				//Log.Info( $"Moving Parameter from index \"{movingIndex}\" to index \"{index}\" in group \"{sourceGroup}\"" );
-
-				sourceCategory.ParameterReferences.RemoveAt( movingIndex );
-				sourceCategory.ParameterReferences.Insert( index, parameterReference );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
+				sourceCategory.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 			}
 		}
 
