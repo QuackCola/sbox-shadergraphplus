@@ -1190,23 +1190,23 @@ internal class ParameterRow : Widget, IParameterRow
 			if ( sourceGroup != targetGroup && targetCategory != null )
 			{
 				var targetIndex = targetCategory.ParameterReferences.IndexOf( targetParameter.Identifier );
-	
+
 				if ( _draggingBelow )
 				{
 					targetIndex++;
 				}
-	
+
 				sourceCategory.ParameterReferences.Remove( sourceParameter.Identifier );
 
 				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
 				targetCategory.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
-				
+
 				sourceParameter.Group = targetGroup == "General" ? "" : targetGroup;
 			}
 			else
 			{
 				var targetIndex = sourceCategory.ParameterReferences.IndexOf( Parameter.Identifier );
-		
+
 				sourceCategory.ParameterReferences.Remove( sourceParameter.Identifier );
 
 				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
