@@ -304,7 +304,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		if ( node.Graph != this )
 			return;
 
-		//SGPLog.Info( $"Removing node with id : {node.Identifier}");
+		//SGPLogger.Info( $"Removing node with id : {node.Identifier}");
 
 		_nodes.Remove( node.Identifier );
 	}
@@ -398,6 +398,31 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
+	public bool TryFindCategoryData( string name, out CategoryData categoryData )
+	{
+		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+
+		if ( categoryData != null )
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	public int GetParameterIndexInCategory( string group, Guid refernce )
+	{
+		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
+		var category = _categoryData.FirstOrDefault( x => x.Value.Name == group ).Value;
+
+		if ( category != null )
+		{
+			return category.ParameterReferences.IndexOf( refernce );
+		}
+
+		return 0;
+	}
+
 	public bool HasParameterWithName( string name )
 	{
 		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
@@ -428,6 +453,24 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_categoryData.Add( categoryData.Identifier, categoryData );
 	}
 
+	/// <summary>
+	/// A parameter name not taken yet - the name itself, or "name 1", "name 2"...
+	/// </summary>
+	public string UniqueParameterName( string baseName )
+	{
+		var names = Parameters.Select( p => p.Name )
+			.ToHashSet( StringComparer.OrdinalIgnoreCase );
+
+		if ( !names.Contains( baseName ) )
+			return baseName;
+
+		for ( var i = 1; ; i++ )
+		{
+			if ( !names.Contains( $"{baseName}{i}" ) )
+				return $"{baseName}{i}";
+		}
+	}
+
 	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
 	{
 		if ( parameter.Graph != this )
@@ -454,6 +497,15 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// Rename a parameter.
+	/// </summary>
+	public void RenameParameter( IBlackboardParameter parameter, string name )
+	{
+		var oldName = parameter.Name;
+		parameter.Name = name;
 	}
 
 	public void UpdateParameter( IBlackboardParameter parameter )

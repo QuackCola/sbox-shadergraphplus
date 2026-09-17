@@ -1,10 +1,7 @@
 ﻿namespace ShaderGraphPlus;
 
-public abstract class BlackboardNode<T> : ShaderNodePlus, IBlackboardNode where T : BlackboardParameter
+public abstract class BlackboardNode<T> : BlackboardNode where T : BlackboardParameter
 {
-	[Hide, Browsable( false )]
-	public Guid ParameterIdentifier { get; set; }
-
 	protected T GetParameter()
 	{
 		if ( Graph is ShaderGraphPlus graph && graph.TryFindParameter<T>( ParameterIdentifier, out var foundParameter ) )
@@ -21,4 +18,10 @@ public abstract class BlackboardNode<T> : ShaderNodePlus, IBlackboardNode where 
 
 		return parameter != null;
 	}
+}
+
+public abstract class BlackboardNode : ShaderNodePlus, IBlackboardNode
+{
+	[Hide, Browsable( false )]
+	public Guid ParameterIdentifier { get; set; }
 }

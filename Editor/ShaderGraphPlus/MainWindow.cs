@@ -43,7 +43,7 @@ public class MainWindow : DockWindow
 
 	private ShaderGraphPlus _graph;
 	private ShaderGraphPlusView _graphView;
-	private ShaderGraphPlusBlackboardView _blackboardView;
+	private NewBlackboardView _blackboardView;
 	private Asset _asset;
 
 	private ShaderTemplateResource _shaderTemplate;
@@ -173,6 +173,13 @@ public class MainWindow : DockWindow
 		//}
 	}
 
+	internal bool IsSelected( object target ) => Selection.FirstOrDefault() == target;
+
+	public void OnParameterSelected( IBlackboardParameter parameter )
+	{
+		Selection.Set( parameter );
+	}
+
 	public void OnSelected( object selection )
 	{
 		void SetDefaultSelection()
@@ -196,12 +203,12 @@ public class MainWindow : DockWindow
 
 							if ( blackboardParameter != null )
 							{
-								_blackboardView.SetSelection( blackboardParameter );
+								//_blackboardView.SetSelection( blackboardParameter );
 								_properties.Target = blackboardParameter;
 							}
 							else
 							{
-								_blackboardView.SetSelection( null );
+								//_blackboardView.SetSelection( null );
 								SetDefaultSelection();
 							}
 
@@ -244,7 +251,7 @@ public class MainWindow : DockWindow
 		if ( _properties.Target is BlackboardParameter || _properties.Target is CategoryData )
 		{
 			OnSelected( null );
-			_blackboardView.ClearSelection();
+			//_blackboardView.ClearSelection();
 		}
 	}
 
@@ -899,6 +906,7 @@ public class MainWindow : DockWindow
 		Update();
 
 		_dirty = true;
+		_blackboardView.OnGraphDirty();
 
 		UpdateTitle();
 
@@ -967,7 +975,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.undoBuffer );
 
 			_graphView.RebuildFromGraph();
-			_blackboardView.RebuildFromGraph();
+			//_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}
@@ -991,7 +999,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
-			_blackboardView.RebuildFromGraph();
+			//_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}
@@ -1012,7 +1020,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
-			_blackboardView.RebuildFromGraph();
+			//_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}
@@ -1306,16 +1314,16 @@ public class MainWindow : DockWindow
 		}
 		else
 		{
-			var result = _graphView.CreateNewNode( _graphView.FindNodeType( typeof( SubgraphOutput ) ), 0 );
-			var parameter = _blackboardView.CreateNewParameter( _graphView.FindParameterType( typeof( Float3SubgraphOutputParameter ) ) ) as Float3SubgraphOutputParameter;
-
-			parameter.Preview = SubgraphOutputPreviewType.Albedo;
-
-			var subgraphOutput = result.Node as SubgraphOutput;
-			subgraphOutput.ParameterIdentifier = parameter.Identifier;
-
-			_graphView.Scale = 1;
-			_graphView.CenterOn( result.Size * 0.5f );
+			//var result = _graphView.CreateNewNode( _graphView.FindNodeType( typeof( SubgraphOutput ) ), 0 );
+			//var parameter = _blackboardView.CreateNewParameter( _graphView.FindParameterType( typeof( Float3SubgraphOutputParameter ) ) ) as Float3SubgraphOutputParameter;
+			//
+			//parameter.Preview = SubgraphOutputPreviewType.Albedo;
+			//
+			//var subgraphOutput = result.Node as SubgraphOutput;
+			//subgraphOutput.ParameterIdentifier = parameter.Identifier;
+			//
+			//_graphView.Scale = 1;
+			//_graphView.CenterOn( result.Size * 0.5f );
 		}
 
 		ClearAttributes();
@@ -1401,7 +1409,7 @@ public class MainWindow : DockWindow
 		_generatedCodeTextView.Value = "";
 		Selection.Set( _graph );
 
-		_blackboardView.RebuildTreeView();
+		//_blackboardView.RebuildTreeView();
 
 		if ( addToPath )
 			AddFileHistory( path );
@@ -1714,14 +1722,13 @@ public class MainWindow : DockWindow
 		_blackboardCanvas.Layout.Spacing = 8;
 		_blackboardCanvas.Layout.Margin = 4;
 
-		_blackboardView = new ShaderGraphPlusBlackboardView( _blackboardCanvas, this );
+		_blackboardView = new NewBlackboardView( this );
 		_blackboardView.Graph = _graph;
 		_blackboardView.OnDirty += ( evaluate ) => SetDirty( evaluate );
-		_blackboardView.OnParameterNodeDeleted += () =>
+		_blackboardView.OnParameterNodesDeleted += () =>
 		{
 			_graphView.RebuildFromGraph();
 		};
-
 		_blackboardCanvas.Layout.Add( _blackboardView, 1 );
 
 		_graphView = new ShaderGraphPlusView( _graphCanvas, this, _blackboardView );
