@@ -23,8 +23,8 @@ editor/Properties/*
 *launchSettings.json
 *.sln
 *.slnx
-
 *idea
+*.blend1
 
 # Exported / standalone games
 Exports/
