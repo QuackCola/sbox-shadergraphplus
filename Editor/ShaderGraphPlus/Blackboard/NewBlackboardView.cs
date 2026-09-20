@@ -1005,7 +1005,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		var parameters = menu.AddMenu( "Add Parameter", "add" );
 		_blackboardView.AddParameterOptions( parameters, Category.Name );
 
-		if ( !string.IsNullOrEmpty( Category.Name ) )
+		if ( Category.Name != "General" )
 		{
 			menu.AddSeparator();
 			menu.AddOption( "Rename Group", "edit", () => _blackboardView.RenameGroup( Category.Name ) );
