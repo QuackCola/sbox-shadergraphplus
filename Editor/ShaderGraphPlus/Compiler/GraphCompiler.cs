@@ -1120,7 +1120,7 @@ public sealed partial class GraphCompiler
 					Priority = Graph.GetCategoryDataIndex( category )//category.Priority
 				};
 
-				//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
+				//SGPLogger.Info( $"Category \"{category.Name}\" with Priority \"{parameterUI.PrimaryGroup.Priority}\"" );
 			}
 		}
 
