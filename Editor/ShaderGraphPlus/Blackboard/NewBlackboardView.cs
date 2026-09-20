@@ -1284,7 +1284,7 @@ internal class ParameterRow : Widget, IParameterRow
 		if ( parameterDragData is null || _parameter is null || parameterDragData.Parameter == _parameter )
 			return false;
 
-		void ReorderInGroup( CategoryData sharedCategory )
+		void TryDragInGroup( CategoryData sharedCategory )
 		{
 			var sourceIndex = sharedCategory.ParameterReferences.IndexOf( parameterDragData.Parameter.Identifier );
 			var targetIndex = sharedCategory.ParameterReferences.IndexOf( _parameter.Identifier );
@@ -1299,7 +1299,7 @@ internal class ParameterRow : Widget, IParameterRow
 			}
 		}
 
-		void ReorderAcrossGroup( CategoryData sourceCategory, CategoryData targetCategory )
+		void TryDragAcrossGroup( CategoryData sourceCategory, CategoryData targetCategory )
 		{
 			var sourceGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( sourceCategory );
 			var targetGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( targetCategory );
@@ -1316,11 +1316,11 @@ internal class ParameterRow : Widget, IParameterRow
 
 		if ( _category.Name == parameterDragData.SourceCategory.Name )
 		{
-			ReorderInGroup( parameterDragData.SourceCategory );
+			TryDragInGroup( parameterDragData.SourceCategory );
 		}
 		else if ( _category.Name != parameterDragData.SourceCategory.Name )
 		{
-			ReorderAcrossGroup( parameterDragData.SourceCategory, _category );
+			TryDragAcrossGroup( parameterDragData.SourceCategory, _category );
 		}
 		else
 		{
