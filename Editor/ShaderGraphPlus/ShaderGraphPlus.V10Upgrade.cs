@@ -88,7 +88,6 @@ public partial class ShaderGraphPlus
 
 					if ( parameter is IGroupableBlackboardParameter groupableParameter )
 					{
-						//Log.Info( $"newCategoryData.Name== {newCategoryData.Name}" );
 						groupableParameter.Group = newCategoryData.Name;
 					}
 
