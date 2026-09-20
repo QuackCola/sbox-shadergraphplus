@@ -740,10 +740,13 @@ public class NewBlackboardView : Widget
 }
 
 /// <summary>
-/// Carried in drag data when dragging a parameter onto the graph or when reordering it in the blackboard.
+/// DragData when dragging a parameter onto the graph or when reordering it in the blackboard.
 /// </summary>
 public record ParameterDragData( BlackboardParameter Parameter, CategoryData SourceCategory );
 
+/// <summary>
+/// DragData when reordering a group in the blackboard.
+/// </summary>
 public record ParameterGroupDragData( CategoryData Category );
 
 internal interface IParameterRow
