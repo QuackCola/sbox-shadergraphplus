@@ -237,7 +237,5 @@ public partial class ShaderGraphPlus
 		}
 
 		obj.Add( JsonKeys.CategoryDataArray, newCategoryDataArray );
-
-		Log.Info( $"V10 Upgraded SGP File :\n{obj}" );
 	}
 }
