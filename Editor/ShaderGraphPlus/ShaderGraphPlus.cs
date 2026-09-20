@@ -543,7 +543,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			SGPLogger.Error( $"Wrong Graph!!!" );
 			return false;
 		}
-			
+
 		if ( newIndex <= -1 )
 		{
 			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );

@@ -169,8 +169,8 @@ public class NewBlackboardView : Widget
 			var groupName = string.IsNullOrWhiteSpace( groupedParameter.Key ) ? "General" : groupedParameter.Key;
 
 			//Log.Info( $"Setting up group \"{groupName}\"" );
-			
-			Graph.TryFindCategoryData( groupName, out var group2 ); 
+
+			Graph.TryFindCategoryData( groupName, out var group2 );
 
 			_rows.Add( new ParameterGroupHeader( this, groupedParameter.Key, group2, groupedParameter.Count(), collapsed, !filtering ) );
 
@@ -821,7 +821,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Paint.SetDefaultFont( 8, 500 );
 		Paint.DrawText( countRect, count, TextFlag.Center );
 
-		Paint.DrawText( countRect.Shrink( 0,0, 100, 0), $"Index {_blackboardView.Graph.GetCategoryDataIndex( Category )}", TextFlag.Center );
+		Paint.DrawText( countRect.Shrink( 0, 0, 100, 0 ), $"Index {_blackboardView.Graph.GetCategoryDataIndex( Category )}", TextFlag.Center );
 
 
 		if ( !_draggingGroup && _dragOver )
@@ -879,7 +879,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	protected override void OnMouseMove( MouseEvent e )
 	{
 		base.OnMouseMove( e );
-		
+
 		Update();
 
 		//if ( Category.Name == "General" )
@@ -887,7 +887,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 		if ( _dragStart is null || !e.ButtonState.HasFlag( MouseButtons.Left ) )
 			return;
-		
+
 		if ( e.LocalPosition.Distance( _dragStart.Value ) < 10 )
 			return;
 
@@ -896,7 +896,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		var drag = new Drag( this );
 		drag.Data.Text = _group;
 		drag.Data.Object = new ParameterGroupDragData( Category );
-	
+
 		drag.Execute();
 	}
 
@@ -962,7 +962,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 			var sourceGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( groupDragData.Category );
 			var targetGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( Category );
-			
+
 			if ( !TryDragOperation( ev, sourceGroupIndex, targetGroupIndex ) )
 			{
 				_draggingAbove = false;
