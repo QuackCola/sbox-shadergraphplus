@@ -742,7 +742,7 @@ public class NewBlackboardView : Widget
 /// <summary>
 /// Carried in drag data when dragging a parameter onto the graph or when reordering it in the blackboard.
 /// </summary>
-public record ParameterDragData( BlackboardParameter Parameter );
+public record ParameterDragData( BlackboardParameter Parameter, CategoryData SourceCategory );
 
 public record ParameterGroupDragData( CategoryData Category );
 
@@ -1018,9 +1018,10 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 internal class ParameterRow : Widget, IParameterRow
 {
-	public BlackboardParameter Parameter { get; }
-	INewGroupableBlackboardParameter IParameterRow.Parameter => Parameter;
-	public string BuiltGroup { get; }
+	INewGroupableBlackboardParameter IParameterRow.Parameter => _parameter;
+
+	private readonly BlackboardParameter _parameter;
+	private readonly CategoryData _category;
 
 	private readonly MainWindow _window;
 	private readonly NewBlackboardView _blackboardView;
@@ -1047,12 +1048,16 @@ internal class ParameterRow : Widget, IParameterRow
 	private bool _draggingAbove = false;
 	private bool _draggingBelow = false;
 
+	public string BuiltGroup { get; }
+
 	public ParameterRow( MainWindow window, NewBlackboardView list, BlackboardParameter parameter ) : base( list )
 	{
 		_window = window;
 		_blackboardView = list;
-		Parameter = parameter;
 		parameter.Graph = list.Graph;
+		_parameter = parameter;
+		_category = _blackboardView.Graph.GetCategoryData( string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group );
+
 		BuiltGroup = NewBlackboardView.GroupName( parameter );
 
 		FixedHeight = Theme.RowHeight + 6;
@@ -1063,7 +1068,7 @@ internal class ParameterRow : Widget, IParameterRow
 		IsDraggable = true;
 		AcceptDrops = true;
 
-		ToolTip = $"{Parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename\nClick the usage count to find references";
+		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename\nClick the usage count to find references";
 
 		Layout = Layout.Row();
 		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, NameX, 3 );
@@ -1147,11 +1152,11 @@ internal class ParameterRow : Widget, IParameterRow
 
 	protected override void OnPaint()
 	{
-		var selected = _window.IsSelected( Parameter );
+		var selected = _window.IsSelected( _parameter );
 		var hovered = PillRect.IsInside( FromScreen( Editor.Application.CursorPosition ) );
 		var typeColor = Color.White;
 
-		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( Parameter.GetType(), out var blackboardConfig ) )
+		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( _parameter.GetType(), out var blackboardConfig ) )
 		{
 			typeColor = blackboardConfig.Color;
 		}
@@ -1173,7 +1178,7 @@ internal class ParameterRow : Widget, IParameterRow
 		if ( _renameEdit.Visible )
 			return;
 
-		var typeName = Parameter.DisplayInfo.Name;
+		var typeName = _parameter.DisplayInfo.Name;
 		var typeRectOffset = 24;
 		var typeRect = Paint.MeasureText( chip.Shrink( chip.Left + typeRectOffset, 0, 0, 0 ), typeName, TextFlag.LeftCenter | TextFlag.SingleLine ).Grow( 4, 0, 4, 0 );
 
@@ -1184,7 +1189,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 		Paint.SetPen( Theme.TextControl.WithAlpha( selected || hovered ? 0.9f : 0.8f ) );
 		Paint.SetDefaultFont();
-		Paint.DrawText( nameRect, Parameter.Name, TextFlag.LeftCenter | TextFlag.SingleLine );
+		Paint.DrawText( nameRect, $"{_parameter.Name}", TextFlag.LeftCenter | TextFlag.SingleLine );
 
 		if ( _draggingAbove )
 		{
@@ -1208,11 +1213,11 @@ internal class ParameterRow : Widget, IParameterRow
 		if ( e.LeftMouseButton )
 		{
 			_dragStart = e.LocalPosition;
-			_window.OnParameterSelected( Parameter );
+			_window.OnParameterSelected( _parameter );
 		}
 		else if ( e.RightMouseButton )
 		{
-			_window.OnParameterSelected( Parameter );
+			_window.OnParameterSelected( _parameter );
 			OpenContextMenu();
 		}
 	}
@@ -1233,8 +1238,8 @@ internal class ParameterRow : Widget, IParameterRow
 		_dragStart = null;
 
 		var drag = new Drag( this );
-		drag.Data.Text = Parameter.Name;
-		drag.Data.Object = new ParameterDragData( Parameter );
+		drag.Data.Text = _parameter.Name;
+		drag.Data.Object = new ParameterDragData( _parameter, _category );
 		drag.Execute();
 	}
 
@@ -1262,10 +1267,10 @@ internal class ParameterRow : Widget, IParameterRow
 				StartRename();
 				break;
 			case KeyCode.Delete:
-				_blackboardView.Remove( Parameter );
+				_blackboardView.Remove( _parameter );
 				break;
 			case KeyCode.Escape when _renameEdit.Visible:
-				_renameEdit.Text = Parameter.Name;
+				_renameEdit.Text = _parameter.Name;
 				_renameEdit.Blur();
 				break;
 			default:
@@ -1274,22 +1279,52 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 	}
 
-	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
+	private bool TryDragOperation( ParameterDragData parameterDragData )
 	{
-		var parameterDragData = ev.Data.OfType<ParameterDragData>().FirstOrDefault();
-
-		if ( parameterDragData is null || Parameter is null || parameterDragData.Parameter == Parameter )
+		if ( parameterDragData is null || _parameter is null || parameterDragData.Parameter == _parameter )
 			return false;
 
-		if ( sourceParameterIndex <= targetParameterIndex )
+		void ReorderInGroup( CategoryData sharedCategory )
 		{
-			//SGPLogger.Info( $"Dragging \"{sourceParameter.Name}\" below \"{targetParameter.Name}\"" );
-			_draggingBelow = true;
+			var sourceIndex = sharedCategory.ParameterReferences.IndexOf( parameterDragData.Parameter.Identifier );
+			var targetIndex = sharedCategory.ParameterReferences.IndexOf( _parameter.Identifier );
+
+			if ( sourceIndex < targetIndex )
+			{
+				_draggingBelow = true;
+			}
+			else
+			{
+				_draggingAbove = true;
+			}
+		}
+
+		void ReorderAcrossGroup( CategoryData sourceCategory, CategoryData targetCategory )
+		{
+			var sourceGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( sourceCategory );
+			var targetGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( targetCategory );
+
+			if ( targetGroupIndex > sourceGroupIndex )
+			{
+				_draggingBelow = true;
+			}
+			else
+			{
+				_draggingAbove = true;
+			}
+		}
+
+		if ( _category.Name == parameterDragData.SourceCategory.Name )
+		{
+			ReorderInGroup( parameterDragData.SourceCategory );
+		}
+		else if ( _category.Name != parameterDragData.SourceCategory.Name )
+		{
+			ReorderAcrossGroup( parameterDragData.SourceCategory, _category );
 		}
 		else
 		{
-			//SGPLogger.Info( $"Dragging \"{sourceParameter.Name}\" Above \"{targetParameter.Name}\"" );
-			_draggingAbove = true;
+			return false;
 		}
 
 		return true;
@@ -1301,10 +1336,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 		if ( ev.Data.Object is ParameterDragData parameterDragData )
 		{
-			var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( parameterDragData.Parameter );
-			var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( Parameter );
-
-			if ( !TryDragOperation( ev, globalSourceParameterIndex, globalTargetParameterIndex ) )
+			if ( !TryDragOperation( parameterDragData ) )
 			{
 				_draggingAbove = false;
 				_draggingBelow = false;
@@ -1323,11 +1355,14 @@ internal class ParameterRow : Widget, IParameterRow
 	{
 		base.OnDragDrop( ev );
 
-		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
-		var targetParameter = Parameter;
+		if ( ev.Data.Object is not ParameterDragData parameterDragData )
+			return;
+
+		var sourceParameter = parameterDragData.Parameter;
+		var targetParameter = _parameter;
 
 		var sourceGroup = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
-		var targetGroup = string.IsNullOrWhiteSpace( Parameter.Group ) ? "General" : Parameter.Group;
+		var targetGroup = string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group;
 
 		var globalSourceIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
 		var globalTargetIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
@@ -1335,7 +1370,7 @@ internal class ParameterRow : Widget, IParameterRow
 		_blackboardView.Graph.TryFindCategoryData( sourceGroup, out var sourceCategory );
 		_blackboardView.Graph.TryFindCategoryData( targetGroup, out var targetCategory );
 
-		if ( !TryDragOperation( ev, globalSourceIndex, globalTargetIndex ) )
+		if ( !TryDragOperation( parameterDragData ) )
 			return;
 
 		if ( sourceCategory != null )
@@ -1360,7 +1395,7 @@ internal class ParameterRow : Widget, IParameterRow
 			}
 			else
 			{
-				var targetIndex = sourceCategory.ParameterReferences.IndexOf( Parameter.Identifier );
+				var targetIndex = sourceCategory.ParameterReferences.IndexOf( _parameter.Identifier );
 
 				sourceCategory.ParameterReferences.Remove( sourceParameter.Identifier );
 
@@ -1389,7 +1424,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private void AddActions( Layout actions )
 	{
-		actions.Add( new IconButton( "delete", () => _blackboardView.Remove( Parameter ), this )
+		actions.Add( new IconButton( "delete", () => _blackboardView.Remove( _parameter ), this )
 		{
 			ToolTip = "Delete parameter",
 			IconSize = 16,
@@ -1403,7 +1438,7 @@ internal class ParameterRow : Widget, IParameterRow
 			return;
 
 		_nameCell.TransparentForMouseEvents = false;
-		_renameEdit.Text = Parameter.Name;
+		_renameEdit.Text = _parameter.Name;
 		_renameEdit.Visible = true;
 		_renameEdit.SelectAll();
 		_renameEdit.Focus();
@@ -1416,7 +1451,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 		_renameEdit.Visible = false;
 		_nameCell.TransparentForMouseEvents = true;
-		_blackboardView.Rename( Parameter, _renameEdit.Text );
+		_blackboardView.Rename( _parameter, _renameEdit.Text );
 		Update();
 	}
 
@@ -1424,10 +1459,10 @@ internal class ParameterRow : Widget, IParameterRow
 	{
 		var menu = _blackboardView.CreateMenu();
 		menu.AddOption( "Rename", "edit", StartRename, "F2" );
-		_blackboardView.AddGroupOptions( menu, Parameter );
+		_blackboardView.AddGroupOptions( menu, _parameter );
 
 		menu.AddSeparator();
-		menu.AddOption( "Delete", "delete", () => _blackboardView.Remove( Parameter ), "Del" );
+		menu.AddOption( "Delete", "delete", () => _blackboardView.Remove( _parameter ), "Del" );
 		menu.OpenAtCursor();
 	}
 }
