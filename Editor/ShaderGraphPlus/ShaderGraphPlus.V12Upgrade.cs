@@ -50,16 +50,16 @@ public partial class ShaderGraphPlus
 		{
 			if ( jsonNode[JsonKeys.Class] is not JsonValue classValue )
 				continue;
-		
+
 			var typeName = classValue.GetValue<string>();
 			var typeDesc = EditorTypeLibrary.GetType<BlackboardParameter>( typeName );
 			var type = new ClassBlackboardParameterType( typeDesc );
-		
+
 			var newParameterObj = jsonNode.DeepClone().AsObject();
-		
+
 			if ( typeDesc != null )
 			{
-				if ( JsonUtils.GetPropertyValue( newParameterObj, "GroupReference", SerializerOptions(), Guid.Empty, out var groupReference ) && groupReference != Guid.Empty)
+				if ( JsonUtils.GetPropertyValue( newParameterObj, "GroupReference", SerializerOptions(), Guid.Empty, out var groupReference ) && groupReference != Guid.Empty )
 				{
 					if ( gatheredCategories.TryGetValue( groupReference, out var groupName ) )
 					{
@@ -87,7 +87,7 @@ public partial class ShaderGraphPlus
 						groupsToAdd["General"].Add( parameterReference );
 					}
 
-				
+
 					newParameterArray.Add( newParameterObj );
 				}
 			}

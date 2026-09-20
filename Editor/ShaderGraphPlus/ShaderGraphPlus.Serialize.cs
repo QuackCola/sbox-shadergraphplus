@@ -20,7 +20,7 @@ partial class ShaderGraphPlus
 		internal const string Class = "_class";
 		internal const string NodeArray = "nodes";
 		internal const string ParameterArray = "parameters";
-		
+
 		internal const string OldGroupDataArray = "categoryData";
 		internal const string GroupDataArray = "groupData";
 	}

@@ -424,7 +424,7 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 		hc.Add( Group );
 		hc.Add( Description );
 		hc.Add( HeaderName );
-		
+
 		foreach ( var option in Options )
 		{
 			hc.Add( option );
