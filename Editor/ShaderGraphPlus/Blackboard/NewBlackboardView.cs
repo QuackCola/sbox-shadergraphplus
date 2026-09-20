@@ -168,11 +168,9 @@ public class NewBlackboardView : Widget
 
 			var groupName = string.IsNullOrWhiteSpace( groupedParameter.Key ) ? "General" : groupedParameter.Key;
 
-			//Log.Info( $"Setting up group \"{groupName}\"" );
+			//SGPLogger.Info( $"Setting up group \"{groupName}\"" );
 
-			Graph.TryFindCategoryData( groupName, out var group2 );
-
-			_rows.Add( new ParameterGroupHeader( this, groupedParameter.Key, group2, groupedParameter.Count(), collapsed, !filtering ) );
+			_rows.Add( new ParameterGroupHeader( this, Graph.GetCategoryData( groupName ), groupedParameter.Count(), collapsed, !filtering ) );
 
 			if ( collapsed )
 				continue;
@@ -758,25 +756,23 @@ internal interface IParameterRow
 internal sealed class ParameterGroupHeader : InspectorHeader
 {
 	private readonly NewBlackboardView _blackboardView;
-	private readonly string _group;
 	private readonly string _title;
 	private readonly int _count;
 
 	private Vector2? _dragStart;
-	private bool _dragOver;
 	private bool _draggingAbove = false;
+	private bool _draggingOnto = false;
 	private bool _draggingBelow = false;
 	private bool _draggingGroup = false;
 
 	public CategoryData Category { get; }
 
-	public ParameterGroupHeader( NewBlackboardView list, string group, CategoryData category, int count, bool collapsed, bool collapsible )
+	public ParameterGroupHeader( NewBlackboardView list, CategoryData category, int count, bool collapsed, bool collapsible )
 	{
 		_blackboardView = list;
-		_group = group;
 		Category = category;
 		category.Graph = list.Graph;
-		_title = NewBlackboardView.GroupTitle( group );
+		_title = NewBlackboardView.GroupTitle( category.Name );
 		_count = count;
 
 		Title = "";
@@ -821,7 +817,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Paint.SetDefaultFont( 8, 500 );
 		Paint.DrawText( countRect, count, TextFlag.Center );
 
-		if ( !_draggingGroup && _dragOver )
+		if ( !_draggingGroup && _draggingOnto )
 		{
 			Paint.ClearBrush();
 			Paint.SetPen( Theme.Primary, 1.5f );
@@ -850,7 +846,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	protected override void OnExpandChanged()
 	{
-		_blackboardView.ToggleGroup( _group );
+		_blackboardView.ToggleGroup( Category.Name == "General" ? "" : Category.Name );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
@@ -891,7 +887,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		_dragStart = null;
 
 		var drag = new Drag( this );
-		drag.Data.Text = _group;
+		drag.Data.Text = Category.Name;
 		drag.Data.Object = new ParameterGroupDragData( Category );
 
 		drag.Execute();
@@ -928,20 +924,20 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		void OnDrag( DragEvent ev, DropAction dropAction )
 		{
 			ev.Action = dropAction;
-			_dragOver = dropAction == DropAction.Move;
+			_draggingOnto = dropAction == DropAction.Move;
 		}
 
 		if ( ev.Data.Object is ParameterDragData parameterDragData )
 		{
-			if ( !NewBlackboardView.GroupName( parameterDragData.Parameter ).Equals( _group, StringComparison.OrdinalIgnoreCase ) )
+			if ( !NewBlackboardView.GroupName( parameterDragData.Parameter ).Equals( Category.Name, StringComparison.OrdinalIgnoreCase ) )
 			{
 				ev.Action = DropAction.Move;
-				_dragOver = true;
+				_draggingOnto = true;
 			}
 			else
 			{
 				ev.Action = DropAction.Ignore;
-				_dragOver = false;
+				_draggingOnto = false;
 			}
 
 			_draggingGroup = false;
@@ -984,12 +980,12 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	public override void OnDragDrop( DragEvent ev )
 	{
-		_dragOver = false;
+		_draggingOnto = false;
 		Update();
 
 		if ( ev.Data.Object is ParameterDragData parameterDragData )
 		{
-			_blackboardView.MoveToGroup( parameterDragData.Parameter, _group );
+			_blackboardView.MoveToGroup( parameterDragData.Parameter, Category.Name );
 		}
 		else if ( ev.Data.Object is ParameterGroupDragData groupDragData )
 		{
@@ -999,7 +995,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	public override void OnDragLeave()
 	{
-		_dragOver = false;
+		_draggingOnto = false;
 		Update();
 	}
 
@@ -1007,13 +1003,13 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	{
 		var menu = _blackboardView.CreateMenu();
 		var parameters = menu.AddMenu( "Add Parameter", "add" );
-		_blackboardView.AddParameterOptions( parameters, _group );
+		_blackboardView.AddParameterOptions( parameters, Category.Name );
 
-		if ( !string.IsNullOrEmpty( _group ) )
+		if ( !string.IsNullOrEmpty( Category.Name ) )
 		{
 			menu.AddSeparator();
-			menu.AddOption( "Rename Group", "edit", () => _blackboardView.RenameGroup( _group ) );
-			menu.AddOption( "Remove Group", "folder_off", () => _blackboardView.ClearGroup( _group ) );
+			menu.AddOption( "Rename Group", "edit", () => _blackboardView.RenameGroup( Category.Name ) );
+			menu.AddOption( "Remove Group", "folder_off", () => _blackboardView.ClearGroup( Category.Name ) );
 		}
 
 		menu.OpenAtCursor();
