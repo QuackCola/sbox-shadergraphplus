@@ -1103,7 +1103,6 @@ public sealed partial class GraphCompiler
 		{
 			isAttribute = materialParameter.IsAttribute;
 
-			// Getting the Priority from the OrderedDictionary now :3
 			var newUI = materialParameter.UI;
 			newUI.Priority = priority;
 			parameterUI = newUI;
