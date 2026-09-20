@@ -170,11 +170,12 @@ public class MainWindow : DockWindow
 
 	}
 
-	internal bool IsSelected( object target ) => Selection.FirstOrDefault() == target;
+	internal bool IsParameterSelected( object target ) => Selection.OfType<BlackboardParameter>().FirstOrDefault() == target;
 
 	public void OnParameterSelected( IBlackboardParameter parameter )
 	{
 		Selection.Set( parameter );
+		_blackboardCanvas.Update();
 	}
 
 	public void OnSelected( object selection )
@@ -196,16 +197,12 @@ public class MainWindow : DockWindow
 					{
 						if ( blackboardNode.ParameterIdentifier != default )
 						{
-							var blackboardParameter = _graph.FindParameter( blackboardNode.ParameterIdentifier );
-
-							if ( blackboardParameter != null )
+							if ( _graph.TryFindParameter( blackboardNode.ParameterIdentifier, out var parameter ) )
 							{
-								//_blackboardView.SetSelection( blackboardParameter );
-								_properties.Target = blackboardParameter;
+								OnParameterSelected( parameter );
 							}
 							else
 							{
-								//_blackboardView.SetSelection( null );
 								SetDefaultSelection();
 							}
 
@@ -248,7 +245,7 @@ public class MainWindow : DockWindow
 		if ( _properties.Target is BlackboardParameter || _properties.Target is GroupData )
 		{
 			OnSelected( null );
-			//_blackboardView.ClearSelection();
+			_blackboardCanvas.Update();
 		}
 	}
 

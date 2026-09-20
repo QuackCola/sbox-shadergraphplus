@@ -1147,7 +1147,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	protected override void OnPaint()
 	{
-		var selected = _window.IsSelected( _parameter );
+		var selected = _window.IsParameterSelected( _parameter );
 		var hovered = PillRect.IsInside( FromScreen( Editor.Application.CursorPosition ) );
 		var typeColor = Color.White;
 
