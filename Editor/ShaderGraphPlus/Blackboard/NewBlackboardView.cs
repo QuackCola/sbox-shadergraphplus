@@ -875,9 +875,6 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 		Update();
 
-		//if ( Category.Name == "General" )
-		//	return;
-
 		if ( _dragStart is null || !e.ButtonState.HasFlag( MouseButtons.Left ) )
 			return;
 
@@ -896,9 +893,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
 	{
 		if ( Category.Name == "General" )
-		{
 			return false;
-		}
 
 		var sourceGroupDragData = ev.Data.OfType<ParameterGroupDragData>().FirstOrDefault();
 
