@@ -84,7 +84,7 @@ public sealed class FloatSubgraphInputParameter : BlackboardSubgraphInputParamet
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, Description, Value, Min, Max, IsRequired, PortOrder );
+		return HashCode.Combine( Name, Description, Value, Group, Min, Max, IsRequired, PortOrder );
 	}
 }
 

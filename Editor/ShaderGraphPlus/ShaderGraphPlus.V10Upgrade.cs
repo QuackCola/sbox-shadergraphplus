@@ -81,7 +81,7 @@ public partial class ShaderGraphPlus
 
 					if ( parameter is IGroupableBlackboardParameter groupableParameter )
 					{
-						groupableParameter.GroupReference = newCategoryData.Identifier;
+						//groupableParameter.GroupReference = newCategoryData.Identifier;
 					}
 
 					if ( !categories.Contains( newCategoryData ) )
@@ -106,7 +106,7 @@ public partial class ShaderGraphPlus
 
 						if ( parameter is IGroupableBlackboardParameter groupableParameter )
 						{
-							groupableParameter.GroupReference = existingEntry.Identifier;
+							//groupableParameter.GroupReference = existingEntry.Identifier;
 						}
 					}
 				}

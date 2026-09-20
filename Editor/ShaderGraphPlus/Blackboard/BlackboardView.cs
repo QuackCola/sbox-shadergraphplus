@@ -3,7 +3,7 @@ using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
-public class NewBlackboardView : Widget
+public class BlackboardView : Widget
 {
 	private readonly UndoStack _undoStack;
 	private readonly MainWindow _window;
@@ -42,7 +42,7 @@ public class NewBlackboardView : Widget
 
 	public Action OnParameterNodesDeleted { get; set; }
 
-	public NewBlackboardView( MainWindow window ) : base( null )
+	public BlackboardView( MainWindow window ) : base( null )
 	{
 		_window = window;
 		_undoStack = window.UndoStack;
@@ -222,11 +222,11 @@ public class NewBlackboardView : Widget
 			((Widget)row).Update();
 	}
 
-	private record GroupEntry( INewGroupableBlackboardParameter Parameter, string GroupName );
+	private record GroupEntry( IGroupableBlackboardParameter Parameter, string GroupName );
 
-	private IEnumerable<IGrouping<string, INewGroupableBlackboardParameter>> FilteredGroups( IEnumerable<IBlackboardParameter> parameters )
+	private IEnumerable<IGrouping<string, IGroupableBlackboardParameter>> FilteredGroups( IEnumerable<IBlackboardParameter> parameters )
 	{
-		var bpParameters = (parameters.Cast<INewGroupableBlackboardParameter>() ?? []);
+		var bpParameters = (parameters.Cast<IGroupableBlackboardParameter>() ?? []);
 		var filter = _filter.Text?.Trim() ?? "";
 
 		var result = bpParameters.Where( p => string.IsNullOrEmpty( filter )
@@ -241,7 +241,7 @@ public class NewBlackboardView : Widget
 			.ThenBy( group => group.Key, StringComparer.OrdinalIgnoreCase );
 	}
 
-	private IEnumerable<INewGroupableBlackboardParameter> DisplayedParameters( IEnumerable<IBlackboardParameter> parameters )
+	private IEnumerable<IGroupableBlackboardParameter> DisplayedParameters( IEnumerable<IBlackboardParameter> parameters )
 	{
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
 		foreach ( var group in FilteredGroups( parameters ) )
@@ -254,7 +254,7 @@ public class NewBlackboardView : Widget
 		}
 	}
 
-	internal static string GroupName( INewGroupableBlackboardParameter parameter ) => NormalizeGroup( parameter.Group );
+	internal static string GroupName( IGroupableBlackboardParameter parameter ) => NormalizeGroup( parameter.Group );
 
 	internal static string GroupTitle( string group ) => string.IsNullOrEmpty( group ) ? "General" : group;
 
@@ -345,7 +345,7 @@ public class NewBlackboardView : Widget
 		BuildFromParameters( Graph.Parameters );
 	}
 
-	internal void MoveToGroup( INewGroupableBlackboardParameter parameter, string group )
+	internal void MoveToGroup( IGroupableBlackboardParameter parameter, string group )
 	{
 		group = NormalizeGroup( group );
 		if ( GroupName( parameter ).Equals( group, StringComparison.OrdinalIgnoreCase ) )
@@ -419,7 +419,7 @@ public class NewBlackboardView : Widget
 		SaveCollapsedGroups();
 	}
 
-	internal void AddGroupOptions( Menu menu, INewGroupableBlackboardParameter parameter )
+	internal void AddGroupOptions( Menu menu, IGroupableBlackboardParameter parameter )
 	{
 		var groups = menu.AddMenu( "Move to Group", "folder" );
 		groups.AddOption( "General", string.IsNullOrEmpty( GroupName( parameter ) ) ? "check" : "", () => MoveToGroup( parameter, "" ) );
@@ -433,7 +433,7 @@ public class NewBlackboardView : Widget
 		groups.AddOption( "New Group…", "create_new_folder", () => OpenGroupDialog( "New Parameter Group", "", group => MoveToGroup( parameter, group ) ) );
 	}
 
-	private IEnumerable<string> ExistingGroups() => Graph.Parameters.OfType<INewGroupableBlackboardParameter>()
+	private IEnumerable<string> ExistingGroups() => Graph.Parameters.OfType<IGroupableBlackboardParameter>()
 	.Select( GroupName )
 	.Where( group => !string.IsNullOrEmpty( group ) )
 	.Distinct( StringComparer.OrdinalIgnoreCase )
@@ -548,7 +548,7 @@ public class NewBlackboardView : Widget
 
 		var parameter = (BlackboardParameter)type.CreateParameter( Graph );
 
-		if ( parameter is INewGroupableBlackboardParameter newGroupable )
+		if ( parameter is IGroupableBlackboardParameter newGroupable )
 		{
 			newGroupable.Group = group;
 
@@ -579,7 +579,7 @@ public class NewBlackboardView : Widget
 		if ( parameter == null )
 			return null;
 
-		if ( parameter is INewGroupableBlackboardParameter groupable )
+		if ( parameter is IGroupableBlackboardParameter groupable )
 		{
 			groupable.Group = group;
 		}
@@ -680,7 +680,7 @@ public class NewBlackboardView : Widget
 
 	private void PruneCollapsedGroups()
 	{
-		var groups = Graph.Parameters.OfType<INewGroupableBlackboardParameter>().Select( GroupName ).ToHashSet( StringComparer.OrdinalIgnoreCase );
+		var groups = Graph.Parameters.OfType<IGroupableBlackboardParameter>().Select( GroupName ).ToHashSet( StringComparer.OrdinalIgnoreCase );
 		_collapsedGroups.RemoveWhere( group => !groups.Contains( group ) );
 		SaveCollapsedGroups();
 	}
@@ -751,14 +751,14 @@ public record ParameterGroupDragData( CategoryData Category );
 
 internal interface IParameterRow
 {
-	INewGroupableBlackboardParameter Parameter { get; }
+	IGroupableBlackboardParameter Parameter { get; }
 	string BuiltGroup { get; }
 	void StartRename();
 }
 
 internal sealed class ParameterGroupHeader : InspectorHeader
 {
-	private readonly NewBlackboardView _blackboardView;
+	private readonly BlackboardView _blackboardView;
 	private readonly string _title;
 	private readonly int _count;
 
@@ -770,12 +770,12 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	public CategoryData Category { get; }
 
-	public ParameterGroupHeader( NewBlackboardView list, CategoryData category, int count, bool collapsed, bool collapsible )
+	public ParameterGroupHeader( BlackboardView list, CategoryData category, int count, bool collapsed, bool collapsible )
 	{
 		_blackboardView = list;
 		Category = category;
 		category.Graph = list.Graph;
-		_title = NewBlackboardView.GroupTitle( category.Name );
+		_title = BlackboardView.GroupTitle( category.Name );
 		_count = count;
 
 		Title = "";
@@ -927,7 +927,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 		if ( ev.Data.Object is ParameterDragData parameterDragData )
 		{
-			if ( !NewBlackboardView.GroupName( parameterDragData.Parameter ).Equals( Category.Name, StringComparison.OrdinalIgnoreCase ) )
+			if ( !BlackboardView.GroupName( parameterDragData.Parameter ).Equals( Category.Name, StringComparison.OrdinalIgnoreCase ) )
 			{
 				ev.Action = DropAction.Move;
 				_draggingOnto = true;
@@ -1016,13 +1016,13 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 internal class ParameterRow : Widget, IParameterRow
 {
-	INewGroupableBlackboardParameter IParameterRow.Parameter => _parameter;
+	IGroupableBlackboardParameter IParameterRow.Parameter => _parameter;
 
 	private readonly BlackboardParameter _parameter;
 	private readonly CategoryData _category;
 
 	private readonly MainWindow _window;
-	private readonly NewBlackboardView _blackboardView;
+	private readonly BlackboardView _blackboardView;
 	private readonly Widget _nameCell;
 	private float _headerHeight = Theme.RowHeight;
 	private Vector2? _dragStart;
@@ -1048,7 +1048,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 	public string BuiltGroup { get; }
 
-	public ParameterRow( MainWindow window, NewBlackboardView list, BlackboardParameter parameter ) : base( list )
+	public ParameterRow( MainWindow window, BlackboardView list, BlackboardParameter parameter ) : base( list )
 	{
 		_window = window;
 		_blackboardView = list;
@@ -1056,7 +1056,7 @@ internal class ParameterRow : Widget, IParameterRow
 		_parameter = parameter;
 		_category = _blackboardView.Graph.GetCategoryData( string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group );
 
-		BuiltGroup = NewBlackboardView.GroupName( parameter );
+		BuiltGroup = BlackboardView.GroupName( parameter );
 
 		FixedHeight = Theme.RowHeight + 6;
 		Cursor = CursorShape.None;
@@ -1088,7 +1088,7 @@ internal class ParameterRow : Widget, IParameterRow
 		var so = parameter.GetSerialized();
 		so.OnPropertyChanged += p =>
 		{
-			p = NewBlackboardView.ResolveParameterProperty( p );
+			p = BlackboardView.ResolveParameterProperty( p );
 
 			// Transient preview scrubs don't touch the document
 			if ( p?.HasAttribute<JsonIgnoreAttribute>() != true )

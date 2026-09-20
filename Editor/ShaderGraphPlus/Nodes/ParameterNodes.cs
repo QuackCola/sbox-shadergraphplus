@@ -410,10 +410,8 @@ public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>,
 			var parameter = GetParameter();
 			var parameterOrder = graph.GetParameterIndex( parameter );
 
-			if ( parameter.IsGrouped )
+			if ( graph.TryFindCategoryData( parameter.Group, out var targetGroup ) )
 			{
-				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
-
 				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
 				input.PrimaryGroup = input.PrimaryGroup with
 				{
@@ -466,10 +464,8 @@ public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParamet
 			var parameter = GetParameter();
 			var parameterOrder = graph.GetParameterIndex( parameter );
 
-			if ( parameter.IsGrouped )
+			if ( graph.TryFindCategoryData( parameter.Group, out var targetGroup ) )
 			{
-				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
-
 				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
 				input.PrimaryGroup = input.PrimaryGroup with
 				{

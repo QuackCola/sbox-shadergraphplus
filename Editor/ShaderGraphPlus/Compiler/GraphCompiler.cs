@@ -1111,19 +1111,16 @@ public sealed partial class GraphCompiler
 
 		if ( parameter is IGroupableBlackboardParameter groupableParameter )
 		{
-			if ( groupableParameter.IsGrouped )
+			if ( Graph.TryFindCategoryData( string.IsNullOrWhiteSpace( groupableParameter.Group ) ? "General" : groupableParameter.Group, out var category ) )
 			{
-				if ( Graph.TryFindCategoryData( groupableParameter.GroupReference, out var category ) )
+				parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
+				parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
 				{
-					parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
-					parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
-					{
-						Name = category.Name,
-						Priority = category.Priority
-					};
+					Name = category.Name,
+					Priority = category.Priority
+				};
 
-					//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
-				}
+				//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
 			}
 		}
 
