@@ -12,13 +12,16 @@ file struct ParameterEntry : IValid
 
 	public bool Grouped { get; internal set; }
 
+	public Guid LegacyGroupReference { get; internal set; }
+
 	public bool IsValid => Parameter != null;
 
-	public ParameterEntry( BlackboardParameter parameter, int orderInRoot, bool grouped )
+	public ParameterEntry( BlackboardParameter parameter, int orderInRoot, bool grouped, Guid legacyGroupReference )
 	{
 		Parameter = parameter;
 		OrderInRoot = orderInRoot;
 		Grouped = grouped;
+		LegacyGroupReference = legacyGroupReference;
 	}
 
 	public ParameterEntry( CategoryData categoryData, int orderInRoot, bool grouped )
@@ -28,6 +31,8 @@ file struct ParameterEntry : IValid
 		CategoryData = categoryData;
 		OrderInRoot = orderInRoot;
 		Grouped = grouped;
+
+		LegacyGroupReference = Guid.Empty;
 	}
 }
 
@@ -70,6 +75,8 @@ public partial class ShaderGraphPlus
 		{
 			if ( !string.IsNullOrWhiteSpace( primaryGroup.Name ) )
 			{
+				Guid legacyGroupReference = Guid.Empty;
+
 				if ( !registeredGroupNames.Contains( primaryGroup.Name ) )
 				{
 					var newCategoryData = new CategoryData
@@ -81,13 +88,16 @@ public partial class ShaderGraphPlus
 
 					if ( parameter is IGroupableBlackboardParameter groupableParameter )
 					{
-						//groupableParameter.GroupReference = newCategoryData.Identifier;
+						//Log.Info( $"newCategoryData.Name== {newCategoryData.Name}" );
+						groupableParameter.Group = newCategoryData.Name;
 					}
 
 					if ( !categories.Contains( newCategoryData ) )
 					{
 						categories.Add( newCategoryData );
 					}
+
+					legacyGroupReference = newCategoryData.Identifier;
 
 					registeredGroupNames.Add( primaryGroup.Name );
 				}
@@ -106,14 +116,18 @@ public partial class ShaderGraphPlus
 
 						if ( parameter is IGroupableBlackboardParameter groupableParameter )
 						{
-							//groupableParameter.GroupReference = existingEntry.Identifier;
+							//Log.Info( $"existingEntry.Name == {existingEntry.Name}" );
+
+							groupableParameter.Group = existingEntry.Name;
 						}
+
+						legacyGroupReference = existingEntry.Identifier;
 					}
 				}
 
 				if ( !updatedParameters.Any( x => x.Parameter.Name == parameter.Name ) )
 				{
-					updatedParameters.Add( new ParameterEntry( parameter, 0, true ) );
+					updatedParameters.Add( new ParameterEntry( parameter, 0, true, legacyGroupReference ) );
 				}
 			}
 			else
@@ -121,7 +135,7 @@ public partial class ShaderGraphPlus
 				if ( !updatedParameters.Any( x => x.Parameter.Name == parameter.Name ) )
 				{
 					// Shove all non-grouped parameters after the grouped parameters.
-					updatedParameters.Add( new ParameterEntry( parameter, updatedParameters.Count(), false ) );
+					updatedParameters.Add( new ParameterEntry( parameter, updatedParameters.Count(), false, Guid.Empty ) );
 				}
 			}
 		}
@@ -188,7 +202,7 @@ public partial class ShaderGraphPlus
 						portOrder = portOrderValue.GetValue<int>();
 					}
 
-					updatedParameters.Add( new ParameterEntry( parameter, portOrder, false ) );
+					updatedParameters.Add( new ParameterEntry( parameter, portOrder, false, Guid.Empty ) );
 				}
 			}
 		}
@@ -196,7 +210,7 @@ public partial class ShaderGraphPlus
 		foreach ( var parameter in updatedParameters.OrderBy( x => x.OrderInRoot ) )
 		{
 			var parameterType = parameter.Parameter.GetType();
-			var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name } };
+			var parameterObject = new JsonObject { { JsonKeys.Class, parameterType.Name }, { "GroupReference", parameter.LegacyGroupReference } };
 
 			SerializeObject( parameter.Parameter, parameterObject, SerializerOptions() );
 			newParameterArray.Add( parameterObject );
@@ -226,5 +240,7 @@ public partial class ShaderGraphPlus
 		}
 
 		obj.Add( JsonKeys.CategoryDataArray, newCategoryDataArray );
+
+		Log.Info( $"V10 Upgraded SGP File :\n{obj}" );
 	}
 }
