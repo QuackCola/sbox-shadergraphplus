@@ -1359,8 +1359,8 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceGroupName = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
 		var targetGroupName = string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group;
 
-		var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
-		var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
+		var sourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
+		var targetParameterIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
 
 		_blackboardView.Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
 		_blackboardView.Graph.TryFindGroupData( targetGroupName, out var targetGroupData );
@@ -1383,7 +1383,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetParameterIndex );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, targetParameterIndex );
 				targetGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 
 				sourceParameter.Group = targetGroupName == "General" ? "" : targetGroupName;
@@ -1394,7 +1394,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetParameterIndex );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, targetParameterIndex );
 				sourceGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 			}
 		}
