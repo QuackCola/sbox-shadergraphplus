@@ -59,19 +59,20 @@ public partial class ShaderGraphPlus
 		
 			if ( typeDesc != null )
 			{
-				if ( !isSubgraph && JsonUtils.GetPropertyValue( newParameterObj, "GroupReference", SerializerOptions(), Guid.Empty, out var groupReference ) && groupReference != Guid.Empty)
+				if ( JsonUtils.GetPropertyValue( newParameterObj, "GroupReference", SerializerOptions(), Guid.Empty, out var groupReference ) && groupReference != Guid.Empty)
 				{
 					if ( gatheredCategories.TryGetValue( groupReference, out var groupName ) )
 					{
-						//newParameterObj.Remove( "GroupReference" );
+						newParameterObj.Remove( "GroupReference" );
 						newParameterObj.Remove( "Group" );
 						newParameterObj.Add( "Group", groupName );
 					}
 
 					newParameterArray.Add( newParameterObj );
 				}
-				else if ( !isSubgraph )
+				else
 				{
+					newParameterObj.Remove( "GroupReference" );
 					newParameterObj.Remove( "Group" );
 					newParameterObj.Add( "Group", "" );
 
@@ -86,12 +87,7 @@ public partial class ShaderGraphPlus
 						groupsToAdd["General"].Add( parameterReference );
 					}
 
-					//newParameterObj.Remove( "GroupReference" );
-					newParameterArray.Add( newParameterObj );
-				}
-				else
-				{
-					//newParameterObj.Remove( "GroupReference" );
+				
 					newParameterArray.Add( newParameterObj );
 				}
 			}
