@@ -1356,14 +1356,14 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceParameter = parameterDragData.Parameter;
 		var targetParameter = _parameter;
 
-		var sourceGroup = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
-		var targetGroup = string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group;
+		var sourceGroupName = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
+		var targetGroupName = string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group;
 
-		var globalSourceIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
-		var globalTargetIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
+		var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
+		var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
 
-		_blackboardView.Graph.TryFindGroupData( sourceGroup, out var sourceGroupData );
-		_blackboardView.Graph.TryFindGroupData( targetGroup, out var targetGroupData );
+		_blackboardView.Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
+		_blackboardView.Graph.TryFindGroupData( targetGroupName, out var targetGroupData );
 
 		if ( !TryDragOperation( parameterDragData ) )
 			return;
@@ -1372,7 +1372,7 @@ internal class ParameterRow : Widget, IParameterRow
 		{
 			using var undoScope = _blackboardView.UndoScope( "Reorder Parameter" );
 
-			if ( sourceGroup != targetGroup && targetGroupData != null )
+			if ( sourceGroupName != targetGroupName && targetGroupData != null )
 			{
 				var targetIndex = targetGroupData.ParameterReferences.IndexOf( targetParameter.Identifier );
 
@@ -1383,10 +1383,10 @@ internal class ParameterRow : Widget, IParameterRow
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetParameterIndex );
 				targetGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 
-				sourceParameter.Group = targetGroup == "General" ? "" : targetGroup;
+				sourceParameter.Group = targetGroupName == "General" ? "" : targetGroupName;
 			}
 			else
 			{
@@ -1394,7 +1394,7 @@ internal class ParameterRow : Widget, IParameterRow
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
 
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetIndex );
+				_blackboardView.Graph.ReOrderParameter( sourceParameter, globalTargetParameterIndex );
 				sourceGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 			}
 		}
