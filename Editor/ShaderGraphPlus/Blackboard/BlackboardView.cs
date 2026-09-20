@@ -170,7 +170,7 @@ public class BlackboardView : Widget
 
 			//SGPLogger.Info( $"Setting up group \"{groupName}\"" );
 
-			_rows.Add( new ParameterGroupHeader( this, Graph.GetCategoryData( groupName ), groupedParameter.Count(), collapsed, !filtering ) );
+			_rows.Add( new ParameterGroupHeader( this, Graph.FindCategoryData( groupName ), groupedParameter.Count(), collapsed, !filtering ) );
 
 			if ( collapsed )
 				continue;
@@ -325,7 +325,7 @@ public class BlackboardView : Widget
 
 		using var undoScope = UndoScope( "Rename Parameter" );
 
-		Graph.RenameParameter( parameter, name );
+		parameter.Name = name;
 
 		_window.OnParameterSelected( parameter );
 	}
@@ -529,7 +529,7 @@ public class BlackboardView : Widget
 			categoryData.Name = group;
 			categoryData.ParameterReferences.Add( parameter.Identifier );
 
-			Graph.AddCategoryData( categoryData );
+			Graph.AddCategoryData( categoryData, group == "General" ? 0 : -1 );
 		}
 		else if ( Graph.TryFindCategoryData( group, out var existingCategory ) )
 		{
@@ -1054,7 +1054,7 @@ internal class ParameterRow : Widget, IParameterRow
 		_blackboardView = list;
 		parameter.Graph = list.Graph;
 		_parameter = parameter;
-		_category = _blackboardView.Graph.GetCategoryData( string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group );
+		_category = _blackboardView.Graph.FindCategoryData( string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group );
 
 		BuiltGroup = BlackboardView.GroupName( parameter );
 

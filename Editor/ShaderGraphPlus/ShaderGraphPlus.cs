@@ -299,6 +299,46 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		AddParameter( (BlackboardParameter)parameter );
 	}
 
+	public void AddParameter( BlackboardParameter parameter, int index = -1 )
+	{
+		parameter.Graph = this;
+
+		if ( index <= -1 )
+		{
+			_parameters.Add( parameter.Identifier, parameter );
+		}
+		else
+		{
+			_parameters.Insert( index, parameter.Identifier, parameter );
+		}
+	}
+
+	public void AddCategoryData( CategoryData categoryData, int index = -1 )
+	{
+		categoryData.Graph = this;
+
+		if ( index < -1 )
+		{
+			throw new IndexOutOfRangeException( $"Invalid Index '{index}' " );
+		}
+
+		if ( index != -1 )
+		{
+			if ( index > _categoryData.Count )
+			{
+				_categoryData.Add( categoryData.Identifier, categoryData );
+			}
+			else
+			{
+				_categoryData.Insert( index, categoryData.Identifier, categoryData );
+			}
+		}
+		else
+		{
+			_categoryData.Add( categoryData.Identifier, categoryData );
+		}
+	}
+
 	public void RemoveNode( BaseNodePlus node )
 	{
 		if ( node.Graph != this )
@@ -309,22 +349,31 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_nodes.Remove( node.Identifier );
 	}
 
+	public void RemoveParameter( BlackboardParameter parameter )
+	{
+		if ( parameter.Graph != this )
+			return;
+
+		RemoveParameter( parameter.Identifier );
+	}
+
+	public void RemoveParameter( Guid identifier )
+	{
+		_parameters.Remove( identifier );
+	}
+
+	public void RemoveCategoryData( CategoryData categoryData )
+	{
+		if ( categoryData.Graph != this )
+			return;
+
+		_categoryData.Remove( categoryData.Identifier );
+	}
+
 	public BaseNodePlus FindNode( string name )
 	{
 		_nodes.TryGetValue( name, out var node );
 		return node;
-	}
-
-	public int GetParameterIndex( BlackboardParameter parameter )
-	{
-		var index = _parameters.IndexOf( parameter.Identifier );
-
-		if ( index != -1 )
-		{
-			return index;
-		}
-
-		return 0;
 	}
 
 	public BlackboardParameter FindParameter( Guid identifier )
@@ -337,6 +386,11 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	{
 		var parameter = _parameters.Values.FirstOrDefault( x => x.Name == name );
 		return parameter;
+	}
+
+	public bool HasParameterWithName( string name )
+	{
+		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
 	}
 
 	public bool TryFindParameter( Guid identifier, out BlackboardParameter parameter )
@@ -365,23 +419,33 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public bool TryFindParameter<T>( Guid identifier, out T parameter ) where T : BlackboardParameter
 	{
-		parameter = null;
+		parameter = FindParameter<T>( identifier );
 
-		if ( _parameters.TryGetValue( identifier, out var foundParameter ) )
-		{
-			parameter = (T)foundParameter;
-
-			return true;
-		}
-
-		return false;
+		return parameter != null;
 	}
 
 	public bool TryFindParameter<T>( string name, out T parameter ) where T : BlackboardParameter
 	{
-		parameter = (T)_parameters.Values.FirstOrDefault( x => x.Name == name );
+		parameter = FindParameter<T>( name );
 
 		return parameter != null;
+	}
+
+	public CategoryData FindCategoryData( string name )
+	{
+		var categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+
+		if ( categoryData != null )
+		{
+			return categoryData;
+		}
+
+		return null;
+	}
+
+	public bool HasCategoryDataWithName( string name )
+	{
+		return _categoryData.Any( x => x.Value.Name == name );
 	}
 
 	public bool TryFindCategoryData( Guid identifier, out CategoryData categoryData )
@@ -398,18 +462,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
-	public CategoryData GetCategoryData( string name )
-	{
-		var categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
-
-		if ( categoryData != null )
-		{
-			return categoryData;
-		}
-
-		return null;
-	}
-
 	public bool TryFindCategoryData( string name, out CategoryData categoryData )
 	{
 		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
@@ -422,9 +474,21 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
+	public int GetParameterIndex( BlackboardParameter parameter )
+	{
+		var index = _parameters.IndexOf( parameter.Identifier );
+
+		if ( index != -1 )
+		{
+			return index;
+		}
+
+		return 0;
+	}
+
 	public int GetCategoryDataIndex( string name )
 	{
-		var categoryData = GetCategoryData( name );
+		var categoryData = FindCategoryData( name );
 		var index = _categoryData.IndexOf( categoryData.Identifier );
 
 		if ( index != -1 )
@@ -460,36 +524,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return 0;
 	}
 
-	public bool HasParameterWithName( string name )
-	{
-		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
-	}
-
-	public bool HasCategoryDataWithName( string name )
-	{
-		return _categoryData.Any( x => x.Value.Name == name );
-	}
-
-	public void AddParameter( BlackboardParameter parameter, int index = -1 )
-	{
-		parameter.Graph = this;
-
-		if ( index <= -1 )
-		{
-			_parameters.Add( parameter.Identifier, parameter );
-		}
-		else
-		{
-			_parameters.Insert( index, parameter.Identifier, parameter );
-		}
-	}
-
-	public void AddCategoryData( CategoryData categoryData )
-	{
-		categoryData.Graph = this;
-		_categoryData.Add( categoryData.Identifier, categoryData );
-	}
-
 	/// <summary>
 	/// A parameter name not taken yet - the name itself, or "name 1", "name 2"...
 	/// </summary>
@@ -513,13 +547,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		if ( parameter.Graph != this )
 			return false;
 
-		if ( newIndex <= -1 )
+		if ( newIndex < -1 )
 		{
-			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );
-
-			SGPLogger.Error( $"New Index Invalid '{newIndex}'" );
-
-			return false;
+			throw new IndexOutOfRangeException( $"Invalid newIndex '{newIndex}'" );
 		}
 
 		_parameters.Remove( parameter.Identifier );
@@ -544,13 +574,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			return false;
 		}
 
-		if ( newIndex <= -1 )
+		if ( newIndex < -1 )
 		{
-			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );
-
-			SGPLogger.Error( $"New Index Invalid '{newIndex}'" );
-
-			return false;
+			throw new IndexOutOfRangeException( $"Invalid newIndex '{newIndex}'" );
 		}
 
 		_categoryData.Remove( categoryData.Identifier );
@@ -565,15 +591,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 
 		return true;
-	}
-
-	/// <summary>
-	/// Rename a parameter.
-	/// </summary>
-	public void RenameParameter( IBlackboardParameter parameter, string name )
-	{
-		var oldName = parameter.Name;
-		parameter.Name = name;
 	}
 
 	public void UpdateParameter( IBlackboardParameter parameter )
@@ -591,49 +608,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			throw new Exception( $"There is no parameter with the identifier : {identifier}" );
 
 		_parameters[identifier].SetValue( value );
-	}
-
-	public void RemoveParameter( BlackboardParameter parameter )
-	{
-		if ( parameter.Graph != this )
-			return;
-
-		RemoveParameter( parameter.Identifier );
-	}
-
-	public void RemoveParameter( Guid identifier )
-	{
-		_parameters.Remove( identifier );
-	}
-
-	public void RemoveCategoryData( CategoryData categoryData )
-	{
-		if ( categoryData.Graph != this )
-			return;
-
-		_categoryData.Remove( categoryData.Identifier );
-	}
-
-	public void UpdateCategoryData( CategoryData categoryData )
-	{
-		if ( categoryData.Graph != this )
-			return;
-
-		_categoryData[categoryData.Identifier] = categoryData;
-	}
-
-	internal NamedRerouteDeclarationNode FindNamedRerouteDeclarationNode( string name )
-	{
-		var node = Nodes.OfType<NamedRerouteDeclarationNode>().Where( x => x.Name == name ).FirstOrDefault();
-
-		if ( node != null )
-		{
-			return node;
-		}
-
-		SGPLogger.Error( $"Could not find NamedReroute \"{name}\"" );
-
-		return null;
 	}
 
 	public void ClearNodes()
@@ -694,6 +668,20 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	IBlackboardParameter IBlackboardNodeGraph.FindParameter( Guid identifier )
 	{
 		return FindParameter( identifier );
+	}
+
+	internal NamedRerouteDeclarationNode FindNamedRerouteDeclarationNode( string name )
+	{
+		var node = Nodes.OfType<NamedRerouteDeclarationNode>().Where( x => x.Name == name ).FirstOrDefault();
+
+		if ( node != null )
+		{
+			return node;
+		}
+
+		SGPLogger.Error( $"Could not find NamedReroute \"{name}\"" );
+
+		return null;
 	}
 
 	internal void UpdateCategoryPriority( CategoryData target, int newPriority )
