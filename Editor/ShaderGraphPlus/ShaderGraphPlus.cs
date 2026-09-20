@@ -102,7 +102,7 @@ public class PreviewSettings
 public partial class ShaderGraphPlus : IBlackboardNodeGraph
 {
 	[Hide]
-	public int Version => 11;
+	public int Version => 12;
 
 	[Hide, JsonIgnore]
 	public IEnumerable<BaseNodePlus> Nodes => _nodes.Values;
