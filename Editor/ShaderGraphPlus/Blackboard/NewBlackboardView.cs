@@ -821,9 +821,6 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Paint.SetDefaultFont( 8, 500 );
 		Paint.DrawText( countRect, count, TextFlag.Center );
 
-		Paint.DrawText( countRect.Shrink( 0, 0, 100, 0 ), $"Index {_blackboardView.Graph.GetCategoryDataIndex( Category )}", TextFlag.Center );
-
-
 		if ( !_draggingGroup && _dragOver )
 		{
 			Paint.ClearBrush();
