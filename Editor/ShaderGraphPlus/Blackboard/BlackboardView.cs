@@ -782,7 +782,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		AcceptDrops = true;
 		IsCollapsable = collapsible;
 		IsExpanded = !collapsed;
-		
+
 		BuildUI();
 
 		Cursor = collapsible ? CursorShape.Finger : CursorShape.Arrow;
