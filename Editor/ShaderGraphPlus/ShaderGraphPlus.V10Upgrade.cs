@@ -115,8 +115,6 @@ public partial class ShaderGraphPlus
 
 						if ( parameter is IGroupableBlackboardParameter groupableParameter )
 						{
-							//Log.Info( $"existingEntry.Name == {existingEntry.Name}" );
-
 							groupableParameter.Group = existingEntry.Name;
 						}
 
