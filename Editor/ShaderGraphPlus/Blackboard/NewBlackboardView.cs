@@ -161,10 +161,18 @@ public class NewBlackboardView : Widget
 		_hasVisibleParameters = groups.Any();
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
 
-		foreach ( var groupedParameter in groups )
+		//foreach ( var groupedParameter in groups.OrderBy( x => Graph.GetCategoryData( string.IsNullOrWhiteSpace( x.Key ) ? "General" : x.Key ).Priority ) )
+		foreach ( var groupedParameter in groups.OrderBy( x => Graph.GetCategoryDataIndex( string.IsNullOrWhiteSpace( x.Key ) ? "General" : x.Key ) ) )
 		{
 			var collapsed = !filtering && _collapsedGroups.Contains( groupedParameter.Key );
-			_rows.Add( new ParameterGroupHeader( this, groupedParameter.Key, groupedParameter.Count(), collapsed, !filtering ) );
+
+			var groupName = string.IsNullOrWhiteSpace( groupedParameter.Key ) ? "General" : groupedParameter.Key;
+
+			//Log.Info( $"Setting up group \"{groupName}\"" );
+			
+			Graph.TryFindCategoryData( groupName, out var group2 ); 
+
+			_rows.Add( new ParameterGroupHeader( this, groupedParameter.Key, group2, groupedParameter.Count(), collapsed, !filtering ) );
 
 			if ( collapsed )
 				continue;
@@ -355,6 +363,17 @@ public class NewBlackboardView : Widget
 		SetCategoryData( group, oldGroup, parameter );
 
 		_window.OnParameterSelected( parameter );
+	}
+
+	internal void ReorderGroup( CategoryData category, int priority )
+	{
+		using var undoScope = UndoScope( "Move Parameter Group" );
+
+		Log.Info( $"Moving Category \"{category.Name}\" to priority \"{priority}\"" );
+
+		Graph.ReOrderCategory( category, priority );
+
+		RebuildFromGraph();
 	}
 
 	internal void RenameGroup( string group )
@@ -655,19 +674,6 @@ public class NewBlackboardView : Widget
 		return group.Equals( "General", StringComparison.OrdinalIgnoreCase ) ? "" : group;
 	}
 
-	//private (string GroupName, int GroupOrder) NormalizeGroup2( string group )
-	//{
-	//	group = group?.Trim() ?? "";
-	//	group = group.Equals( "General", StringComparison.OrdinalIgnoreCase ) ? "" : group;
-	//
-	//	if ( Graph.TryFindCategoryData( group, out var categoryData ) )
-	//	{
-	//
-	//	}
-	//
-	//	return new( group , );
-	//}
-
 	private void ExpandGroup( string group )
 	{
 		if ( _collapsedGroups.Remove( group ) )
@@ -740,6 +746,8 @@ public class NewBlackboardView : Widget
 /// </summary>
 public record ParameterDragData( BlackboardParameter Parameter );
 
+public record ParameterGroupDragData( CategoryData Category );
+
 internal interface IParameterRow
 {
 	INewGroupableBlackboardParameter Parameter { get; }
@@ -753,18 +761,29 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	private readonly string _group;
 	private readonly string _title;
 	private readonly int _count;
-	private bool _dragOver;
 
-	public ParameterGroupHeader( NewBlackboardView list, string group, int count, bool collapsed, bool collapsible )
+	private Vector2? _dragStart;
+	private bool _dragOver;
+	private bool _draggingAbove = false;
+	private bool _draggingBelow = false;
+	private bool _draggingGroup = false;
+
+	public CategoryData Category { get; }
+
+	public ParameterGroupHeader( NewBlackboardView list, string group, CategoryData category, int count, bool collapsed, bool collapsible )
 	{
 		_blackboardView = list;
 		_group = group;
+		Category = category;
+		category.Graph = list.Graph;
 		_title = NewBlackboardView.GroupTitle( group );
 		_count = count;
 
 		Title = "";
 		Icon = "folder";
 		Color = Theme.Blue;
+		IsDraggable = true;
+		AcceptDrops = true;
 		IsCollapsable = collapsible;
 		IsExpanded = !collapsed;
 		BuildUI();
@@ -802,11 +821,29 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		Paint.SetDefaultFont( 8, 500 );
 		Paint.DrawText( countRect, count, TextFlag.Center );
 
-		if ( _dragOver )
+		Paint.DrawText( countRect.Shrink( 0,0, 100, 0), $"Index {_blackboardView.Graph.GetCategoryDataIndex( Category )}", TextFlag.Center );
+
+
+		if ( !_draggingGroup && _dragOver )
 		{
 			Paint.ClearBrush();
 			Paint.SetPen( Theme.Primary, 1.5f );
 			Paint.DrawRect( LocalRect.Shrink( 0.75f ) );
+		}
+		else
+		{
+			if ( _draggingAbove )
+			{
+				Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+				Paint.DrawLine( LocalRect.TopLeft, LocalRect.TopRight );
+				_draggingAbove = false;
+			}
+			else if ( _draggingBelow )
+			{
+				Paint.SetPen( Theme.Primary, 2f, PenStyle.Dot );
+				Paint.DrawLine( LocalRect.BottomLeft, LocalRect.BottomRight );
+				_draggingBelow = false;
+			}
 		}
 	}
 
@@ -823,23 +860,129 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 	{
 		base.OnMousePress( e );
 
+		if ( e.LeftMouseButton )
+		{
+			_dragStart = e.LocalPosition;
+		}
+
 		if ( e.RightMouseButton )
 			OpenContextMenu();
 	}
 
-	public override void OnDragHover( DragEvent ev )
+	protected override void OnMouseReleased( MouseEvent e )
 	{
-		var valid = ev.Data.Object is ParameterDragData data
-			&& !NewBlackboardView.GroupName( data.Parameter ).Equals( _group, StringComparison.OrdinalIgnoreCase );
-		ev.Action = valid ? DropAction.Move : DropAction.Ignore;
-		_dragOver = valid;
-		Update();
+		base.OnMouseReleased( e );
+
+		_dragStart = null;
 	}
 
-	public override void OnDragLeave()
+	protected override void OnMouseMove( MouseEvent e )
 	{
-		_dragOver = false;
+		base.OnMouseMove( e );
+		
 		Update();
+
+		//if ( Category.Name == "General" )
+		//	return;
+
+		if ( _dragStart is null || !e.ButtonState.HasFlag( MouseButtons.Left ) )
+			return;
+		
+		if ( e.LocalPosition.Distance( _dragStart.Value ) < 10 )
+			return;
+
+		_dragStart = null;
+
+		var drag = new Drag( this );
+		drag.Data.Text = _group;
+		drag.Data.Object = new ParameterGroupDragData( Category );
+	
+		drag.Execute();
+	}
+
+	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
+	{
+		if ( Category.Name == "General" )
+		{
+			return false;
+		}
+
+		var sourceGroupDragData = ev.Data.OfType<ParameterGroupDragData>().FirstOrDefault();
+
+		if ( sourceGroupDragData is null || Category is null || sourceGroupDragData.Category == Category )
+			return false;
+
+		if ( sourceParameterIndex <= targetParameterIndex )
+		{
+			//SGPLogger.Info( $"Dragging \"{sourceGroupDragData.Category.Name}\" at index \"{sourceParameterIndex}\"  below \"{Category.Name}\" at index \"{targetParameterIndex}\"" );
+			_draggingBelow = true;
+		}
+		else
+		{
+			//SGPLogger.Info( $"Dragging \"{sourceGroupDragData.Category.Name}\" at index \"{sourceParameterIndex}\" Above \"{Category.Name}\" at index \"{targetParameterIndex}\"" );
+			_draggingAbove = true;
+		}
+
+		return true;
+	}
+
+	public override void OnDragHover( DragEvent ev )
+	{
+		void OnDrag( DragEvent ev, DropAction dropAction )
+		{
+			ev.Action = dropAction;
+			_dragOver = dropAction == DropAction.Move;
+		}
+
+		if ( ev.Data.Object is ParameterDragData parameterDragData )
+		{
+			if ( !NewBlackboardView.GroupName( parameterDragData.Parameter ).Equals( _group, StringComparison.OrdinalIgnoreCase ) )
+			{
+				ev.Action = DropAction.Move;
+				_dragOver = true;
+			}
+			else
+			{
+				ev.Action = DropAction.Ignore;
+				_dragOver = false;
+			}
+
+			_draggingGroup = false;
+			Update();
+
+			return;
+		}
+		else if ( ev.Data.Object is ParameterGroupDragData groupDragData )
+		{
+			if ( groupDragData.Category.Name == "General" )
+			{
+				OnDrag( ev, DropAction.Ignore );
+				return;
+			}
+
+			var sourceGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( groupDragData.Category );
+			var targetGroupIndex = _blackboardView.Graph.GetCategoryDataIndex( Category );
+			
+			if ( !TryDragOperation( ev, sourceGroupIndex, targetGroupIndex ) )
+			{
+				_draggingAbove = false;
+				_draggingBelow = false;
+
+				OnDrag( ev, DropAction.Ignore );
+				return;
+			}
+			else
+			{
+				OnDrag( ev, DropAction.Move );
+			}
+
+			_draggingGroup = true;
+			Update();
+
+			return;
+		}
+
+		OnDrag( ev, DropAction.Ignore );
 	}
 
 	public override void OnDragDrop( DragEvent ev )
@@ -847,8 +990,20 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		_dragOver = false;
 		Update();
 
-		if ( ev.Data.Object is ParameterDragData data )
-			_blackboardView.MoveToGroup( data.Parameter, _group );
+		if ( ev.Data.Object is ParameterDragData parameterDragData )
+		{
+			_blackboardView.MoveToGroup( parameterDragData.Parameter, _group );
+		}
+		else if ( ev.Data.Object is ParameterGroupDragData groupDragData )
+		{
+			_blackboardView.ReorderGroup( groupDragData.Category, _blackboardView.Graph.GetCategoryDataIndex( Category ) );
+		}
+	}
+
+	public override void OnDragLeave()
+	{
+		_dragOver = false;
+		Update();
 	}
 
 	private void OpenContextMenu()
@@ -1069,15 +1224,6 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 	}
 
-	protected override void OnDoubleClick( MouseEvent e )
-	{
-		if ( !e.LeftMouseButton || !PillRect.IsInside( e.LocalPosition ) )
-			return;
-
-		_dragStart = null;
-		StartRename();
-	}
-
 	protected override void OnMouseReleased( MouseEvent e ) => _dragStart = null;
 
 	protected override void OnMouseMove( MouseEvent e )
@@ -1106,6 +1252,15 @@ internal class ParameterRow : Widget, IParameterRow
 		base.OnMouseLeave();
 	}
 
+	protected override void OnDoubleClick( MouseEvent e )
+	{
+		if ( !e.LeftMouseButton || !PillRect.IsInside( e.LocalPosition ) )
+			return;
+
+		_dragStart = null;
+		StartRename();
+	}
+
 	protected override void OnKeyPress( KeyEvent e )
 	{
 		switch ( e.Key )
@@ -1128,9 +1283,9 @@ internal class ParameterRow : Widget, IParameterRow
 
 	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
 	{
-		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
+		var parameterDragData = ev.Data.OfType<ParameterDragData>().FirstOrDefault();
 
-		if ( sourceParameter is null || Parameter is null || sourceParameter == Parameter )
+		if ( parameterDragData is null || Parameter is null || parameterDragData.Parameter == Parameter )
 			return false;
 
 		if ( sourceParameterIndex <= targetParameterIndex )
@@ -1151,16 +1306,23 @@ internal class ParameterRow : Widget, IParameterRow
 	{
 		base.OnDragHover( ev );
 
-		var sourceParameter = ev.Data.OfType<ParameterDragData>().FirstOrDefault().Parameter;
-
-		var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
-		var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( Parameter );
-
-		if ( !TryDragOperation( ev, globalSourceParameterIndex, globalTargetParameterIndex ) )
+		if ( ev.Data.Object is ParameterDragData parameterDragData )
 		{
-			_draggingAbove = false;
-			_draggingBelow = false;
-			return;
+			var globalSourceParameterIndex = _blackboardView.Graph.GetParameterIndex( parameterDragData.Parameter );
+			var globalTargetParameterIndex = _blackboardView.Graph.GetParameterIndex( Parameter );
+
+			if ( !TryDragOperation( ev, globalSourceParameterIndex, globalTargetParameterIndex ) )
+			{
+				_draggingAbove = false;
+				_draggingBelow = false;
+				ev.Action = DropAction.Ignore;
+
+				return;
+			}
+		}
+		else
+		{
+			ev.Action = DropAction.Ignore;
 		}
 	}
 

@@ -975,7 +975,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.undoBuffer );
 
 			_graphView.RebuildFromGraph();
-			//_blackboardView.RebuildFromGraph();
+			_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}
@@ -999,7 +999,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
-			//_blackboardView.RebuildFromGraph();
+			_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}
@@ -1020,7 +1020,7 @@ public class MainWindow : DockWindow
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
-			//_blackboardView.RebuildFromGraph();
+			_blackboardView.RebuildFromGraph();
 
 			SetDirty();
 		}

@@ -398,6 +398,18 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
+	public CategoryData GetCategoryData( string name )
+	{
+		var categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+
+		if ( categoryData != null )
+		{
+			return categoryData;
+		}
+
+		return null;
+	}
+
 	public bool TryFindCategoryData( string name, out CategoryData categoryData )
 	{
 		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
@@ -408,6 +420,31 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 
 		return false;
+	}
+
+	public int GetCategoryDataIndex( string name )
+	{
+		var categoryData = GetCategoryData( name );
+		var index = _categoryData.IndexOf( categoryData.Identifier );
+
+		if ( index != -1 )
+		{
+			return index;
+		}
+
+		return 0;
+	}
+
+	public int GetCategoryDataIndex( CategoryData categoryData )
+	{
+		var index = _categoryData.IndexOf( categoryData.Identifier );
+
+		if ( index != -1 )
+		{
+			return index;
+		}
+
+		return 0;
 	}
 
 	public int GetParameterIndexInCategory( string group, Guid refernce )
@@ -494,6 +531,37 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		else
 		{
 			_parameters.Insert( newIndex, parameter.Identifier, parameter );
+		}
+
+		return true;
+	}
+
+	public bool ReOrderCategory( CategoryData categoryData, int newIndex )
+	{
+		if ( categoryData.Graph != this )
+		{
+			SGPLogger.Error( $"Wrong Graph!!!" );
+			return false;
+		}
+			
+		if ( newIndex <= -1 )
+		{
+			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );
+
+			SGPLogger.Error( $"New Index Invalid '{newIndex}'" );
+
+			return false;
+		}
+
+		_categoryData.Remove( categoryData.Identifier );
+
+		if ( newIndex > _categoryData.Count )
+		{
+			_categoryData.Add( categoryData.Identifier, categoryData );
+		}
+		else
+		{
+			_categoryData.Insert( newIndex, categoryData.Identifier, categoryData );
 		}
 
 		return true;
