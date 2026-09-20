@@ -85,6 +85,8 @@ public abstract class BlackboardParameter : INewGroupableBlackboardParameter, IV
 	public virtual bool IsValid => true;
 
 	public virtual string Name { get; set; }
+
+	[Hide]
 	public string Group { get; set; }
 
 	public BlackboardParameter()
