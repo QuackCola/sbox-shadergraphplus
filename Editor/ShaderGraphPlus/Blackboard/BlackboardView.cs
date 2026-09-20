@@ -1063,7 +1063,7 @@ internal class ParameterRow : Widget, IParameterRow
 		IsDraggable = true;
 		AcceptDrops = true;
 
-		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename\nClick the usage count to find references";
+		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename";
 
 		Layout = Layout.Row();
 		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, NameX, 3 );
