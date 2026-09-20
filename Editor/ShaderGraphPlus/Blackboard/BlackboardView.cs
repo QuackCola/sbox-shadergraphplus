@@ -782,13 +782,14 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		AcceptDrops = true;
 		IsCollapsable = collapsible;
 		IsExpanded = !collapsed;
+		
 		BuildUI();
 
 		Cursor = collapsible ? CursorShape.Finger : CursorShape.Arrow;
 		AcceptDrops = true;
 		ToolTip = collapsible
-			? "Click to collapse or expand. Drag parameters here to move them into this group. Right-click for group actions."
-			: "Matching groups are expanded while filtering. Drag parameters here to move them into this group. Right-click for group actions.";
+			? $"Click to collapse or expand.\nDrag parameters here to move them into this group.{(_title != "General" ? "\nDrag to reorder this group. " : " ")}\nRight-click for group actions.\n"
+			: $"Matching groups are expanded while filtering.\n Drag parameters here to move them into this group.{(_title != "General" ? "\nDrag to reorder this group. " : " ")}\nRight-click for group actions.";
 	}
 
 	protected override void OnPaint()
@@ -1063,7 +1064,7 @@ internal class ParameterRow : Widget, IParameterRow
 		IsDraggable = true;
 		AcceptDrops = true;
 
-		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node\nDouble-click the parameter pill to rename";
+		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node.\nDrag onto another parameter to reorder.\nDouble-click the parameter pill to rename.";
 
 		Layout = Layout.Row();
 		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, NameX, 3 );
