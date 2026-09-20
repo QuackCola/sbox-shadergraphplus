@@ -1294,7 +1294,7 @@ internal class ParameterRow : Widget, IParameterRow
 			}
 		}
 
-		void TryDragAcrossGroup( GroupData sourceGroup, GroupData targetGroup )
+		void TryDragToOtherGroup( GroupData sourceGroup, GroupData targetGroup )
 		{
 			var sourceGroupIndex = _blackboardView.Graph.GetGroupDataIndex( sourceGroup );
 			var targetGroupIndex = _blackboardView.Graph.GetGroupDataIndex( targetGroup );
@@ -1315,7 +1315,7 @@ internal class ParameterRow : Widget, IParameterRow
 		}
 		else if ( _groupData.Name != parameterDragData.SourceGroup.Name )
 		{
-			TryDragAcrossGroup( parameterDragData.SourceGroup, _groupData );
+			TryDragToOtherGroup( parameterDragData.SourceGroup, _groupData );
 		}
 		else
 		{
