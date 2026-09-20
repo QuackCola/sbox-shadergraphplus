@@ -1117,7 +1117,7 @@ public sealed partial class GraphCompiler
 				parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
 				{
 					Name = category.Name,
-					Priority = category.Priority
+					Priority = Graph.GetCategoryDataIndex( category )//category.Priority
 				};
 
 				//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
