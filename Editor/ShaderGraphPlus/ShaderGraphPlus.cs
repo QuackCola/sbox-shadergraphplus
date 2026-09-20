@@ -542,6 +542,25 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 	}
 
+
+	/// <summary>
+	/// A group name not taken yet - the name itself, or "name 1", "name 2"...
+	/// </summary>
+	public string UniqueGroupName( string baseName )
+	{
+		var names = GroupData.Select( g => g.Name )
+			.ToHashSet( StringComparer.OrdinalIgnoreCase );
+
+		if ( !names.Contains( baseName ) )
+			return baseName;
+
+		for ( var i = 1; ; i++ )
+		{
+			if ( !names.Contains( $"{baseName}{i}" ) )
+				return $"{baseName}{i}";
+		}
+	}
+
 	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
 	{
 		if ( parameter.Graph != this )
