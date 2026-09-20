@@ -167,10 +167,7 @@ public class MainWindow : DockWindow
 
 	public void OnDeselected( object oldSelection )
 	{
-		//if ( oldSelection is BlackboardParameter || oldSelection is CategoryData )
-		//{
-		//	_blackboardView.ClearSelection();
-		//}
+
 	}
 
 	internal bool IsSelected( object target ) => Selection.FirstOrDefault() == target;
@@ -248,7 +245,7 @@ public class MainWindow : DockWindow
 	internal void OnGraphViewClicked()
 	{
 		// Fixes not being able to select the graph in the GraphView when the latest target was a BlackboardParameter.
-		if ( _properties.Target is BlackboardParameter || _properties.Target is CategoryData )
+		if ( _properties.Target is BlackboardParameter || _properties.Target is GroupData )
 		{
 			OnSelected( null );
 			//_blackboardView.ClearSelection();
@@ -967,11 +964,11 @@ public class MainWindow : DockWindow
 			_redoOption.Enabled = _undoStack.CanUndo;
 
 			_graph.ClearNodes();
-			_graph.ClearCategoryData();
+			_graph.ClearGroupData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.undoBuffer, true );
-			_graph.DeserializeCategoryData( op.undoBuffer );
+			_graph.DeserializeGroupData( op.undoBuffer );
 			_graph.DeserializeParameters( op.undoBuffer );
 
 			_graphView.RebuildFromGraph();
@@ -991,11 +988,11 @@ public class MainWindow : DockWindow
 			_redoOption.Enabled = _undoStack.CanRedo;
 
 			_graph.ClearNodes();
-			_graph.ClearCategoryData();
+			_graph.ClearGroupData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.redoBuffer, true );
-			_graph.DeserializeCategoryData( op.redoBuffer );
+			_graph.DeserializeGroupData( op.redoBuffer );
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();
@@ -1012,11 +1009,11 @@ public class MainWindow : DockWindow
 			SGPLogger.Info( $"SetUndoLevel ({op.name})" );
 
 			_graph.ClearNodes();
-			_graph.ClearCategoryData();
+			_graph.ClearGroupData();
 			_graph.ClearParameters();
 
 			_graph.DeserializeNodes( op.redoBuffer, true );
-			_graph.DeserializeCategoryData( op.redoBuffer );
+			_graph.DeserializeGroupData( op.redoBuffer );
 			_graph.DeserializeParameters( op.redoBuffer );
 
 			_graphView.RebuildFromGraph();

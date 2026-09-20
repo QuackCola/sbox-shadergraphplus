@@ -112,8 +112,8 @@ public class Properties : Widget
 				_header.Text = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
 				break;
-			case CategoryData category:
-				_header.Text = "Category";
+			case GroupData group:
+				_header.Text = "Group";
 				_header.Icon = "folder";
 				break;
 			default:

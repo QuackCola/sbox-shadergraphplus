@@ -6,7 +6,7 @@ file struct ParameterEntry : IValid
 {
 	public BlackboardParameter Parameter { get; internal set; }
 
-	public CategoryData CategoryData { get; internal set; }
+	public GroupData GroupData { get; internal set; }
 
 	public int OrderInRoot { get; internal set; }
 
@@ -24,11 +24,11 @@ file struct ParameterEntry : IValid
 		LegacyGroupReference = legacyGroupReference;
 	}
 
-	public ParameterEntry( CategoryData categoryData, int orderInRoot, bool grouped )
+	public ParameterEntry( GroupData groupData, int orderInRoot, bool grouped )
 	{
 		Parameter = null;
 
-		CategoryData = categoryData;
+		GroupData = groupData;
 		OrderInRoot = orderInRoot;
 		Grouped = grouped;
 
@@ -41,7 +41,7 @@ public partial class ShaderGraphPlus
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 10 )]
 	internal static void Upgrader_v10( JsonObject obj )
 	{
-		var categories = new List<CategoryData>();
+		var groups = new List<GroupData>();
 		var updatedParameters = new List<ParameterEntry>();
 		var registeredGroupNames = new List<string>();
 
@@ -79,30 +79,30 @@ public partial class ShaderGraphPlus
 
 				if ( !registeredGroupNames.Contains( primaryGroup.Name ) )
 				{
-					var newCategoryData = new CategoryData
+					var newGroupData = new GroupData
 					{
 						Name = $"{primaryGroup.Name} Group",
 						Priority = primaryGroup.Priority
 					};
-					newCategoryData.ParameterReferences.Add( parameter.Identifier );
+					newGroupData.ParameterReferences.Add( parameter.Identifier );
 
 					if ( parameter is IGroupableBlackboardParameter groupableParameter )
 					{
-						groupableParameter.Group = newCategoryData.Name;
+						groupableParameter.Group = newGroupData.Name;
 					}
 
-					if ( !categories.Contains( newCategoryData ) )
+					if ( !groups.Contains( newGroupData ) )
 					{
-						categories.Add( newCategoryData );
+						groups.Add( newGroupData );
 					}
 
-					legacyGroupReference = newCategoryData.Identifier;
+					legacyGroupReference = newGroupData.Identifier;
 
 					registeredGroupNames.Add( primaryGroup.Name );
 				}
 				else
 				{
-					var existingEntry = categories.FirstOrDefault( x => x.Name == $"{primaryGroup.Name} Group" );
+					var existingEntry = groups.FirstOrDefault( x => x.Name == $"{primaryGroup.Name} Group" );
 
 					if ( existingEntry != null )
 					{
@@ -111,7 +111,7 @@ public partial class ShaderGraphPlus
 							existingEntry.ParameterReferences.Add( parameter.Identifier );
 						}
 
-						categories[categories.IndexOf( existingEntry )] = existingEntry;
+						groups[groups.IndexOf( existingEntry )] = existingEntry;
 
 						if ( parameter is IGroupableBlackboardParameter groupableParameter )
 						{
@@ -216,26 +216,26 @@ public partial class ShaderGraphPlus
 		obj.Remove( JsonKeys.ParameterArray );
 		obj.Add( JsonKeys.ParameterArray, newParameterArray );
 
-		var newCategoryDataArray = new JsonArray();
+		var newGroupDataArray = new JsonArray();
 
 		// Sort the categories
-		var sortedCategories = categories.OrderBy( x => x.Priority ).ToList();
+		var sortedGroups = groups.OrderBy( x => x.Priority ).ToList();
 
-		for ( int i = 0; i < sortedCategories.Count; i++ )
+		for ( int i = 0; i < sortedGroups.Count; i++ )
 		{
-			sortedCategories[i].Priority = i;
+			sortedGroups[i].Priority = i;
 		}
 
-		foreach ( var category in sortedCategories )
+		foreach ( var sortedGroup in sortedGroups )
 		{
-			var type = category.GetType();
-			var categoryDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
+			var type = sortedGroup.GetType();
+			var groupDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
 
-			SerializeObject( category, categoryDataObject, SerializerOptions() );
+			SerializeObject( sortedGroup, groupDataObject, SerializerOptions() );
 
-			newCategoryDataArray.Add( categoryDataObject );
+			newGroupDataArray.Add( groupDataObject );
 		}
 
-		obj.Add( JsonKeys.CategoryDataArray, newCategoryDataArray );
+		obj.Add( JsonKeys.OldGroupDataArray, newGroupDataArray );
 	}
 }

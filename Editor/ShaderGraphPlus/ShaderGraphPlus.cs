@@ -123,10 +123,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	IEnumerable<IBlackboardParameter> IBlackboardNodeGraph.Parameters => Parameters;
 
 	[Hide, JsonIgnore]
-	public IEnumerable<CategoryData> CategoryData => _categoryData.Values;
+	public IEnumerable<GroupData> GroupData => _groupData.Values;
 
 	[Hide, JsonIgnore]
-	private readonly OrderedDictionary<Guid, CategoryData> _categoryData = new();
+	private readonly OrderedDictionary<Guid, GroupData> _groupData = new();
 
 	/// <summary>
 	///	Custom key-value storage for this project.
@@ -313,9 +313,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 	}
 
-	public void AddCategoryData( CategoryData categoryData, int index = -1 )
+	public void AddGroupData( GroupData groupData, int index = -1 )
 	{
-		categoryData.Graph = this;
+		groupData.Graph = this;
 
 		if ( index < -1 )
 		{
@@ -324,18 +324,18 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 		if ( index != -1 )
 		{
-			if ( index > _categoryData.Count )
+			if ( index > _groupData.Count )
 			{
-				_categoryData.Add( categoryData.Identifier, categoryData );
+				_groupData.Add( groupData.Identifier, groupData );
 			}
 			else
 			{
-				_categoryData.Insert( index, categoryData.Identifier, categoryData );
+				_groupData.Insert( index, groupData.Identifier, groupData );
 			}
 		}
 		else
 		{
-			_categoryData.Add( categoryData.Identifier, categoryData );
+			_groupData.Add( groupData.Identifier, groupData );
 		}
 	}
 
@@ -362,12 +362,12 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_parameters.Remove( identifier );
 	}
 
-	public void RemoveCategoryData( CategoryData categoryData )
+	public void RemoveGroupData( GroupData groupData )
 	{
-		if ( categoryData.Graph != this )
+		if ( groupData.Graph != this )
 			return;
 
-		_categoryData.Remove( categoryData.Identifier );
+		_groupData.Remove( groupData.Identifier );
 	}
 
 	public BaseNodePlus FindNode( string name )
@@ -431,30 +431,30 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return parameter != null;
 	}
 
-	public CategoryData FindCategoryData( string name )
+	public GroupData FindGroupData( string name )
 	{
-		var categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+		var groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
 
-		if ( categoryData != null )
+		if ( groupData != null )
 		{
-			return categoryData;
+			return groupData;
 		}
 
 		return null;
 	}
 
-	public bool HasCategoryDataWithName( string name )
+	public bool HasGroupDataWithName( string name )
 	{
-		return _categoryData.Any( x => x.Value.Name == name );
+		return _groupData.Any( x => x.Value.Name == name );
 	}
 
-	public bool TryFindCategoryData( Guid identifier, out CategoryData categoryData )
+	public bool TryFindGroupData( Guid identifier, out GroupData groupData )
 	{
-		categoryData = null;
+		groupData = null;
 
-		if ( _categoryData.TryGetValue( identifier, out var foundCategoryData ) )
+		if ( _groupData.TryGetValue( identifier, out var foundGroupData ) )
 		{
-			categoryData = foundCategoryData;
+			groupData = foundGroupData;
 
 			return true;
 		}
@@ -462,11 +462,11 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
-	public bool TryFindCategoryData( string name, out CategoryData categoryData )
+	public bool TryFindGroupData( string name, out GroupData groupData )
 	{
-		categoryData = _categoryData.FirstOrDefault( x => x.Value.Name == name ).Value;
+		groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
 
-		if ( categoryData != null )
+		if ( groupData != null )
 		{
 			return true;
 		}
@@ -486,10 +486,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return 0;
 	}
 
-	public int GetCategoryDataIndex( string name )
+	public int GetGroupDataIndex( string name )
 	{
-		var categoryData = FindCategoryData( name );
-		var index = _categoryData.IndexOf( categoryData.Identifier );
+		var groupData = FindGroupData( name );
+		var index = _groupData.IndexOf( groupData.Identifier );
 
 		if ( index != -1 )
 		{
@@ -499,9 +499,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return 0;
 	}
 
-	public int GetCategoryDataIndex( CategoryData categoryData )
+	public int GetGroupDataIndex( GroupData groupData )
 	{
-		var index = _categoryData.IndexOf( categoryData.Identifier );
+		var index = _groupData.IndexOf( groupData.Identifier );
 
 		if ( index != -1 )
 		{
@@ -511,10 +511,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return 0;
 	}
 
-	public int GetParameterIndexInCategory( string group, Guid refernce )
+	public int GetParameterIndexInGroup( string group, Guid refernce )
 	{
 		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
-		var category = _categoryData.FirstOrDefault( x => x.Value.Name == group ).Value;
+		var category = _groupData.FirstOrDefault( x => x.Value.Name == group ).Value;
 
 		if ( category != null )
 		{
@@ -566,9 +566,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return true;
 	}
 
-	public bool ReOrderCategory( CategoryData categoryData, int newIndex )
+	public bool ReOrderGroup( GroupData groupData, int newIndex )
 	{
-		if ( categoryData.Graph != this )
+		if ( groupData.Graph != this )
 		{
 			SGPLogger.Error( $"Wrong Graph!!!" );
 			return false;
@@ -579,15 +579,15 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 			throw new IndexOutOfRangeException( $"Invalid newIndex '{newIndex}'" );
 		}
 
-		_categoryData.Remove( categoryData.Identifier );
+		_groupData.Remove( groupData.Identifier );
 
-		if ( newIndex > _categoryData.Count )
+		if ( newIndex > _groupData.Count )
 		{
-			_categoryData.Add( categoryData.Identifier, categoryData );
+			_groupData.Add( groupData.Identifier, groupData );
 		}
 		else
 		{
-			_categoryData.Insert( newIndex, categoryData.Identifier, categoryData );
+			_groupData.Insert( newIndex, groupData.Identifier, groupData );
 		}
 
 		return true;
@@ -620,9 +620,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_parameters.Clear();
 	}
 
-	public void ClearCategoryData()
+	public void ClearGroupData()
 	{
-		_categoryData.Clear();
+		_groupData.Clear();
 	}
 
 	string INodeGraph.SerializeNodes( IEnumerable<IGraphNode> nodes )
@@ -684,14 +684,14 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return null;
 	}
 
-	internal void UpdateCategoryPriority( CategoryData target, int newPriority )
+	internal void UpdateGroupDataPriority( GroupData target, int newPriority )
 	{
 		var oldPriority = target.Priority;
 		target.Priority = newPriority;
 
 		if ( newPriority > oldPriority ) // Category moved down the list
 		{
-			foreach ( var kvp in _categoryData )
+			foreach ( var kvp in _groupData )
 			{
 				if ( kvp.Value != target &&
 					kvp.Value.Priority > oldPriority &&
@@ -703,7 +703,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 		else if ( newPriority < oldPriority ) // Category moved up the list
 		{
-			foreach ( var kvp in _categoryData )
+			foreach ( var kvp in _groupData )
 			{
 				if ( kvp.Value != target &&
 					kvp.Value.Priority >= newPriority &&

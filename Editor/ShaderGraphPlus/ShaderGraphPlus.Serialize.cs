@@ -20,7 +20,9 @@ partial class ShaderGraphPlus
 		internal const string Class = "_class";
 		internal const string NodeArray = "nodes";
 		internal const string ParameterArray = "parameters";
-		internal const string CategoryDataArray = "categoryData";
+		
+		internal const string OldGroupDataArray = "categoryData";
+		internal const string GroupDataArray = "groupData";
 	}
 
 	internal static JsonSerializerOptions SerializerOptions( bool indented = false )
@@ -47,7 +49,7 @@ partial class ShaderGraphPlus
 		SerializeObject( this, doc, options );
 		SerializeNodes( Nodes, doc, options );
 		SerializeParameters( Parameters, doc, options );
-		SerializeCategoryData( CategoryData, doc, options );
+		SerializeGroupData( GroupData, doc, options );
 
 		doc.Add( JsonKeys.Version, JsonSerializer.SerializeToNode( Version, options ) );
 
@@ -67,7 +69,7 @@ partial class ShaderGraphPlus
 		}
 
 		DeserializeObject( this, root, options );
-		DeserializeCategoryData( root, options );
+		DeserializeGroupData( root, options );
 		DeserializeParameters( root, options );
 		DeserializeNodes( root, options, subgraphPath, fileVersion );
 
@@ -330,35 +332,35 @@ partial class ShaderGraphPlus
 		return parameters.Values;
 	}
 
-	public IEnumerable<CategoryData> DeserializeCategoryData( string json )
+	public IEnumerable<GroupData> DeserializeGroupData( string json )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
 
-		return DeserializeCategoryData( root, SerializerOptions() );
+		return DeserializeGroupData( root, SerializerOptions() );
 	}
 
-	private IEnumerable<CategoryData> DeserializeCategoryData( JsonElement doc, JsonSerializerOptions options )
+	private IEnumerable<GroupData> DeserializeGroupData( JsonElement doc, JsonSerializerOptions options )
 	{
-		var data = new Dictionary<string, CategoryData>();
+		var data = new Dictionary<string, GroupData>();
 
-		if ( doc.TryGetProperty( JsonKeys.CategoryDataArray, out var arrayProperty ) )
+		if ( doc.TryGetProperty( JsonKeys.GroupDataArray, out var arrayProperty ) )
 		{
 			foreach ( var element in arrayProperty.EnumerateArray() )
 			{
 				var typeName = element.GetProperty( JsonKeys.Class ).GetString();
-				var typeDesc = EditorTypeLibrary.GetType<CategoryData>( typeName );
+				var typeDesc = EditorTypeLibrary.GetType<GroupData>( typeName );
 
-				CategoryData categoryData;
+				GroupData groupData;
 
 				if ( typeDesc != null )
 				{
-					categoryData = EditorTypeLibrary.Create<CategoryData>( typeName );
-					DeserializeObject( categoryData, element, options );
+					groupData = EditorTypeLibrary.Create<GroupData>( typeName );
+					DeserializeObject( groupData, element, options );
 
-					data.Add( categoryData.Name, categoryData );
+					data.Add( groupData.Name, groupData );
 
-					AddCategoryData( categoryData );
+					AddGroupData( groupData );
 				}
 			}
 		}
@@ -374,7 +376,7 @@ partial class ShaderGraphPlus
 		doc = SerializeNodes( Nodes, doc );
 		doc = SerializeParameters( Parameters, doc );
 
-		return SerializeCategoryData( CategoryData, doc ).ToJsonString( options );
+		return SerializeGroupData( GroupData, doc ).ToJsonString( options );
 	}
 
 	public string SerializeNodes()
@@ -520,45 +522,45 @@ partial class ShaderGraphPlus
 		doc.Add( JsonKeys.ParameterArray, parameterArray );
 	}
 
-	public string SerializeCategoryData()
+	public string SerializeGroupData()
 	{
-		return SerializeCategoryData( CategoryData );
+		return SerializeGroupData( GroupData );
 	}
 
-	private string SerializeCategoryData( IEnumerable<CategoryData> data )
+	private string SerializeGroupData( IEnumerable<GroupData> data )
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions();
 
-		SerializeCategoryData( data, doc, options );
+		SerializeGroupData( data, doc, options );
 
 		return doc.ToJsonString( options );
 	}
 
-	private JsonObject SerializeCategoryData( IEnumerable<CategoryData> data, JsonObject doc )
+	private JsonObject SerializeGroupData( IEnumerable<GroupData> data, JsonObject doc )
 	{
 		var options = SerializerOptions();
 
-		SerializeCategoryData( data, doc, options );
+		SerializeGroupData( data, doc, options );
 
 		return doc;
 	}
 
-	private static void SerializeCategoryData( IEnumerable<CategoryData> data, JsonObject doc, JsonSerializerOptions options )
+	private static void SerializeGroupData( IEnumerable<GroupData> data, JsonObject doc, JsonSerializerOptions options )
 	{
-		var categoryDataArray = new JsonArray();
+		var groupDataArray = new JsonArray();
 
 		foreach ( var parameter in data )
 		{
 			var type = parameter.GetType();
-			var categoryDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
+			var groupDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
 
-			SerializeObject( parameter, categoryDataObject, options );
+			SerializeObject( parameter, groupDataObject, options );
 
-			categoryDataArray.Add( categoryDataObject );
+			groupDataArray.Add( groupDataObject );
 		}
 
-		doc.Add( JsonKeys.CategoryDataArray, categoryDataArray );
+		doc.Add( JsonKeys.GroupDataArray, groupDataArray );
 	}
 
 }

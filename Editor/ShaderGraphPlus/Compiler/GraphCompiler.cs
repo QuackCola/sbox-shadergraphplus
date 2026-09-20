@@ -1110,16 +1110,16 @@ public sealed partial class GraphCompiler
 
 		if ( parameter is IGroupableBlackboardParameter groupableParameter )
 		{
-			if ( Graph.TryFindCategoryData( string.IsNullOrWhiteSpace( groupableParameter.Group ) ? "General" : groupableParameter.Group, out var category ) )
+			if ( Graph.TryFindGroupData( string.IsNullOrWhiteSpace( groupableParameter.Group ) ? "General" : groupableParameter.Group, out var groupData ) )
 			{
-				parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
+				parameterUI.Priority = groupData.ParameterReferences.IndexOf( parameter.Identifier );
 				parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
 				{
-					Name = category.Name,
-					Priority = Graph.GetCategoryDataIndex( category )//category.Priority
+					Name = groupData.Name,
+					Priority = Graph.GetGroupDataIndex( groupData )//groupData.Priority
 				};
 
-				//SGPLogger.Info( $"Category \"{category.Name}\" with Priority \"{parameterUI.PrimaryGroup.Priority}\"" );
+				//SGPLogger.Info( $"Group \"{groupData.Name}\" with Priority \"{parameterUI.PrimaryGroup.Priority}\"" );
 			}
 		}
 

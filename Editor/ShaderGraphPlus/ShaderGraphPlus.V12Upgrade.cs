@@ -18,8 +18,8 @@ public partial class ShaderGraphPlus
 		if ( obj[JsonKeys.NodeArray] is not JsonArray oldNodeArray )
 			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.NodeArray}\"" );
 
-		if ( obj[JsonKeys.CategoryDataArray] is not JsonArray oldCategoryDataArray )
-			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.CategoryDataArray}\"" );
+		if ( obj[JsonKeys.OldGroupDataArray] is not JsonArray oldCategoryDataArray )
+			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.OldGroupDataArray}\"" );
 
 		var isSubgraph = CheckIfSubgraph( obj );
 
@@ -44,7 +44,7 @@ public partial class ShaderGraphPlus
 		//
 
 		var newParameterArray = new JsonArray();
-		var categoriesToAdd = new Dictionary<string, List<Guid>>();
+		var groupsToAdd = new Dictionary<string, List<Guid>>();
 
 		foreach ( var jsonNode in oldParameterArray )
 		{
@@ -77,13 +77,13 @@ public partial class ShaderGraphPlus
 
 					JsonUtils.GetPropertyValue( newParameterObj, "Identifier", SerializerOptions(), Guid.Empty, out var parameterReference );
 
-					if ( !categoriesToAdd.ContainsKey( "General" ) )
+					if ( !groupsToAdd.ContainsKey( "General" ) )
 					{
-						categoriesToAdd.TryAdd( "General", [parameterReference] );
+						groupsToAdd.TryAdd( "General", [parameterReference] );
 					}
 					else
 					{
-						categoriesToAdd["General"].Add( parameterReference );
+						groupsToAdd["General"].Add( parameterReference );
 					}
 
 					//newParameterObj.Remove( "GroupReference" );
@@ -98,32 +98,34 @@ public partial class ShaderGraphPlus
 		}
 
 		//
-		// Upgrade Categories
+		// Upgrade Groups
 		//
 
-		var newCategoryDataArray = new JsonArray();
+		var newGroupDataArray = new JsonArray();
 
-		foreach ( var category in categoriesToAdd )
+		foreach ( var group in groupsToAdd )
 		{
-			var newCategoryObj = new JsonObject { { JsonKeys.Class, "CategoryData" } };
-			var newCategory = new CategoryData() { Name = category.Key, ParameterReferences = category.Value };
+			var newGroupDataObj = new JsonObject { { JsonKeys.Class, typeof( GroupData ).Name } };
+			var newGroup = new GroupData() { Name = group.Key, ParameterReferences = group.Value };
 
-			SerializeObject( newCategory, newCategoryObj, SerializerOptions() );
+			SerializeObject( newGroup, newGroupDataObj, SerializerOptions() );
 
-			newCategoryDataArray.Add( newCategoryObj );
+			newGroupDataArray.Add( newGroupDataObj );
 		}
 
 		foreach ( var jsonNode in oldCategoryDataArray )
 		{
-			var newCategoryDataObj = jsonNode.DeepClone().AsObject();
+			var newGroupDataObj = jsonNode.DeepClone().AsObject();
 
-			newCategoryDataArray.Add( newCategoryDataObj );
+			JsonUtils.UpdatePropertyValue( newGroupDataObj, JsonKeys.Class, typeof( GroupData ).Name, SerializerOptions() );
+
+			newGroupDataArray.Add( newGroupDataObj );
 		}
 
 		obj.Remove( JsonKeys.ParameterArray );
 		obj.Add( JsonKeys.ParameterArray, newParameterArray );
 
-		obj.Remove( JsonKeys.CategoryDataArray );
-		obj.Add( JsonKeys.CategoryDataArray, newCategoryDataArray );
+		obj.Remove( JsonKeys.OldGroupDataArray );
+		obj.Add( JsonKeys.GroupDataArray, newGroupDataArray );
 	}
 }

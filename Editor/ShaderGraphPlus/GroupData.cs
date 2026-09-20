@@ -1,6 +1,6 @@
 namespace ShaderGraphPlus;
 
-public class CategoryData
+public class GroupData
 {
 	[Hide]
 	public Guid Identifier { get; set; }
@@ -26,12 +26,12 @@ public class CategoryData
 	[Hide]
 	public List<Guid> ParameterReferences { get; set; }
 
-	public CategoryData( List<Guid> parameterReferences ) : this()
+	public GroupData( List<Guid> parameterReferences ) : this()
 	{
 		ParameterReferences = parameterReferences;
 	}
 
-	public CategoryData()
+	public GroupData()
 	{
 		NewIdentifier();
 		ParameterReferences = new List<Guid>();
@@ -51,7 +51,7 @@ public class CategoryData
 			int count = 0;
 			var id = $"{name}{count}";
 
-			while ( graph.HasCategoryDataWithName( id ) )
+			while ( graph.HasGroupDataWithName( id ) )
 			{
 				id = $"{name}{count++}";
 			}
