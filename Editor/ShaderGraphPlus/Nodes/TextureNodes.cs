@@ -859,7 +859,7 @@ public sealed class TextureCoord : ShaderNodePlus
 	[Hide]
 	public override string Title => $"{DisplayInfo.For( this ).Name} {CoordinateChannelResult}";
 
-	// TODO : Include upgrade step in v13 upgrader to convert serialized UseSecondaryCoord property to the appropiate enum option.
+	// TODO : Include upgrade step in the v12 upgrader to convert serialized UseSecondaryCoord property to the appropiate enum option.
 
 	/*
 	/// <summary>
@@ -868,14 +868,15 @@ public sealed class TextureCoord : ShaderNodePlus
 	public bool UseSecondaryCoord { get; set; } = false;
 	*/
 
-	public GraphCompiler.TextureCoordinateChannel CoordinateChannel { get; set; } = GraphCompiler.TextureCoordinateChannel.UV0;
+	[Title( "UV Channel" )]
+	public GraphCompiler.TextureCoordinateChannel UVChannel { get; set; } = GraphCompiler.TextureCoordinateChannel.UV0;
 
 	[Hide]
 	private string CoordinateChannelResult
 	{
 		get
 		{
-			return CoordinateChannel switch
+			return UVChannel switch
 			{
 				GraphCompiler.TextureCoordinateChannel.UV0 => "",
 				GraphCompiler.TextureCoordinateChannel.UV1 => "2",
@@ -898,6 +899,6 @@ public sealed class TextureCoord : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		return compiler.GetTextureCoordinates( Tiling, CoordinateChannel );
+		return compiler.GetTextureCoordinates( Tiling, UVChannel );
 	};
 }
