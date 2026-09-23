@@ -32,6 +32,10 @@ COMMON
 struct VertexInput
 {
 	#include ""common/vertexinput.hlsl""
+
+	float2 vTexCoord3 : TEXCOORD4 < Semantic( LowPrecisionUv2 ); >; 
+	float2 vTexCoord4 : TEXCOORD5 < Semantic( LowPrecisionUv3 ); >;
+
 	float4 vColor : COLOR0 < Semantic( Color ); >;
 /*sgp_vertex_input_data*/
 };
