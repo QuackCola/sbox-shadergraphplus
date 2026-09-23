@@ -846,6 +846,7 @@ public sealed class SampleTextureCubeNode : ShaderNodePlus
 	public NodeResult.Func A => ( GraphCompiler compiler ) => Component( "a", compiler );
 }
 
+
 /// <summary>
 /// Texture Coordinate from vertex data.
 /// </summary>
@@ -855,18 +856,40 @@ public sealed class TextureCoord : ShaderNodePlus
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.StageInputNode;
 
+	[Hide]
+	public override string Title => $"{DisplayInfo.For( this ).Name} {CoordinateChannelResult}";
+
+	// TODO : Include upgrade step in v13 upgrader to convert serialized UseSecondaryCoord property to the appropiate enum option.
+
+	/*
 	/// <summary>
 	/// Use the secondary vertex coordinate
 	/// </summary>
 	public bool UseSecondaryCoord { get; set; } = false;
+	*/
+
+	public GraphCompiler.TextureCoordinateChannel CoordinateChannel { get; set; } = GraphCompiler.TextureCoordinateChannel.UV0;
+
+	[Hide]
+	private string CoordinateChannelResult
+	{
+		get
+		{
+			return CoordinateChannel switch
+			{
+				GraphCompiler.TextureCoordinateChannel.UV0 => "",
+				GraphCompiler.TextureCoordinateChannel.UV1 => "2",
+				GraphCompiler.TextureCoordinateChannel.UV2 => "3",
+				GraphCompiler.TextureCoordinateChannel.UV3 => "4",
+				_ => "",
+			};
+		}
+	}
 
 	/// <summary>
 	/// How many times this coordinate repeats itself to give a tiled effect
 	/// </summary>
 	public Vector2 Tiling { get; set; } = 1;
-
-	[Hide]
-	public override string Title => $"{DisplayInfo.For( this ).Name}{(UseSecondaryCoord ? " 2" : "")}";
 
 	/// <summary>
 	/// Coordinate result
@@ -875,6 +898,6 @@ public sealed class TextureCoord : ShaderNodePlus
 	[Hide]
 	public NodeResult.Func Result => ( GraphCompiler compiler ) =>
 	{
-		return compiler.GetTextureCoordinates( Tiling, UseSecondaryCoord );
+		return compiler.GetTextureCoordinates( Tiling, CoordinateChannel );
 	};
 }

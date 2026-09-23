@@ -8,6 +8,18 @@ namespace ShaderGraphPlus;
 
 public sealed partial class GraphCompiler
 {
+	public enum TextureCoordinateChannel
+	{
+		[Title( "UV0" ), Description( "vTextureCoords.xy" )]
+		UV0,
+		[Title( "UV1" ), Description( "vTextureCoords.zw" )]
+		UV1,
+		[Title( "UV2" ), Description( "vTexCoord3" )]
+		UV2, 
+		[Title( "UV3" ), Description( "vTexCoord4" )]
+		UV3,
+	}
+
 	public struct GraphIssue
 	{
 		public BaseNodePlus Node;
@@ -354,21 +366,30 @@ public sealed partial class GraphCompiler
 		result.Globals.Add( name, global );
 	}
 
-	public NodeResult GetTextureCoordinates( Vector2 tiling, bool useSecondaryCoord = false )
+	public NodeResult GetTextureCoordinates( Vector2 tiling, TextureCoordinateChannel coordinateChannel )
 	{
 		var result = "";
+
+		var coords = coordinateChannel switch
+		{
+			TextureCoordinateChannel.UV0 => "i.vTextureCoords.xy",
+			TextureCoordinateChannel.UV1 => "i.vTextureCoords.zw",
+			TextureCoordinateChannel.UV2 => "i.vTexCoord3",
+			TextureCoordinateChannel.UV3 => "i.vTexCoord4",
+			_ => "i.vTextureCoords.xy",
+		};
 
 		if ( IsSurfaceShader )
 		{
 			if ( IsPreview )
 			{
-				result = $"{ResultValue( useSecondaryCoord )} ? i.vTextureCoords.zw : i.vTextureCoords.xy";
+				result = coords;//$"{ResultValue( useSecondaryCoord )} ? i.vTextureCoords.zw : i.vTextureCoords.xy";
 				return new( ResultType.Vector2, $"{ResultValue( tiling.IsNearZeroLength )} ? {result} : ({result}) * {ResultValue( tiling )}" );
 
 			}
 			else
 			{
-				result = useSecondaryCoord ? "i.vTextureCoords.zw" : "i.vTextureCoords.xy";
+				result = coords;
 			}
 		}
 		else

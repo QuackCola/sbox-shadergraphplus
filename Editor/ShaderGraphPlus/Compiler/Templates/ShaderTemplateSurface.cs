@@ -32,10 +32,8 @@ COMMON
 struct VertexInput
 {
 	#include ""common/vertexinput.hlsl""
-
 	float2 vTexCoord3 : TEXCOORD4 < Semantic( LowPrecisionUv2 ); >; 
 	float2 vTexCoord4 : TEXCOORD5 < Semantic( LowPrecisionUv3 ); >;
-
 	float4 vColor : COLOR0 < Semantic( Color ); >;
 /*sgp_vertex_input_data*/
 };
@@ -43,6 +41,8 @@ struct VertexInput
 struct PixelInput
 {
 	#include ""common/pixelinput.hlsl""
+	float2 vTexCoord3 : TEXCOORD8;
+	float2 vTexCoord4 : TEXCOORD9;
 	float3 vPositionOs : TEXCOORD14;
 	float3 vNormalOs : TEXCOORD15;
 	float4 vTangentUOs_flTangentVSign : TANGENT	< Semantic( TangentU_SignV ); >;
@@ -67,6 +67,8 @@ VS
 		PixelInput i = ProcessVertex( v );
 		i.vPositionOs = v.vPositionOs.xyz;
 		i.vColor = v.vColor;
+		i.vTexCoord3 = v.vTexCoord3;
+		i.vTexCoord4 = v.vTexCoord4;
 
 		ExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( v.nInstanceTransformID );
 		i.vTintColor = extraShaderData.vTint;
