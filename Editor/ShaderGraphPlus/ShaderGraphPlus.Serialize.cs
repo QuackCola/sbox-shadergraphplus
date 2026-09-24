@@ -312,16 +312,7 @@ partial class ShaderGraphPlus
 
 					if ( string.IsNullOrWhiteSpace( parameter.Name ) )
 					{
-						var name = $"{(IsSubgraph ? "SubgraphInput" : "MaterialParameter")}";
-						var id = name;
-						int count = 0;
-
-						while ( parameters.ContainsKey( id ) )
-						{
-							id = $"{name}_{count++}";
-						}
-
-						parameter.Name = id;
+						parameter.Name = UniqueParameterName( $"{(IsSubgraph ? "SubgraphInput" : "MaterialParameter")}" );
 					}
 
 					parameters.Add( parameter.Name, parameter );
