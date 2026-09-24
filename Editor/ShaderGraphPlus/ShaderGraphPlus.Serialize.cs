@@ -18,6 +18,8 @@ partial class ShaderGraphPlus
 	{
 		internal const string Version = "__version";
 		internal const string Class = "_class";
+		internal const string Identifier = "Identifier";
+		
 		internal const string NodeArray = "nodes";
 		internal const string ParameterArray = "parameters";
 
@@ -417,7 +419,7 @@ partial class ShaderGraphPlus
 			if ( property.PropertyType == typeof( NodeInput ) )
 				continue;
 
-			if ( property.Name == "Identifier" )
+			if ( property.Name == JsonKeys.Identifier )
 				continue;
 
 			if ( property.IsDefined( typeof( JsonIgnoreAttribute ) ) )
@@ -471,7 +473,7 @@ partial class ShaderGraphPlus
 
 			if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
 			{
-				nodeObject.Add( "Identifier", newIdentifier );
+				nodeObject.Add( JsonKeys.Identifier, newIdentifier );
 			}
 
 			SerializeObject( node, nodeObject, options, identifiers );
@@ -516,7 +518,7 @@ partial class ShaderGraphPlus
 			var parameterObject = new JsonObject
 			{
 				{ JsonKeys.Class, type.Name },
-				{ "Identifier", parameter.Identifier }
+				{ JsonKeys.Identifier, parameter.Identifier }
 			};
 
 			SerializeObject( parameter, parameterObject, options );
@@ -561,7 +563,7 @@ partial class ShaderGraphPlus
 			var groupDataObject = new JsonObject
 			{
 				{ JsonKeys.Class, type.Name },
-				{ "Identifier", group.Identifier }
+				{ JsonKeys.Identifier, group.Identifier }
 			};
 
 			SerializeObject( group, groupDataObject, options );
