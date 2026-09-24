@@ -3,7 +3,8 @@
 namespace ShaderGraphPlus;
 
 public partial class ShaderGraphPlus
-{   /// <summary>
+{
+	/// <summary>
 	/// Changes : <br/>
 	/// - Replace Domain with ShaderType.
 	/// </summary>
