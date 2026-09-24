@@ -96,7 +96,7 @@ public class Properties : Widget
 	{
 		switch ( _target )
 		{
-			case ShaderGraphPlus graph:
+			case ShaderGraphPlus:
 				_header.Text = "Graph Settings";
 				_header.Icon = "settings";
 				break;
@@ -115,7 +115,7 @@ public class Properties : Widget
 				_header.Text = $"{(!string.IsNullOrWhiteSpace( baseName ) ? $"{baseName} " : "")}{parameter.DisplayInfo.Name ?? parameter.GetType().Name}";
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
 				break;
-			case GroupData group:
+			case GroupData:
 				_header.Text = "Group";
 				_header.Icon = "folder";
 				break;
