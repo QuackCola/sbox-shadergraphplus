@@ -109,7 +109,10 @@ public class Properties : Widget
 				_header.Icon = node.DisplayInfo.Icon ?? "account_tree";
 				break;
 			case BlackboardParameter parameter:
-				_header.Text = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+				var sgp = parameter.Graph as ShaderGraphPlus;
+				var baseName = sgp.IsSubgraph ? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}" : "";
+
+				_header.Text = $"{(!string.IsNullOrWhiteSpace( baseName ) ? $"{baseName} " : "")}{parameter.DisplayInfo.Name ?? parameter.GetType().Name}";
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
 				break;
 			case GroupData group:
