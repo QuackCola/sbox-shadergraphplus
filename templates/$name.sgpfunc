@@ -23,8 +23,8 @@
   "nodes": [
     {
       "_class": "SubgraphOutput",
-      "ParameterIdentifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
       "Identifier": "0",
+      "ParameterIdentifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
       "Position": "0,0",
       "HandleOffsets": {}
     }
@@ -32,10 +32,10 @@
   "parameters": [
     {
       "_class": "Float3SubgraphOutputParameter",
+      "Identifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
       "Name": "SubgraphOutput",
       "Description": "",
       "Preview": "Albedo",
-      "Identifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
       "Group": ""
     }
   ],
