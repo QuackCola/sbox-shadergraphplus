@@ -708,7 +708,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		var oldPriority = target.Priority;
 		target.Priority = newPriority;
 
-		if ( newPriority > oldPriority ) // Category moved down the list
+		if ( newPriority > oldPriority ) // Group moved down the list
 		{
 			foreach ( var kvp in _groupData )
 			{
@@ -720,7 +720,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 				}
 			}
 		}
-		else if ( newPriority < oldPriority ) // Category moved up the list
+		else if ( newPriority < oldPriority ) // Group moved up the list
 		{
 			foreach ( var kvp in _groupData )
 			{
