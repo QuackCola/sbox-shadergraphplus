@@ -23,7 +23,7 @@
   "nodes": [
     {
       "_class": "SubgraphOutput",
-      "ParameterIdentifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc",
+      "ParameterIdentifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
       "Identifier": "0",
       "Position": "0,0",
       "HandleOffsets": {}
@@ -32,13 +32,23 @@
   "parameters": [
     {
       "_class": "Float3SubgraphOutputParameter",
-      "Name": "SubgraphOutput0",
+      "Name": "SubgraphOutput",
       "Description": "",
-      "PortOrder": 0,
       "Preview": "Albedo",
-      "Identifier": "56022ee5-9c59-48c1-8458-52c33c32d8cc"
+      "Identifier": "09893d72-f5e4-4c08-ba63-60364fd7fb2c",
+      "Group": ""
     }
   ],
-  "categoryData": [],
-  "__version": 11
+  "groupData": [
+    {
+      "_class": "GroupData",
+      "Identifier": "7e8869df-ae54-4a8b-9223-be42695d391f",
+      "Name": "General",
+      "Priority": 0,
+      "ParameterReferences": [
+        "09893d72-f5e4-4c08-ba63-60364fd7fb2c"
+      ]
+    }
+  ],
+  "__version": 12
 }
