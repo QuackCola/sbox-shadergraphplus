@@ -27,7 +27,7 @@ public partial class ShaderGraphPlus
 
 		foreach ( var jsonNode in oldCategoryDataArray )
 		{
-			if ( jsonNode["Identifier"] is not JsonValue identifierValue )
+			if ( jsonNode[JsonKeys.Identifier] is not JsonValue identifierValue )
 				continue;
 
 			if ( jsonNode["Name"] is not JsonValue nameValue )
@@ -76,7 +76,7 @@ public partial class ShaderGraphPlus
 					newParameterObj.Remove( "Group" );
 					newParameterObj.Add( "Group", "" );
 
-					JsonUtils.GetPropertyValue( newParameterObj, "Identifier", SerializerOptions(), Guid.Empty, out var parameterReference );
+					JsonUtils.GetPropertyValue( newParameterObj, JsonKeys.Identifier, SerializerOptions(), Guid.Empty, out var parameterReference );
 
 					if ( !groupsToAdd.ContainsKey( "General" ) )
 					{
