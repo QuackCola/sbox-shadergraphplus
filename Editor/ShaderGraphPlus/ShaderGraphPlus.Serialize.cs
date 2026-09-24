@@ -417,6 +417,9 @@ partial class ShaderGraphPlus
 			if ( property.PropertyType == typeof( NodeInput ) )
 				continue;
 
+			if ( property.Name == "Identifier" )
+				continue;
+
 			if ( property.IsDefined( typeof( JsonIgnoreAttribute ) ) )
 				continue;
 
@@ -425,13 +428,6 @@ partial class ShaderGraphPlus
 				propertyName = jpna.Name;
 
 			var propertyValue = property.GetValue( obj );
-			if ( propertyName == "Identifier" && propertyValue is string identifier )
-			{
-				if ( identifiers.TryGetValue( identifier, out var newIdentifier ) )
-				{
-					propertyValue = newIdentifier;
-				}
-			}
 
 			if ( propertyName != "Version" )
 			{
@@ -473,6 +469,11 @@ partial class ShaderGraphPlus
 			var type = node.GetType();
 			var nodeObject = new JsonObject { { JsonKeys.Class, type.Name } };
 
+			if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
+			{
+				nodeObject.Add( "Identifier", newIdentifier );
+			}
+
 			SerializeObject( node, nodeObject, options, identifiers );
 
 			nodeArray.Add( nodeObject );
@@ -512,7 +513,11 @@ partial class ShaderGraphPlus
 		foreach ( var parameter in parameters )
 		{
 			var type = parameter.GetType();
-			var parameterObject = new JsonObject { { JsonKeys.Class, type.Name } };
+			var parameterObject = new JsonObject
+			{
+				{ JsonKeys.Class, type.Name },
+				{ "Identifier", parameter.Identifier }
+			};
 
 			SerializeObject( parameter, parameterObject, options );
 
@@ -546,16 +551,20 @@ partial class ShaderGraphPlus
 		return doc;
 	}
 
-	private static void SerializeGroupData( IEnumerable<GroupData> data, JsonObject doc, JsonSerializerOptions options )
+	private static void SerializeGroupData( IEnumerable<GroupData> groups, JsonObject doc, JsonSerializerOptions options )
 	{
 		var groupDataArray = new JsonArray();
 
-		foreach ( var parameter in data )
+		foreach ( var group in groups )
 		{
-			var type = parameter.GetType();
-			var groupDataObject = new JsonObject { { JsonKeys.Class, type.Name } };
+			var type = group.GetType();
+			var groupDataObject = new JsonObject
+			{
+				{ JsonKeys.Class, type.Name },
+				{ "Identifier", group.Identifier }
+			};
 
-			SerializeObject( parameter, groupDataObject, options );
+			SerializeObject( group, groupDataObject, options );
 
 			groupDataArray.Add( groupDataObject );
 		}
