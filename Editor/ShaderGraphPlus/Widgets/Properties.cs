@@ -74,7 +74,7 @@ public class Properties : Widget
 	[MethodImpl( MethodImplOptions.AggressiveInlining )]
 	public bool IsTarget<T>( out T targetValue )
 	{
-		targetValue = default( T );
+		targetValue = default;
 
 		if ( Target is T target )
 		{
