@@ -64,7 +64,7 @@ public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParamet
 
 public abstract class BlackboardParameter : IGroupableBlackboardParameter, IValid
 {
-	[Hide, Browsable( false ), Order( 0 )]
+	[Hide, Browsable( false )]
 	public Guid Identifier { get; set; }
 
 	[Browsable( false )]
