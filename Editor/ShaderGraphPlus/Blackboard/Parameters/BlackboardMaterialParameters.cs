@@ -286,12 +286,6 @@ public sealed class SamplerStateParameter : BlackboardParameter, IGroupableBlack
 	[InlineEditor( Label = false ), Group( "Value" )]
 	public Sampler Value { get; set; }
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	public SamplerStateParameter() : base()
 	{
 		Value = new Sampler();
@@ -299,7 +293,7 @@ public sealed class SamplerStateParameter : BlackboardParameter, IGroupableBlack
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()
@@ -355,19 +349,13 @@ public sealed class ShaderFeatureBooleanParameter : BlackboardParameter, IBlackb
 	[Title( "Preview" )]
 	public bool Preview { get; set; } = false;
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	public ShaderFeatureBooleanParameter() : base()
 	{
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()
@@ -424,12 +412,6 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 	[Title( "Preview" )]
 	public int PreviewIndex { get; set; } = 0;
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	public ShaderFeatureEnumParameter() : base()
 	{
 		Options = new List<ShaderFeatureEnumOption>();
@@ -439,6 +421,7 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 	{
 		HashCode hc = new HashCode();
 		hc.Add( Name );
+		hc.Add( Group );
 		hc.Add( Description );
 		hc.Add( HeaderName );
 

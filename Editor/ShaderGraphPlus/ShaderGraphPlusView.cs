@@ -1,6 +1,7 @@
 ﻿using Editor;
 using NodeEditorPlus;
 using ShaderGraphPlus.Nodes;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -16,7 +17,7 @@ public class ShaderGraphPlusView : GraphView
 	}
 
 	private readonly MainWindow _window;
-	private readonly ShaderGraphPlusBlackboardView _blackboard;
+	private readonly BlackboardView _blackboard;
 	private readonly UndoStack _undoStack;
 
 	private DragEventSource _currentDragEventSource = DragEventSource.None;
@@ -29,8 +30,8 @@ public class ShaderGraphPlusView : GraphView
 
 	public static bool EnableGridAlignedWires
 	{
-		get => _cachedConnectionStyle ??= EditorCookie.Get( "shadergraphplus.gridwires", false );
-		set => EditorCookie.Set( "shadergraphplus.gridwires", _cachedConnectionStyle = value );
+		get => _cachedConnectionStyle ??= EditorCookie.Get( EditorCookieNames.ShaderGraphPlusGridWires, false );
+		set => EditorCookie.Set( EditorCookieNames.ShaderGraphPlusGridWires, _cachedConnectionStyle = value );
 	}
 
 	private ConnectionStyle _oldConnectionStyle;
@@ -50,7 +51,7 @@ public class ShaderGraphPlusView : GraphView
 	? GridConnectionStyle.Instance
 	: ConnectionStyle.Default;
 
-	public ShaderGraphPlusView( Widget parent, MainWindow window, ShaderGraphPlusBlackboardView blackboard ) : base( parent )
+	public ShaderGraphPlusView( Widget parent, MainWindow window, BlackboardView blackboard ) : base( parent )
 	{
 		_window = window;
 		_blackboard = blackboard;
@@ -129,7 +130,7 @@ public class ShaderGraphPlusView : GraphView
 
 						return new ParameterNodeType( EditorTypeLibrary.GetType<Texture2DParameterNode>(), asset.AssetPath, () =>
 						{
-							_blackboard.RebuildFromGraph( true );
+							_blackboard.RebuildFromGraph();
 						}
 						);
 					}
@@ -137,7 +138,7 @@ public class ShaderGraphPlusView : GraphView
 			}
 		}
 
-		if ( ev.Data.Object is not BlackboardGroupTreeNode && ev.Data.Object is ShaderGraphPlusParameterTreeNode parameterTreeNode && parameterTreeNode.Value is BlackboardParameter parameter )
+		if ( ev.Data.Object is ParameterDragData parameterDragData && parameterDragData.Parameter is BlackboardParameter parameter )
 		{
 			_currentDragEventSource = DragEventSource.Blackboard;
 
@@ -566,7 +567,7 @@ public class ShaderGraphPlusView : GraphView
 
 		Add( nodeUI );
 
-		_blackboard.RebuildFromGraph( true );
+		_blackboard.RebuildFromGraph();
 
 		return node;
 	}
@@ -851,7 +852,7 @@ public class ShaderGraphPlusView : GraphView
 			{
 				Graph.RemoveParameter( parameterNode.ParameterIdentifier );
 
-				_blackboard.RebuildFromGraph( true );
+				_blackboard.RebuildFromGraph();
 			}
 		}
 

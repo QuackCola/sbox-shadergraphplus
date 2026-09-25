@@ -23,15 +23,15 @@
   "nodes": [
     {
       "_class": "Result",
+      "Identifier": "0",
       "DefaultOpacity": 1,
       "DefaultRoughness": 1,
       "DefaultMetalness": 0,
       "DefaultAmbientOcclusion": 1,
-      "Identifier": "0",
       "Position": "0,0"
     }
   ],
   "parameters": [],
-  "categoryData": [],
-  "__version": 11
+  "groupData": [],
+  "__version": 12
 }

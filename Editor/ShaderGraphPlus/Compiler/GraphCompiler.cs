@@ -1103,7 +1103,6 @@ public sealed partial class GraphCompiler
 		{
 			isAttribute = materialParameter.IsAttribute;
 
-			// Getting the Priority from the OrderedDictionary now :3
 			var newUI = materialParameter.UI;
 			newUI.Priority = priority;
 			parameterUI = newUI;
@@ -1111,19 +1110,16 @@ public sealed partial class GraphCompiler
 
 		if ( parameter is IGroupableBlackboardParameter groupableParameter )
 		{
-			if ( groupableParameter.IsGrouped )
+			if ( Graph.TryFindGroupData( string.IsNullOrWhiteSpace( groupableParameter.Group ) ? "General" : groupableParameter.Group, out var groupData ) )
 			{
-				if ( Graph.TryFindCategoryData( groupableParameter.GroupReference, out var category ) )
+				parameterUI.Priority = groupData.ParameterReferences.IndexOf( parameter.Identifier );
+				parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
 				{
-					parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
-					parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
-					{
-						Name = category.Name,
-						Priority = category.Priority
-					};
+					Name = groupData.Name,
+					Priority = Graph.GetGroupDataIndex( groupData )//groupData.Priority
+				};
 
-					//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
-				}
+				//SGPLogger.Info( $"Group \"{groupData.Name}\" with Priority \"{parameterUI.PrimaryGroup.Priority}\"" );
 			}
 		}
 

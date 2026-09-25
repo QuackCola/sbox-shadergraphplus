@@ -74,7 +74,7 @@ public class Properties : Widget
 	[MethodImpl( MethodImplOptions.AggressiveInlining )]
 	public bool IsTarget<T>( out T targetValue )
 	{
-		targetValue = default( T );
+		targetValue = default;
 
 		if ( Target is T target )
 		{
@@ -96,7 +96,7 @@ public class Properties : Widget
 	{
 		switch ( _target )
 		{
-			case ShaderGraphPlus graph:
+			case ShaderGraphPlus:
 				_header.Text = "Graph Settings";
 				_header.Icon = "settings";
 				break;
@@ -109,11 +109,14 @@ public class Properties : Widget
 				_header.Icon = node.DisplayInfo.Icon ?? "account_tree";
 				break;
 			case BlackboardParameter parameter:
-				_header.Text = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+				var sgp = parameter.Graph as ShaderGraphPlus;
+				var baseName = sgp.IsSubgraph ? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}" : "";
+
+				_header.Text = $"{(!string.IsNullOrWhiteSpace( baseName ) ? $"{baseName} " : "")}{parameter.DisplayInfo.Name ?? parameter.GetType().Name}";
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
 				break;
-			case CategoryData category:
-				_header.Text = "Category";
+			case GroupData:
+				_header.Text = "Group";
 				_header.Icon = "folder";
 				break;
 			default:

@@ -102,7 +102,7 @@ public class PreviewSettings
 public partial class ShaderGraphPlus : IBlackboardNodeGraph
 {
 	[Hide]
-	public int Version => 11;
+	public int Version => 12;
 
 	[Hide, JsonIgnore]
 	public IEnumerable<BaseNodePlus> Nodes => _nodes.Values;
@@ -123,10 +123,10 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	IEnumerable<IBlackboardParameter> IBlackboardNodeGraph.Parameters => Parameters;
 
 	[Hide, JsonIgnore]
-	public IEnumerable<CategoryData> CategoryData => _categoryData.Values;
+	public IEnumerable<GroupData> GroupData => _groupData.Values;
 
 	[Hide, JsonIgnore]
-	private readonly OrderedDictionary<Guid, CategoryData> _categoryData = new();
+	private readonly OrderedDictionary<Guid, GroupData> _groupData = new();
 
 	/// <summary>
 	///	Custom key-value storage for this project.
@@ -299,32 +299,81 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		AddParameter( (BlackboardParameter)parameter );
 	}
 
+	public void AddParameter( BlackboardParameter parameter, int index = -1 )
+	{
+		parameter.Graph = this;
+
+		if ( index <= -1 )
+		{
+			_parameters.Add( parameter.Identifier, parameter );
+		}
+		else
+		{
+			_parameters.Insert( index, parameter.Identifier, parameter );
+		}
+	}
+
+	public void AddGroupData( GroupData groupData, int index = -1 )
+	{
+		groupData.Graph = this;
+
+		if ( index < -1 )
+		{
+			throw new IndexOutOfRangeException( $"Invalid Index '{index}' " );
+		}
+
+		if ( index != -1 )
+		{
+			if ( index > _groupData.Count )
+			{
+				_groupData.Add( groupData.Identifier, groupData );
+			}
+			else
+			{
+				_groupData.Insert( index, groupData.Identifier, groupData );
+			}
+		}
+		else
+		{
+			_groupData.Add( groupData.Identifier, groupData );
+		}
+	}
+
 	public void RemoveNode( BaseNodePlus node )
 	{
 		if ( node.Graph != this )
 			return;
 
-		//SGPLog.Info( $"Removing node with id : {node.Identifier}");
+		//SGPLogger.Info( $"Removing node with id : {node.Identifier}");
 
 		_nodes.Remove( node.Identifier );
+	}
+
+	public void RemoveParameter( BlackboardParameter parameter )
+	{
+		if ( parameter.Graph != this )
+			return;
+
+		RemoveParameter( parameter.Identifier );
+	}
+
+	public void RemoveParameter( Guid identifier )
+	{
+		_parameters.Remove( identifier );
+	}
+
+	public void RemoveGroupData( GroupData groupData )
+	{
+		if ( groupData.Graph != this )
+			return;
+
+		_groupData.Remove( groupData.Identifier );
 	}
 
 	public BaseNodePlus FindNode( string name )
 	{
 		_nodes.TryGetValue( name, out var node );
 		return node;
-	}
-
-	public int GetParameterIndex( BlackboardParameter parameter )
-	{
-		var index = _parameters.IndexOf( parameter.Identifier );
-
-		if ( index != -1 )
-		{
-			return index;
-		}
-
-		return 0;
 	}
 
 	public BlackboardParameter FindParameter( Guid identifier )
@@ -337,6 +386,11 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	{
 		var parameter = _parameters.Values.FirstOrDefault( x => x.Name == name );
 		return parameter;
+	}
+
+	public bool HasParameterWithName( string name )
+	{
+		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
 	}
 
 	public bool TryFindParameter( Guid identifier, out BlackboardParameter parameter )
@@ -365,32 +419,42 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public bool TryFindParameter<T>( Guid identifier, out T parameter ) where T : BlackboardParameter
 	{
-		parameter = null;
-
-		if ( _parameters.TryGetValue( identifier, out var foundParameter ) )
-		{
-			parameter = (T)foundParameter;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public bool TryFindParameter<T>( string name, out T parameter ) where T : BlackboardParameter
-	{
-		parameter = (T)_parameters.Values.FirstOrDefault( x => x.Name == name );
+		parameter = FindParameter<T>( identifier );
 
 		return parameter != null;
 	}
 
-	public bool TryFindCategoryData( Guid identifier, out CategoryData categoryData )
+	public bool TryFindParameter<T>( string name, out T parameter ) where T : BlackboardParameter
 	{
-		categoryData = null;
+		parameter = FindParameter<T>( name );
 
-		if ( _categoryData.TryGetValue( identifier, out var foundCategoryData ) )
+		return parameter != null;
+	}
+
+	public GroupData FindGroupData( string name )
+	{
+		var groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
+
+		if ( groupData != null )
 		{
-			categoryData = foundCategoryData;
+			return groupData;
+		}
+
+		return null;
+	}
+
+	public bool HasGroupDataWithName( string name )
+	{
+		return _groupData.Any( x => x.Value.Name == name );
+	}
+
+	public bool TryFindGroupData( Guid identifier, out GroupData groupData )
+	{
+		groupData = null;
+
+		if ( _groupData.TryGetValue( identifier, out var foundGroupData ) )
+		{
+			groupData = foundGroupData;
 
 			return true;
 		}
@@ -398,34 +462,103 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return false;
 	}
 
-	public bool HasParameterWithName( string name )
+	public bool TryFindGroupData( string name, out GroupData groupData )
 	{
-		return _parameters.Any( x => string.Equals( x.Value.Name, name, StringComparison.CurrentCultureIgnoreCase ) );
-	}
+		groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
 
-	public bool HasCategoryDataWithName( string name )
-	{
-		return _categoryData.Any( x => x.Value.Name == name );
-	}
-
-	public void AddParameter( BlackboardParameter parameter, int index = -1 )
-	{
-		parameter.Graph = this;
-
-		if ( index <= -1 )
+		if ( groupData != null )
 		{
-			_parameters.Add( parameter.Identifier, parameter );
+			return true;
 		}
-		else
+
+		return false;
+	}
+
+	public int GetParameterIndex( BlackboardParameter parameter )
+	{
+		var index = _parameters.IndexOf( parameter.Identifier );
+
+		if ( index != -1 )
 		{
-			_parameters.Insert( index, parameter.Identifier, parameter );
+			return index;
+		}
+
+		return 0;
+	}
+
+	public int GetGroupDataIndex( string name )
+	{
+		var groupData = FindGroupData( name );
+		var index = _groupData.IndexOf( groupData.Identifier );
+
+		if ( index != -1 )
+		{
+			return index;
+		}
+
+		return 0;
+	}
+
+	public int GetGroupDataIndex( GroupData groupData )
+	{
+		var index = _groupData.IndexOf( groupData.Identifier );
+
+		if ( index != -1 )
+		{
+			return index;
+		}
+
+		return 0;
+	}
+
+	public int GetParameterIndexInGroup( string group, Guid refernce )
+	{
+		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
+		var category = _groupData.FirstOrDefault( x => x.Value.Name == group ).Value;
+
+		if ( category != null )
+		{
+			return category.ParameterReferences.IndexOf( refernce );
+		}
+
+		return 0;
+	}
+
+	/// <summary>
+	/// A parameter name not taken yet - the name itself, or "name 1", "name 2"...
+	/// </summary>
+	public string UniqueParameterName( string baseName )
+	{
+		var names = Parameters.Select( p => p.Name )
+			.ToHashSet( StringComparer.OrdinalIgnoreCase );
+
+		if ( !names.Contains( baseName ) )
+			return baseName;
+
+		for ( var i = 1; ; i++ )
+		{
+			if ( !names.Contains( $"{baseName}{i}" ) )
+				return $"{baseName}{i}";
 		}
 	}
 
-	public void AddCategoryData( CategoryData categoryData )
+
+	/// <summary>
+	/// A group name not taken yet - the name itself, or "name 1", "name 2"...
+	/// </summary>
+	public string UniqueGroupName( string baseName )
 	{
-		categoryData.Graph = this;
-		_categoryData.Add( categoryData.Identifier, categoryData );
+		var names = GroupData.Select( g => g.Name )
+			.ToHashSet( StringComparer.OrdinalIgnoreCase );
+
+		if ( !names.Contains( baseName ) )
+			return baseName;
+
+		for ( var i = 1; ; i++ )
+		{
+			if ( !names.Contains( $"{baseName}{i}" ) )
+				return $"{baseName}{i}";
+		}
 	}
 
 	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
@@ -433,13 +566,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		if ( parameter.Graph != this )
 			return false;
 
-		if ( newIndex <= -1 )
+		if ( newIndex < -1 )
 		{
-			//throw new IndexOutOfRangeException( $"New Index Invalid '{newIndex}'" );
-
-			SGPLogger.Error( $"New Index Invalid '{newIndex}'" );
-
-			return false;
+			throw new IndexOutOfRangeException( $"Invalid newIndex '{newIndex}'" );
 		}
 
 		_parameters.Remove( parameter.Identifier );
@@ -451,6 +580,33 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		else
 		{
 			_parameters.Insert( newIndex, parameter.Identifier, parameter );
+		}
+
+		return true;
+	}
+
+	public bool ReOrderGroup( GroupData groupData, int newIndex )
+	{
+		if ( groupData.Graph != this )
+		{
+			SGPLogger.Error( $"Wrong Graph!!!" );
+			return false;
+		}
+
+		if ( newIndex < -1 )
+		{
+			throw new IndexOutOfRangeException( $"Invalid newIndex '{newIndex}'" );
+		}
+
+		_groupData.Remove( groupData.Identifier );
+
+		if ( newIndex > _groupData.Count )
+		{
+			_groupData.Add( groupData.Identifier, groupData );
+		}
+		else
+		{
+			_groupData.Insert( newIndex, groupData.Identifier, groupData );
 		}
 
 		return true;
@@ -473,49 +629,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_parameters[identifier].SetValue( value );
 	}
 
-	public void RemoveParameter( BlackboardParameter parameter )
-	{
-		if ( parameter.Graph != this )
-			return;
-
-		RemoveParameter( parameter.Identifier );
-	}
-
-	public void RemoveParameter( Guid identifier )
-	{
-		_parameters.Remove( identifier );
-	}
-
-	public void RemoveCategoryData( CategoryData categoryData )
-	{
-		if ( categoryData.Graph != this )
-			return;
-
-		_categoryData.Remove( categoryData.Identifier );
-	}
-
-	public void UpdateCategoryData( CategoryData categoryData )
-	{
-		if ( categoryData.Graph != this )
-			return;
-
-		_categoryData[categoryData.Identifier] = categoryData;
-	}
-
-	internal NamedRerouteDeclarationNode FindNamedRerouteDeclarationNode( string name )
-	{
-		var node = Nodes.OfType<NamedRerouteDeclarationNode>().Where( x => x.Name == name ).FirstOrDefault();
-
-		if ( node != null )
-		{
-			return node;
-		}
-
-		SGPLogger.Error( $"Could not find NamedReroute \"{name}\"" );
-
-		return null;
-	}
-
 	public void ClearNodes()
 	{
 		_nodes.Clear();
@@ -526,9 +639,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		_parameters.Clear();
 	}
 
-	public void ClearCategoryData()
+	public void ClearGroupData()
 	{
-		_categoryData.Clear();
+		_groupData.Clear();
 	}
 
 	string INodeGraph.SerializeNodes( IEnumerable<IGraphNode> nodes )
@@ -576,14 +689,28 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return FindParameter( identifier );
 	}
 
-	internal void UpdateCategoryPriority( CategoryData target, int newPriority )
+	internal NamedRerouteDeclarationNode FindNamedRerouteDeclarationNode( string name )
+	{
+		var node = Nodes.OfType<NamedRerouteDeclarationNode>().Where( x => x.Name == name ).FirstOrDefault();
+
+		if ( node != null )
+		{
+			return node;
+		}
+
+		SGPLogger.Error( $"Could not find NamedReroute \"{name}\"" );
+
+		return null;
+	}
+
+	internal void UpdateGroupDataPriority( GroupData target, int newPriority )
 	{
 		var oldPriority = target.Priority;
 		target.Priority = newPriority;
 
-		if ( newPriority > oldPriority ) // Category moved down the list
+		if ( newPriority > oldPriority ) // Group moved down the list
 		{
-			foreach ( var kvp in _categoryData )
+			foreach ( var kvp in _groupData )
 			{
 				if ( kvp.Value != target &&
 					kvp.Value.Priority > oldPriority &&
@@ -593,9 +720,9 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 				}
 			}
 		}
-		else if ( newPriority < oldPriority ) // Category moved up the list
+		else if ( newPriority < oldPriority ) // Group moved up the list
 		{
-			foreach ( var kvp in _categoryData )
+			foreach ( var kvp in _groupData )
 			{
 				if ( kvp.Value != target &&
 					kvp.Value.Priority >= newPriority &&
