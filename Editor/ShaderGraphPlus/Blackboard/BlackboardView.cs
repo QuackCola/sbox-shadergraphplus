@@ -1,5 +1,4 @@
 ﻿using Editor;
-using static Editor.Label;
 using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
