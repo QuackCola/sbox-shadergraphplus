@@ -1,5 +1,4 @@
-﻿using Sandbox.Resources;
-using System.Text;
+﻿using System.Text;
 
 namespace ShaderGraphPlus;
 
