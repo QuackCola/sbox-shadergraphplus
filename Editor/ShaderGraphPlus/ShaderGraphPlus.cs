@@ -433,7 +433,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public GroupData FindGroupData( string name )
 	{
-		var groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
+		var groupData = _groupData.FirstOrDefault( x => x.Value.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ).Value;
 
 		if ( groupData != null )
 		{
@@ -445,7 +445,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public bool HasGroupDataWithName( string name )
 	{
-		return _groupData.Any( x => x.Value.Name == name );
+		return _groupData.Any( x => x.Value.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
 	}
 
 	public bool TryFindGroupData( Guid identifier, out GroupData groupData )
@@ -464,7 +464,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	public bool TryFindGroupData( string name, out GroupData groupData )
 	{
-		groupData = _groupData.FirstOrDefault( x => x.Value.Name == name ).Value;
+		groupData = _groupData.FirstOrDefault( x => x.Value.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ).Value;
 
 		if ( groupData != null )
 		{
@@ -583,6 +583,11 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 
 		return true;
+	}
+
+	public bool ReOrderGroup( string groupName, int newIndex )
+	{
+		return TryFindGroupData( groupName, out var group ) && ReOrderGroup( group, newIndex );
 	}
 
 	public bool ReOrderGroup( GroupData groupData, int newIndex )

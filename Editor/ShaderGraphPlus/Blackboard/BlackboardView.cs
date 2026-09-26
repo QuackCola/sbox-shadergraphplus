@@ -1,4 +1,5 @@
 ﻿using Editor;
+using static Editor.Label;
 using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
@@ -74,7 +75,7 @@ public class BlackboardView : Widget
 
 		ToolButton addButton = null;
 		addButton = toolbar.Add( HeaderButton( "add",
-			"<b>Add Parameter</b><p>Adds a shader parameter</p>",
+			"<b>Add Parameter</b>",
 			() => OpenAddMenu( addButton ) ) );
 
 		var panel = Layout.Add( new Widget( this ) { Layout = Layout.Column() }, 1 );
@@ -161,11 +162,11 @@ public class BlackboardView : Widget
 		_hasVisibleParameters = groups.Any();
 		var filtering = !string.IsNullOrWhiteSpace( _filter.Text );
 
-		foreach ( var groupedParameter in groups.OrderBy( x => Graph.GetGroupDataIndex( string.IsNullOrWhiteSpace( x.Key ) ? "General" : x.Key ) ) )
+		foreach ( var groupedParameter in groups.OrderBy( x => Graph.GetGroupDataIndex( string.IsNullOrWhiteSpace( x.Key ) ? BlackboardGlobals.EmptyGroupName : x.Key ) ) )
 		{
 			var collapsed = !filtering && _collapsedGroups.Contains( groupedParameter.Key );
 
-			var groupName = string.IsNullOrWhiteSpace( groupedParameter.Key ) ? "General" : groupedParameter.Key;
+			var groupName = string.IsNullOrWhiteSpace( groupedParameter.Key ) ? BlackboardGlobals.EmptyGroupName : groupedParameter.Key;
 
 			//SGPLogger.Info( $"Setting up group \"{groupName}\"" );
 
@@ -253,13 +254,23 @@ public class BlackboardView : Widget
 		}
 	}
 
+	/// <summary>
+	/// Get a normalized version of the <paramref name="parameter"/> name.
+	/// </summary>
+	/// <param name="parameter"></param>
+	/// <returns>The <paramref name="parameter"/> name as-is, or if the <paramref name="parameter"/> is named "General" just an empty string.</returns>
 	internal static string GroupName( IGroupableBlackboardParameter parameter ) => NormalizeGroup( parameter.Group );
 
-	internal static string GroupTitle( string group ) => string.IsNullOrEmpty( group ) ? "General" : group;
+	/// <summary>
+	/// Get a non null, empty or just whitespace version of the <paramref name="groupName"/>.
+	/// </summary>
+	/// <param name="groupName"></param>
+	/// <returns>The <paramref name="groupName"/> if it isnt null, empty or just whitespace, otherwise the empty group name.</returns>
+	internal static string GroupTitle( string groupName ) => string.IsNullOrWhiteSpace( groupName ) ? BlackboardGlobals.EmptyGroupName : groupName;
 
 	internal void Remove( BlackboardParameter parameter )
 	{
-		var parameterNodes = Graph.Nodes.OfType<BlackboardNode>()
+		var parameterNodes = Graph.Nodes.OfType<IBlackboardNode>()
 			.Where( node => node.ParameterIdentifier == parameter.Identifier )
 			.ToArray();
 
@@ -269,7 +280,7 @@ public class BlackboardView : Widget
 
 			foreach ( var node in parameterNodes )
 			{
-				Graph.RemoveNode( node );
+				Graph.RemoveNode( (BaseNodePlus)node );
 			}
 
 			if ( parameterNodes.Any() )
@@ -293,11 +304,11 @@ public class BlackboardView : Widget
 
 		var usages = new List<string>();
 		if ( parameterNodes.Length > 0 )
-			usages.Add( $"{parameterNodes.Length} parameter node{(parameterNodes.Length == 1 ? "" : "s")}" );
+			usages.Add( $"'{parameterNodes.Length}' parameter node{(parameterNodes.Length == 1 ? "" : "s")}" );
 
 		var confirm = new PopupWindow(
 			"Delete Parameter",
-			$"Delete '{parameter.Name}'?\n\nUsed by {string.Join( " and ", usages )}. These references will be cleared.",
+			$"Delete '{parameter.Name}'?\n\nIs referenced by {string.Join( " and ", usages )}. These references will be cleared.",
 			"Cancel",
 			new Dictionary<string, Action> { ["Delete"] = Delete } );
 		confirm.Show();
@@ -344,20 +355,19 @@ public class BlackboardView : Widget
 		BuildFromParameters( Graph.Parameters );
 	}
 
-	internal void MoveToGroup( IGroupableBlackboardParameter parameter, string group )
+	internal void MoveToGroup( IGroupableBlackboardParameter parameter, string targetGroupName )
 	{
-		group = NormalizeGroup( group );
-		if ( GroupName( parameter ).Equals( group, StringComparison.OrdinalIgnoreCase ) )
+		targetGroupName = NormalizeGroup( targetGroupName );
+		if ( GroupName( parameter ).Equals( targetGroupName, StringComparison.OrdinalIgnoreCase ) )
 			return;
 
 		using var undoScope = UndoScope( "Move Parameter" );
 
-		var oldGroup = parameter.Group;
-		parameter.Group = group;
-		ExpandGroup( group );
+		var sourceGroupName = parameter.Group;
+		ExpandGroup( targetGroupName );
 		PruneCollapsedGroups();
 
-		SetGroupData( group, oldGroup, parameter );
+		SetGroupData( sourceGroupName, targetGroupName, parameter );
 
 		_window.OnParameterSelected( parameter );
 	}
@@ -371,27 +381,30 @@ public class BlackboardView : Widget
 		RebuildFromGraph();
 	}
 
-	internal void RenameGroup( string group )
+	internal void RenameGroup( string oldName )
 	{
-		if ( string.IsNullOrEmpty( group ) )
+		if ( string.IsNullOrEmpty( oldName ) )
 			return;
 
-		OpenGroupDialog( "Rename Parameter Group", group, newName =>
+		OpenGroupDialog( "Rename Parameter Group", oldName, newName =>
 		{
 			newName = NormalizeGroup( newName );
-			if ( newName.Equals( group, StringComparison.OrdinalIgnoreCase ) )
+			if ( newName.Equals( oldName, StringComparison.OrdinalIgnoreCase ) )
 				return;
 
 			using var undoScope = UndoScope( "Rename Parameter Group" );
 
-			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
+			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( oldName, StringComparison.OrdinalIgnoreCase ) ))
 			{
-				parameter.Group = newName;
+				SetGroupData( oldName, newName, parameter, true );
 			}
 
-			RenameGroupData( group, newName );
+			if ( GroupTitle( newName ).Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) )
+			{
+				Graph.ReOrderGroup( BlackboardGlobals.EmptyGroupName, 0 );
+			}
 
-			if ( _collapsedGroups.Remove( group ) && !string.IsNullOrEmpty( newName ) )
+			if ( _collapsedGroups.Remove( oldName ) && !string.IsNullOrEmpty( newName ) )
 				_collapsedGroups.Add( newName );
 
 			PruneCollapsedGroups();
@@ -408,8 +421,7 @@ public class BlackboardView : Widget
 		foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
 		{
 			// Migrate each parameter to the 'General' group.
-			SetGroupData( "", parameter.Group, parameter );
-			parameter.Group = "";
+			SetGroupData( parameter.Group, "",  parameter );
 		}
 
 		_collapsedGroups.Remove( group );
@@ -419,7 +431,7 @@ public class BlackboardView : Widget
 	internal void AddGroupOptions( Menu menu, IGroupableBlackboardParameter parameter )
 	{
 		var groups = menu.AddMenu( "Move to Group", "folder" );
-		groups.AddOption( "General", string.IsNullOrEmpty( GroupName( parameter ) ) ? "check" : "", () => MoveToGroup( parameter, "" ) );
+		groups.AddOption( BlackboardGlobals.EmptyGroupName, string.IsNullOrEmpty( GroupName( parameter ) ) ? "check" : "", () => MoveToGroup( parameter, "" ) );
 
 		foreach ( var group in ExistingGroups() )
 		{
@@ -452,7 +464,7 @@ public class BlackboardView : Widget
 	{
 		var menu = CreateMenu();
 		AddParameterOptions( menu, "" );
-		AddGroupedOptions( menu, false );
+		//AddGroupedOptions( menu, false );
 		menu.OpenAt( anchor.ScreenRect.BottomLeft );
 	}
 
@@ -471,23 +483,12 @@ public class BlackboardView : Widget
 		}
 	}
 
-	private void RenameGroupData( string oldName, string newName )
-	{
-		if ( Graph is null )
-			return;
-
-		if ( Graph.TryFindGroupData( oldName, out var existingGroup ) )
-		{
-			existingGroup.Name = newName;
-		}
-	}
-
 	private void RemoveParameterFromGroupData( BlackboardParameter parameter )
 	{
 		if ( Graph is null )
 			return;
 
-		var group = string.IsNullOrWhiteSpace( parameter.Group ) ? "General" : parameter.Group;
+		var group = string.IsNullOrWhiteSpace( parameter.Group ) ? BlackboardGlobals.EmptyGroupName : parameter.Group;
 
 		if ( Graph.TryFindGroupData( group, out var groupData ) )
 		{
@@ -500,37 +501,71 @@ public class BlackboardView : Widget
 		}
 	}
 
-	private void SetGroupData( string group, string oldGroup, IBlackboardParameter parameter )
+	private void SetGroupData( string sourceGroupName, string targetGroupName, IGroupableBlackboardParameter parameter, bool renaming = false )
 	{
-		if ( Graph is null )
-			return;
-
-		oldGroup = string.IsNullOrWhiteSpace( oldGroup ) ? "General" : oldGroup;
-		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
-
-		//SGPLogger.Info( $"Moving Parameter \"{parameter.Name}\" from group \"{oldGroup}\" to group \"{group}\"" );
-
-		if ( oldGroup != group && Graph.TryFindGroupData( oldGroup, out var oldGroupData ) )
+		void RemoveParameterFromGroup( GroupData group )
 		{
-			oldGroupData.ParameterReferences.Remove( parameter.Identifier );
-
-			if ( oldGroupData.ParameterReferences.Count == 0 )
+			group.ParameterReferences.Remove( parameter.Identifier );
+		
+			if ( group.ParameterReferences.Count == 0 )
 			{
-				Graph.RemoveGroupData( oldGroupData );
+				Graph.RemoveGroupData( group );
 			}
 		}
 
-		if ( !Graph.HasGroupDataWithName( group ) )
-		{
-			var groupData = new GroupData();
-			groupData.Name = group;
-			groupData.ParameterReferences.Add( parameter.Identifier );
+		if ( Graph is null )
+			return;
 
-			Graph.AddGroupData( groupData, group == "General" ? 0 : -1 );
-		}
-		else if ( Graph.TryFindGroupData( group, out var existingGroup ) )
+		sourceGroupName = GroupTitle( sourceGroupName );
+		parameter.Group = targetGroupName;
+		targetGroupName = GroupTitle( targetGroupName );
+
+		//SGPLogger.Info( $"Moving Parameter \"{parameter.Name}\" from group \"{sourceGroupName}\" to group \"{targetGroupName}\"" );
+
+		if ( renaming )
 		{
-			existingGroup.ParameterReferences.Add( parameter.Identifier );
+			if ( Graph.TryFindGroupData( targetGroupName, out var targetGroupData ) )
+			{
+				if ( Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData ) )
+				{
+					RemoveParameterFromGroup( sourceGroupData );
+				}
+				
+				if ( !targetGroupData.ParameterReferences.Contains( parameter.Identifier ) )
+				{
+					targetGroupData.ParameterReferences.Add( parameter.Identifier );
+				}
+			}
+			else if ( Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData ) )
+			{
+				// Just rename the source group to the targetGroupName
+				// if a group with the targetGroupName does not exist yet.
+				sourceGroupData.Name = targetGroupName;
+			}
+		}
+		else
+		{
+			Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
+
+			if ( !sourceGroupName.Equals( targetGroupName, StringComparison.OrdinalIgnoreCase ) )
+			{
+				RemoveParameterFromGroup( sourceGroupData );
+			}
+
+			if ( Graph.TryFindGroupData( targetGroupName, out var existingGroup ) )
+			{
+				existingGroup.ParameterReferences.Add( parameter.Identifier );
+			}
+			else
+			{
+				var newGroup = new GroupData
+				{
+					Name = targetGroupName,
+					ParameterReferences = [parameter.Identifier]
+				};
+				
+				Graph.AddGroupData( newGroup, targetGroupName.Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) ? 0 : -1 );
+			}
 		}
 	}
 
@@ -547,8 +582,6 @@ public class BlackboardView : Widget
 
 		if ( parameter is IGroupableBlackboardParameter groupable )
 		{
-			groupable.Group = group;
-
 			SetGroupData( group, group, groupable );
 		}
 
@@ -663,10 +696,15 @@ public class BlackboardView : Widget
 		}
 	}
 
+	/// <summary>
+	/// Get a normalized version of <paramref name="group"/>.
+	/// </summary>
+	/// <param name="group"></param>
+	/// <returns>The <paramref name="group"/> string as-is, or if <paramref name="group"/> is "General" just an empty string.</returns>
 	private static string NormalizeGroup( string group )
 	{
 		group = group?.Trim() ?? "";
-		return group.Equals( "General", StringComparison.OrdinalIgnoreCase ) ? "" : group;
+		return group.Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) ? "" : group;
 	}
 
 	private void ExpandGroup( string group )
@@ -787,9 +825,22 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 		Cursor = collapsible ? CursorShape.Finger : CursorShape.Arrow;
 		AcceptDrops = true;
-		ToolTip = collapsible
-			? $"Click to collapse or expand.\nDrag parameters here to move them into this group.{(_title != "General" ? "\nDrag to reorder this group. " : " ")}\nRight-click for group actions.\n"
-			: $"Matching groups are expanded while filtering.\n Drag parameters here to move them into this group.{(_title != "General" ? "\nDrag to reorder this group. " : " ")}\nRight-click for group actions.";
+
+		ToolTip = collapsible ?
+		@$"
+			<strong>{_title}</strong><br>
+			Click to collapse or expand.<br>
+			Drag parameters here to move them into this group.<br>
+			{(_title != BlackboardGlobals.EmptyGroupName ? "Drag to reorder this group. " : "")}<br>
+			Right-click for group actions.
+		" :
+		@$"
+			<strong>{_title}</strong><br>
+			Matching groups are expanded while filtering.<br>
+			Drag parameters here to move them into this group.<br>
+			{(_title != BlackboardGlobals.EmptyGroupName ? "Drag to reorder this group. " : "")}<br>
+			Right-click for group actions.
+		";
 	}
 
 	protected override void OnPaint()
@@ -847,7 +898,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	protected override void OnExpandChanged()
 	{
-		_blackboardView.ToggleGroup( Group.Name == "General" ? "" : Group.Name );
+		_blackboardView.ToggleGroup( Group.Name == BlackboardGlobals.EmptyGroupName ? "" : Group.Name );
 	}
 
 	protected override void OnMousePress( MouseEvent e )
@@ -893,7 +944,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 
 	private bool TryDragOperation( DragEvent ev, int sourceParameterIndex, int targetParameterIndex )
 	{
-		if ( Group.Name == "General" )
+		if ( Group.Name.Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) )
 			return false;
 
 		var sourceGroupDragData = ev.Data.OfType<ParameterGroupDragData>().FirstOrDefault();
@@ -943,7 +994,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		}
 		else if ( ev.Data.Object is ParameterGroupDragData groupDragData )
 		{
-			if ( groupDragData.Group.Name == "General" )
+			if ( groupDragData.Group.Name.Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) )
 			{
 				OnDrag( ev, DropAction.Ignore );
 				return;
@@ -1001,7 +1052,7 @@ internal sealed class ParameterGroupHeader : InspectorHeader
 		var parameters = menu.AddMenu( "Add Parameter", "add" );
 		_blackboardView.AddParameterOptions( parameters, Group.Name );
 
-		if ( Group.Name != "General" )
+		if ( !Group.Name.Equals( "General", StringComparison.OrdinalIgnoreCase ) )
 		{
 			menu.AddSeparator();
 			menu.AddOption( "Rename Group", "edit", () => _blackboardView.RenameGroup( Group.Name ) );
@@ -1052,7 +1103,7 @@ internal class ParameterRow : Widget, IParameterRow
 		_blackboardView = list;
 		parameter.Graph = list.Graph;
 		_parameter = parameter;
-		_groupData = _blackboardView.Graph.FindGroupData( string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group );
+		_groupData = _blackboardView.Graph.FindGroupData( string.IsNullOrWhiteSpace( _parameter.Group ) ? BlackboardGlobals.EmptyGroupName : _parameter.Group );
 
 		BuiltGroup = BlackboardView.GroupName( parameter );
 
@@ -1064,7 +1115,12 @@ internal class ParameterRow : Widget, IParameterRow
 		IsDraggable = true;
 		AcceptDrops = true;
 
-		ToolTip = $"{_parameter.DisplayInfo.Name} parameter\nDrag onto the graph to create a node.\nDrag onto another parameter to reorder.\nDouble-click the parameter pill to rename.";
+		ToolTip = @$"
+			<strong>{_parameter.DisplayInfo.Name} parameter</strong><br>
+			Drag onto the graph to create a node linked to this parameter.<br>
+			Drag onto another parameter to reorder.<br>
+			Double-click the parameter pill to rename.
+		";
 
 		Layout = Layout.Row();
 		Layout.Margin = new Sandbox.UI.Margin( NameX, 3, NameX, 3 );
@@ -1073,7 +1129,7 @@ internal class ParameterRow : Widget, IParameterRow
 		Layout.Alignment = TextFlag.LeftTop;
 
 		_renameEdit = new LineEdit( this ) { Visible = false, FixedHeight = Theme.RowHeight };
-		_renameEdit.SetStyles( $"background-color: {Theme.ControlBackground.Hex}; selection-background-color: {Theme.Primary.Hex}; selection-color: white; border: none;" );
+		_renameEdit.SetStyles( $"background -color: {Theme.ControlBackground.Hex}; selection-background-color: {Theme.Primary.Hex}; selection-color: white; border: none;" );
 		_renameEdit.EditingFinished += FinishRename;
 
 		// The rename edit lives in the name area cell so the layout owns its geometry
@@ -1357,8 +1413,8 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceParameter = parameterDragData.Parameter;
 		var targetParameter = _parameter;
 
-		var sourceGroupName = string.IsNullOrWhiteSpace( sourceParameter.Group ) ? "General" : sourceParameter.Group;
-		var targetGroupName = string.IsNullOrWhiteSpace( _parameter.Group ) ? "General" : _parameter.Group;
+		var sourceGroupName = BlackboardView.GroupTitle( sourceParameter.Group );
+		var targetGroupName = BlackboardView.GroupTitle( _parameter.Group );
 
 		var sourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
 		var targetParameterIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
@@ -1384,10 +1440,15 @@ internal class ParameterRow : Widget, IParameterRow
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
 
+				if ( sourceGroupData.ParameterReferences.Count == 0 )
+				{
+					_blackboardView.Graph.RemoveGroupData( sourceGroupData );
+				}
+
 				_blackboardView.Graph.ReOrderParameter( sourceParameter, targetParameterIndex );
 				targetGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 
-				sourceParameter.Group = targetGroupName == "General" ? "" : targetGroupName;
+				sourceParameter.Group = _parameter.Group;
 			}
 			else
 			{

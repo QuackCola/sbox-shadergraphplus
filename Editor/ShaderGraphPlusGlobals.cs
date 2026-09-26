@@ -7,6 +7,11 @@ internal static class ShaderGraphPlusGlobals
 		internal const int NoNodePreviewID = 0;
 	}
 
+	internal static class BlackboardGlobals
+	{
+		internal const string EmptyGroupName = "General";
+	}
+
 	internal static class ControlWidgetCustomEditors
 	{
 		internal const string UIGroupEditor = "sgp.UiGroupEditor";
