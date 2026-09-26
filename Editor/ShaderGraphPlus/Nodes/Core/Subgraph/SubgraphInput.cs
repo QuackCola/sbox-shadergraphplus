@@ -41,7 +41,7 @@ public enum SubgraphPortType
 /// </summary>
 [Title( "Subgraph Input" ), Icon( "input" ), SubgraphOnly]
 [InternalNode]
-public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IBlackboardNode, IErroringNode
+public sealed class SubgraphInput : BlackboardNode, IParameterNode, IErroringNode
 {
 	[Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -59,9 +59,6 @@ public sealed class SubgraphInput : ShaderNodePlus, IParameterNode, IBlackboardN
 
 	//[Hide, JsonIgnore]
 	//private bool IsSubgraph => (Graph is ShaderGraphPlus shaderGraph && shaderGraph.IsSubgraph);
-
-	[Hide]
-	public Guid ParameterIdentifier { get; set; }
 
 	//[Hide]
 	//private bool IsPreviewInputEnabled => InputType != SubgraphPortType.Texture2DObject;
