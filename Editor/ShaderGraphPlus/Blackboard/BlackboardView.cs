@@ -545,11 +545,11 @@ public class BlackboardView : Widget
 
 		var parameter = (BlackboardParameter)type.CreateParameter( Graph );
 
-		if ( parameter is IGroupableBlackboardParameter newGroupable )
+		if ( parameter is IGroupableBlackboardParameter groupable )
 		{
-			newGroupable.Group = group;
+			groupable.Group = group;
 
-			SetGroupData( group, group, newGroupable );
+			SetGroupData( group, group, groupable );
 		}
 
 		Graph.AddParameter( parameter );
