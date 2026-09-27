@@ -296,7 +296,7 @@ internal class SubgraphNodeControlWidget : ControlWidget
 			var type = inputRef.Value.inputValueType;
 			var groupName = inputRef.Value.inputParameter.GetGroupTitle();
 
-			if ( !groups.ContainsKey( groupName ) )
+			if ( groupName != BlackboardGlobals.EmptyGroupName && !groups.ContainsKey( groupName ) )
 			{
 				groups.Add( groupName, new List<SerializedProperty>() );
 			}
@@ -530,7 +530,14 @@ internal class SubgraphNodeControlWidget : ControlWidget
 
 			if ( property != null )
 			{
-				groups[groupName].Add( property );
+				if ( groupName != BlackboardGlobals.EmptyGroupName )
+				{
+					groups[groupName].Add( property );
+				}
+				else
+				{
+					Sheet.AddRow( property );
+				}
 			}
 		}
 
