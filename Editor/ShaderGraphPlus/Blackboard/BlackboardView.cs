@@ -215,7 +215,6 @@ public class BlackboardView : Widget
 	internal void RebuildParameterOrder()
 	{
 		var parameterReferences = new HashSet<Guid>();
-		var index = 0;
 
 		// Group 1 : 0,1 -> 0,1
 		// Group 2 : 0,1,2,3 -> 2,3,4,5
@@ -226,7 +225,6 @@ public class BlackboardView : Widget
 		{
 			foreach ( var parameterReference in group.ParameterReferences )
 			{
-				var newIndex = index++;
 				var parameter = Graph.FindParameter( parameterReference );
 
 				if ( parameterReferences.Add( parameterReference ) )
