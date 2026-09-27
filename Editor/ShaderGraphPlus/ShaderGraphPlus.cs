@@ -435,12 +435,7 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	{
 		var groupData = _groupData.FirstOrDefault( x => x.Value.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ).Value;
 
-		if ( groupData != null )
-		{
-			return groupData;
-		}
-
-		return null;
+		return groupData ?? null;
 	}
 
 	public bool HasGroupDataWithName( string name )
@@ -466,24 +461,14 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	{
 		groupData = _groupData.FirstOrDefault( x => x.Value.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ).Value;
 
-		if ( groupData != null )
-		{
-			return true;
-		}
-
-		return false;
+		return groupData != null;
 	}
 
 	public int GetParameterIndex( BlackboardParameter parameter )
 	{
 		var index = _parameters.IndexOf( parameter.Identifier );
 
-		if ( index != -1 )
-		{
-			return index;
-		}
-
-		return 0;
+		return index != -1 ? index : 0;
 	}
 
 	public int GetGroupDataIndex( string name )
@@ -503,22 +488,16 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	{
 		var index = _groupData.IndexOf( groupData.Identifier );
 
-		if ( index != -1 )
-		{
-			return index;
-		}
-
-		return 0;
+		return index != -1 ? index : 0;
 	}
 
 	public int GetParameterIndexInGroup( string parameterGroupName, Guid parameterReference )
 	{
 		parameterGroupName = string.IsNullOrWhiteSpace( parameterGroupName ) ? "General" : parameterGroupName;
-		var category = _groupData.FirstOrDefault( x => x.Value.Name == parameterGroupName ).Value;
 
-		if ( category != null )
+		if ( TryFindGroupData( parameterGroupName, out var groupData ) )
 		{
-			return category.ParameterReferences.IndexOf( parameterReference );
+			return groupData.ParameterReferences.IndexOf( parameterReference );
 		}
 
 		return 0;
