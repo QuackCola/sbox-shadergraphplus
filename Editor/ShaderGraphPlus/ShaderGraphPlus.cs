@@ -511,14 +511,14 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		return 0;
 	}
 
-	public int GetParameterIndexInGroup( string group, Guid refernce )
+	public int GetParameterIndexInGroup( string parameterGroupName, Guid parameterReference )
 	{
-		group = string.IsNullOrWhiteSpace( group ) ? "General" : group;
-		var category = _groupData.FirstOrDefault( x => x.Value.Name == group ).Value;
+		parameterGroupName = string.IsNullOrWhiteSpace( parameterGroupName ) ? "General" : parameterGroupName;
+		var category = _groupData.FirstOrDefault( x => x.Value.Name == parameterGroupName ).Value;
 
 		if ( category != null )
 		{
-			return category.ParameterReferences.IndexOf( refernce );
+			return category.ParameterReferences.IndexOf( parameterReference );
 		}
 
 		return 0;
