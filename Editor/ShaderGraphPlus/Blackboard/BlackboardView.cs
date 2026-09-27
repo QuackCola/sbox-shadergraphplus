@@ -544,9 +544,8 @@ public class BlackboardView : Widget
 		}
 		else
 		{
-			Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
 
-			if ( !sourceGroupName.Equals( targetGroupName, StringComparison.OrdinalIgnoreCase ) )
+			if ( Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData ) && !sourceGroupName.Equals( targetGroupName, StringComparison.OrdinalIgnoreCase ) )
 			{
 				RemoveParameterFromGroup( sourceGroupData );
 			}
