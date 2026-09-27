@@ -374,7 +374,7 @@ internal class SubgraphNodeControlWidget : ControlWidget
 			}
 			else if ( type == typeof( Vector2 ) )
 			{
-				property =  TypeLibrary.CreateProperty<Vector2>(
+				property = TypeLibrary.CreateProperty<Vector2>(
 					displayName, () =>
 					{
 						var val = getter();
