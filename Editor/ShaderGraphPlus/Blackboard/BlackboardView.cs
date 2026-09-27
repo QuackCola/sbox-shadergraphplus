@@ -1498,9 +1498,10 @@ internal class ParameterRow : Widget, IParameterRow
 			}
 
 			_blackboardView.RebuildParameterOrder();
+			_blackboardView.RebuildFromGraph();
 		}
 
-		_blackboardView.RebuildFromGraph();
+		
 	}
 
 	private void AddActions()
