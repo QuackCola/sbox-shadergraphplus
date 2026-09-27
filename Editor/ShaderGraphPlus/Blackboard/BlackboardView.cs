@@ -212,6 +212,43 @@ public class BlackboardView : Widget
 			BuildFromParameters( Graph.Parameters, preserveSelection );
 	}
 
+	internal void RebuildParameterOrder()
+	{
+		var parameterReferences = new HashSet<Guid>();
+		var index = 0;
+
+		// Group 1 : 0,1 -> 0,1
+		// Group 2 : 0,1,2,3 -> 2,3,4,5
+		// Group 3 : 0 - > 6
+		// Resulting global order for each parameter : 0,1,2,3,4,5,6
+
+		foreach ( var group in Graph.GroupData )
+		{
+			foreach ( var parameterReference in group.ParameterReferences )
+			{
+				var newIndex = index++;
+				var parameter = Graph.FindParameter( parameterReference );
+
+				if ( parameterReferences.Add( parameterReference ) )
+				{
+					var currentIndex = parameterReferences.Count;
+
+					if ( currentIndex > 0 )
+					{
+						currentIndex--;
+					}
+
+					SGPLogger.Info( $"Parameter \"{parameter.Name}\" at index \"{currentIndex}\"" );
+				}
+			}
+		}
+
+		foreach ( var ( parameterIndex, parameterId ) in parameterReferences.Index() )
+		{
+			Graph.ReOrderParameter( parameterId, parameterIndex );
+		}
+	}
+
 	/// <summary>
 	/// Repaint rows so selection highlights stay in sync with the properties target.
 	/// </summary>
@@ -291,6 +328,8 @@ public class BlackboardView : Widget
 
 			RemoveParameterFromGroupData( parameter );
 
+			RebuildParameterOrder();
+
 			//OnDirty?.Invoke( true );
 		}
 
@@ -368,6 +407,8 @@ public class BlackboardView : Widget
 
 		SetGroupData( sourceGroupName, targetGroupName, parameter );
 
+		RebuildParameterOrder();
+
 		_window.OnParameterSelected( parameter );
 	}
 
@@ -376,6 +417,8 @@ public class BlackboardView : Widget
 		using var undoScope = UndoScope( "Move Parameter Group" );
 
 		Graph.ReOrderGroup( group, priority );
+
+		RebuildParameterOrder();
 
 		RebuildFromGraph();
 	}
@@ -403,6 +446,8 @@ public class BlackboardView : Widget
 				Graph.ReOrderGroup( BlackboardGlobals.EmptyGroupName, 0 );
 			}
 
+			RebuildParameterOrder();
+
 			if ( _collapsedGroups.Remove( oldName ) && !string.IsNullOrEmpty( newName ) )
 				_collapsedGroups.Add( newName );
 
@@ -422,6 +467,8 @@ public class BlackboardView : Widget
 			// Migrate each parameter to the 'General' group.
 			SetGroupData( parameter.Group, "", parameter );
 		}
+
+		RebuildParameterOrder();
 
 		_collapsedGroups.Remove( group );
 		SaveCollapsedGroups();
@@ -584,6 +631,8 @@ public class BlackboardView : Widget
 		}
 
 		Graph.AddParameter( parameter );
+
+		RebuildParameterOrder();
 
 		OnDirty?.Invoke( true );
 
@@ -1414,9 +1463,6 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceGroupName = BlackboardView.GroupTitle( sourceParameter.Group );
 		var targetGroupName = BlackboardView.GroupTitle( _parameter.Group );
 
-		var sourceParameterIndex = _blackboardView.Graph.GetParameterIndex( sourceParameter );
-		var targetParameterIndex = _blackboardView.Graph.GetParameterIndex( targetParameter );
-
 		_blackboardView.Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
 		_blackboardView.Graph.TryFindGroupData( targetGroupName, out var targetGroupData );
 
@@ -1443,7 +1489,6 @@ internal class ParameterRow : Widget, IParameterRow
 					_blackboardView.Graph.RemoveGroupData( sourceGroupData );
 				}
 
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, targetParameterIndex );
 				targetGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 
 				sourceParameter.Group = _parameter.Group;
@@ -1453,10 +1498,10 @@ internal class ParameterRow : Widget, IParameterRow
 				var targetIndex = sourceGroupData.ParameterReferences.IndexOf( _parameter.Identifier );
 
 				sourceGroupData.ParameterReferences.Remove( sourceParameter.Identifier );
-
-				_blackboardView.Graph.ReOrderParameter( sourceParameter, targetParameterIndex );
 				sourceGroupData.ParameterReferences.Insert( targetIndex, sourceParameter.Identifier );
 			}
+
+			_blackboardView.RebuildParameterOrder();
 		}
 
 		_blackboardView.RebuildFromGraph();

@@ -561,6 +561,14 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 		}
 	}
 
+	public bool ReOrderParameter( Guid identifier, int newIndex )
+	{
+		if ( !TryFindParameter( identifier, out var parameter ) )
+			return false;
+
+		return ReOrderParameter( parameter, newIndex );
+	}
+
 	public bool ReOrderParameter( BlackboardParameter parameter, int newIndex )
 	{
 		if ( parameter.Graph != this )
