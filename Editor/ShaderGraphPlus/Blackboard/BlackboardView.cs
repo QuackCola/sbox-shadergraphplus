@@ -652,12 +652,14 @@ public class BlackboardView : Widget
 
 		if ( parameter is IGroupableBlackboardParameter groupable )
 		{
-			groupable.Group = group;
+			SetGroupData( group, group, groupable );
 		}
 
 		onCreated?.Invoke();
 
 		Graph.AddParameter( parameter );
+
+		RebuildParameterOrder();
 
 		return parameter;
 	}
