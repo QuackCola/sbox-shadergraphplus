@@ -1,4 +1,5 @@
 ﻿using Editor;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -22,6 +23,12 @@ internal sealed class ParameterAvailableInAttribute : Attribute
 public interface IGroupableBlackboardParameter : IBlackboardParameter
 {
 	string Group { get; set; }
+
+	/// <summary>
+	/// Get a non null, empty or just whitespace version of the <see cref="Group"/>.
+	/// </summary>
+	/// <returns>The <see cref="Group"/> if it isnt null, empty or just whitespace, otherwise the empty group name.</returns>
+	public string GetGroupTitle();
 }
 
 public interface IBlackboardMaterialParameter : IGroupableBlackboardParameter
@@ -100,6 +107,12 @@ public abstract class BlackboardParameter : IGroupableBlackboardParameter, IVali
 		Identifier = Guid.NewGuid();
 		return Identifier;
 	}
+
+	/// <summary>
+	/// Get a non null, empty or just whitespace version of the <see cref="Group"/>.
+	/// </summary>
+	/// <returns>The <see cref="Group"/> if it isnt null, empty or just whitespace, otherwise the empty group name.</returns>
+	public string GetGroupTitle() => string.IsNullOrWhiteSpace( Group ) ? BlackboardGlobals.EmptyGroupName : Group;
 
 	public abstract object GetValue();
 

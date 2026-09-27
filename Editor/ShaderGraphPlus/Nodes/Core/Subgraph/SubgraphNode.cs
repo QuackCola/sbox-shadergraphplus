@@ -294,12 +294,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 		{
 			var name = inputRef.Key.Identifier;
 			var type = inputRef.Value.inputValueType;
-			var group = inputRef.Value.inputParameter.Group;
-			group = string.IsNullOrWhiteSpace( group ) ? BlackboardGlobals.EmptyGroupName : group;
+			var groupName = inputRef.Value.inputParameter.GetGroupTitle();
 
-			if ( !groups.ContainsKey( group ) )
+			if ( !groups.ContainsKey( groupName ) )
 			{
-				groups.Add( group, new List<SerializedProperty>() );
+				groups.Add( groupName, new List<SerializedProperty>() );
 			}
 
 			var inputType = inputRef.Value.inputParameter.PortType;
@@ -531,7 +530,7 @@ internal class SubgraphNodeControlWidget : ControlWidget
 
 			if ( property != null )
 			{
-				groups[group].Add( property );
+				groups[groupName].Add( property );
 			}
 		}
 
