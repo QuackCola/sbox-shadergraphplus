@@ -239,7 +239,7 @@ public class BlackboardView : Widget
 			}
 		}
 
-		foreach ( var ( parameterIndex, parameterIdentifier ) in parameterReferences.Index() )
+		foreach ( var (parameterIndex, parameterIdentifier) in parameterReferences.Index() )
 		{
 			Graph.ReOrderParameter( parameterIdentifier, parameterIndex );
 		}
