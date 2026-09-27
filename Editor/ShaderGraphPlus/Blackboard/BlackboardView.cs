@@ -1459,17 +1459,14 @@ internal class ParameterRow : Widget, IParameterRow
 		var sourceGroupName = BlackboardView.GroupTitle( sourceParameter.Group );
 		var targetGroupName = BlackboardView.GroupTitle( _parameter.Group );
 
-		_blackboardView.Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData );
-		_blackboardView.Graph.TryFindGroupData( targetGroupName, out var targetGroupData );
-
 		if ( !TryDragOperation( parameterDragData ) )
 			return;
 
-		if ( sourceGroupData != null )
+		if ( _blackboardView.Graph.TryFindGroupData( sourceGroupName, out var sourceGroupData ) )
 		{
 			using var undoScope = _blackboardView.UndoScope( "Reorder Parameter" );
 
-			if ( sourceGroupName != targetGroupName && targetGroupData != null )
+			if ( sourceGroupName != targetGroupName && _blackboardView.Graph.TryFindGroupData( targetGroupName, out var targetGroupData ) )
 			{
 				var targetIndex = targetGroupData.ParameterReferences.IndexOf( targetParameter.Identifier );
 
