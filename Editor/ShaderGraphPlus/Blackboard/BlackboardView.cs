@@ -231,14 +231,10 @@ public class BlackboardView : Widget
 
 				if ( parameterReferences.Add( parameterReference ) )
 				{
+					/*
 					var currentIndex = parameterReferences.Count;
-
-					if ( currentIndex > 0 )
-					{
-						currentIndex--;
-					}
-
-					SGPLogger.Info( $"Parameter \"{parameter.Name}\" at index \"{currentIndex}\"" );
+					SGPLogger.Info( $"Parameter \"{parameter.Name}\" at index \"{( currentIndex > 0 ? currentIndex - 1 : currentIndex )}\"" );
+					*/
 				}
 			}
 		}
