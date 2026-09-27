@@ -393,7 +393,7 @@ public class BlackboardView : Widget
 
 			using var undoScope = UndoScope( "Rename Parameter Group" );
 
-			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( oldName, StringComparison.OrdinalIgnoreCase ) ))
+			foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( oldName, StringComparison.OrdinalIgnoreCase ) ) )
 			{
 				SetGroupData( oldName, newName, parameter, true );
 			}
@@ -420,7 +420,7 @@ public class BlackboardView : Widget
 		foreach ( var parameter in Graph.Parameters.Where( p => GroupName( p ).Equals( group, StringComparison.OrdinalIgnoreCase ) ) )
 		{
 			// Migrate each parameter to the 'General' group.
-			SetGroupData( parameter.Group, "",  parameter );
+			SetGroupData( parameter.Group, "", parameter );
 		}
 
 		_collapsedGroups.Remove( group );
@@ -505,7 +505,7 @@ public class BlackboardView : Widget
 		void RemoveParameterFromGroup( GroupData group )
 		{
 			group.ParameterReferences.Remove( parameter.Identifier );
-		
+
 			if ( group.ParameterReferences.Count == 0 )
 			{
 				Graph.RemoveGroupData( group );
@@ -529,7 +529,7 @@ public class BlackboardView : Widget
 				{
 					RemoveParameterFromGroup( sourceGroupData );
 				}
-				
+
 				if ( !targetGroupData.ParameterReferences.Contains( parameter.Identifier ) )
 				{
 					targetGroupData.ParameterReferences.Add( parameter.Identifier );
@@ -562,7 +562,7 @@ public class BlackboardView : Widget
 					Name = targetGroupName,
 					ParameterReferences = [parameter.Identifier]
 				};
-				
+
 				Graph.AddGroupData( newGroup, targetGroupName.Equals( BlackboardGlobals.EmptyGroupName, StringComparison.OrdinalIgnoreCase ) ? 0 : -1 );
 			}
 		}
