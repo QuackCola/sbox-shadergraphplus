@@ -216,10 +216,10 @@ public class BlackboardView : Widget
 	{
 		var parameterReferences = new HashSet<Guid>();
 
-		// Group 1 : 0,1 -> 0,1
-		// Group 2 : 0,1,2,3 -> 2,3,4,5
-		// Group 3 : 0 - > 6
-		// Resulting global order for each parameter : 0,1,2,3,4,5,6
+		// Group 1 : 0,1 ---> 0,1
+		// Group 2 : 0,1,2,3 ---> 2,3,4,5
+		// Group 3 : 0 ---> 6
+		// Resulting new index's for each parameter in Graph.Parameters : 0,1,2,3,4,5,6
 
 		foreach ( var group in Graph.GroupData )
 		{
