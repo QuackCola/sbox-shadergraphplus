@@ -533,7 +533,7 @@ internal class SubgraphNodeControlWidget : ControlWidget
 			{
 				//if ( groupName != BlackboardGlobals.EmptyGroupName )
 				//{
-					groups[groupName].Add( property );
+				groups[groupName].Add( property );
 				//}
 				//else
 				//{
