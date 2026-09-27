@@ -320,9 +320,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 			var attributes = new List<Attribute>();
 			var displayName = $"Default {name}";
 
+			SerializedProperty property = null;
+
 			if ( type == typeof( bool ) )
 			{
-				var prop = TypeLibrary.CreateProperty<bool>(
+				property = TypeLibrary.CreateProperty<bool>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -336,12 +338,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( int ) )
 			{
-				var prop = TypeLibrary.CreateProperty<int>(
+				property = TypeLibrary.CreateProperty<int>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -355,12 +355,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( float ) )
 			{
-				var prop = TypeLibrary.CreateProperty<float>(
+				property = TypeLibrary.CreateProperty<float>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -374,12 +372,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Vector2 ) )
 			{
-				var prop =  TypeLibrary.CreateProperty<Vector2>(
+				property =  TypeLibrary.CreateProperty<Vector2>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -393,12 +389,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Vector3 ) )
 			{
-				var prop = TypeLibrary.CreateProperty<Vector3>(
+				property = TypeLibrary.CreateProperty<Vector3>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -412,12 +406,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Vector4 ) )
 			{
-				var prop = TypeLibrary.CreateProperty<Vector4>(
+				property = TypeLibrary.CreateProperty<Vector4>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -431,12 +423,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Color ) )
 			{
-				var prop = TypeLibrary.CreateProperty<Color>(
+				property = TypeLibrary.CreateProperty<Color>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -450,12 +440,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Float2x2 ) )
 			{
-				var prop = EditorTypeLibrary.CreateProperty<Float2x2>(
+				property = EditorTypeLibrary.CreateProperty<Float2x2>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -469,12 +457,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Float3x3 ) )
 			{
-				var prop = EditorTypeLibrary.CreateProperty<Float3x3>(
+				property = EditorTypeLibrary.CreateProperty<Float3x3>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -488,12 +474,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Float4x4 ) )
 			{
-				var prop = EditorTypeLibrary.CreateProperty<Float4x4>(
+				property = EditorTypeLibrary.CreateProperty<Float4x4>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -507,12 +491,10 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( type == typeof( Gradient ) )
 			{
-				var prop = EditorTypeLibrary.CreateProperty<Gradient>(
+				property = EditorTypeLibrary.CreateProperty<Gradient>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -526,14 +508,12 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
-
-				groups[group].Add( prop );
 			}
 			else if ( !Node.IsSubgraph && type == typeof( Sampler ) )
 			{
 				attributes.Add( new InlineEditorAttribute() { Label = false } );
 
-				var prop = EditorTypeLibrary.CreateProperty<Sampler>(
+				property = EditorTypeLibrary.CreateProperty<Sampler>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -547,8 +527,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
 				);
+			}
 
-				groups[group].Add( prop );
+			if ( property != null )
+			{
+				groups[group].Add( property );
 			}
 		}
 
