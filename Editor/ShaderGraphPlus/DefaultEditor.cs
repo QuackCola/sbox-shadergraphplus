@@ -76,12 +76,12 @@ public class DefaultEditor : ValueEditor
 		{
 			if ( subgraphNode.InputReferences.TryGetValue( innerPlugIn, out var entry ) )
 			{
-				var subgraphInput = entry.inputNode;
+				var subgraphInput = entry.inputParameter;
 				if ( subgraphInput.IsRequired ) return;
-				type = entry.inputNodeValueType;
+				type = entry.inputValueType;
 				if ( innerPlugIn.ConnectedOutput is not null )
 				{
-					rawVal = subgraphInput.DefaultValue;
+					rawVal = subgraphInput.GetValue();
 					val = rawVal.ToString();
 				}
 				else
