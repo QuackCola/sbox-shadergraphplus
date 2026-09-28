@@ -448,6 +448,7 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 		base.CheckParameter( out issues );
 
 		var takenOptions = new List<string>();
+
 		foreach ( var option in Options )
 		{
 			var index = Options.IndexOf( option );
@@ -459,13 +460,18 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 				continue;
 			}
 
+			if ( BlackboardRegex.NonLettersAndNumbers.IsMatch( option.Name ) )
+			{
+				issues.Add( $"Shader Feature Enum{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} Option name \"{option.Name}\" contains invalid characters!" );
+			}
+
 			if ( !takenOptions.Contains( option.Name ) )
 			{
 				takenOptions.Add( option.Name );
 			}
 			else
 			{
-				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} duplicate option \"{option}\"" );
+				issues.Add( $"Shader Feature{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} contains duplicate option \"{option}\"" );
 			}
 		}
 
