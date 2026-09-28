@@ -40,6 +40,13 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 	[JsonIgnore, Hide, Browsable( false )]
 	public override bool CanRemove => true;
 
+	[JsonIgnore, Hide, Browsable( false )]
+	public new ShaderGraphPlus Graph
+	{
+		get => (ShaderGraphPlus)base.Graph;
+		set => base.Graph = value;
+	}
+
 	//[Hide, Browsable( false )]
 	//public Guid OutputIdentifier { get; set; }
 
@@ -384,21 +391,14 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 	{
 		var errors = new List<string>();
 
-		if ( Graph is ShaderGraphPlus shaderGraphPlus && shaderGraphPlus.IsSubgraph )
+		if ( Graph.IsSubgraph )
 		{
-			//if ( string.IsNullOrWhiteSpace( OutputName ) )
-			//{
-			//	errors.Add( $"Subgraph output must have a name!" );
-			//
-			//	return errors;
-			//}
-
-			foreach ( var node in Graph.Nodes )
+			foreach ( var node in Graph.Nodes.OfType<SubgraphOutput>() )
 			{
 				if ( node == this )
 					continue;
 
-				if ( node is SubgraphOutput otherOutput && otherOutput.OutputName == OutputName )
+				if ( node.OutputName == OutputName )
 				{
 					errors.Add( $"Duplicate subgraph output node \"{OutputName}\"" );
 
