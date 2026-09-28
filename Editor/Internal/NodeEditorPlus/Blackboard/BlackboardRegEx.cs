@@ -2,5 +2,5 @@
 
 public static class BlackboardRegex
 {
-	public static Regex NonLettersAndNumbers { get; } = new Regex( @"[^\p{L}\p{N}]" );
+	public static Regex InvalidCharacters { get; } = new Regex( @"[^\p{L}\p{N}_-]" );
 }

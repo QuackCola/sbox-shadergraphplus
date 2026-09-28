@@ -460,7 +460,7 @@ public sealed class ShaderFeatureEnumParameter : BlackboardParameter, IBlackboar
 				continue;
 			}
 
-			if ( BlackboardRegex.NonLettersAndNumbers.IsMatch( option.Name ) )
+			if ( BlackboardRegex.InvalidCharacters.IsMatch( option.Name ) )
 			{
 				issues.Add( $"Shader Feature Enum{(!string.IsNullOrWhiteSpace( Name ) ? $" {Name}" : " Enum")} Option name \"{option.Name}\" contains invalid characters!" );
 			}
