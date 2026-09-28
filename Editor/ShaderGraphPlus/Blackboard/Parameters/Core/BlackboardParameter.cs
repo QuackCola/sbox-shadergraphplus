@@ -141,6 +141,11 @@ public abstract class BlackboardParameter : IGroupableBlackboardParameter, IVali
 		var cleanedName = Name.Replace( " ", "" );
 		//var prefix = GetParameterPrefix( this.GetType() );
 
+		if ( BlackboardRegex.NonLettersAndNumbers.IsMatch( cleanedName ) )
+		{
+			issues.Add( $"Parameter name \"{Name}\" contains invalid characters!" );
+		}
+
 		// Check if parameter name conflicts with an existing Global or potential Globals included by an .hlsl include 
 		if ( GraphCompiler.ReservedGlobalParameters.ContainsKey( cleanedName ) )
 		{
