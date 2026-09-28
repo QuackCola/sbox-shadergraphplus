@@ -62,8 +62,6 @@ public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParamete
 
 public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParameter
 {
-	bool IsValid { get; }
-
 	SubgraphOutputPreviewType Preview { get; set; }
 
 	bool CannotPreviewOutputType { get; }
@@ -95,11 +93,12 @@ public abstract class BlackboardParameter : IGroupableBlackboardParameter, IVali
 		NewIdentifier();
 
 		Name = "";
+		Group = "";
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public Guid NewIdentifier()
