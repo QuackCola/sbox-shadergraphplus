@@ -4,9 +4,9 @@ public abstract class BlackboardNode<T> : BlackboardNode where T : BlackboardPar
 {
 	protected T GetParameter()
 	{
-		if ( Graph is ShaderGraphPlus graph && graph.TryFindParameter<T>( ParameterIdentifier, out var foundParameter ) )
+		if ( Graph is ShaderGraphPlus graph && graph.TryFindParameter<T>( ParameterIdentifier, out var parameter ) )
 		{
-			return foundParameter;
+			return parameter;
 		}
 
 		return null;

@@ -2,7 +2,7 @@ namespace ShaderGraphPlus.Nodes;
 
 [Title( "Enum Combo Switch" ), Category( "Utility/Logic" ), Icon( "alt_route" )]
 [InternalNode]
-public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitializeNode, IParameterNode, IBlackboardNode, IErroringNode
+public sealed class EnumFeatureSwitchNode : BlackboardNode<ShaderFeatureEnumParameter>, BaseNodePlus.IInitializeNode, IParameterNode, IErroringNode
 {
 	[Hide, JsonIgnore, Browsable( false )]
 	public override Color NodeTitleColor { get; set; } = ShaderGraphPlusTheme.NodeHeaderColors.LogicNode;
@@ -12,9 +12,6 @@ public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitia
 
 	[Hide, JsonIgnore, Browsable( false )]
 	public string Name => $"F_{Feature.Name.ToUpper().Replace( " ", "_" )}";
-
-	[Hide, Browsable( false )]
-	public Guid ParameterIdentifier { get; set; }
 
 	[Hide, JsonIgnore, Browsable( false )]
 	public ShaderFeatureEnum Feature
@@ -120,28 +117,13 @@ public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitia
 		}
 	}
 
-	private ShaderFeatureEnumParameter GetFeatureParameter()
-	{
-		if ( Graph is ShaderGraphPlus graph )
-		{
-			var parameter = graph.FindParameter<ShaderFeatureEnumParameter>( ParameterIdentifier );
-
-			if ( parameter != null )
-			{
-				return parameter;
-			}
-		}
-
-		return new ShaderFeatureEnumParameter();
-	}
-
 	private ShaderFeatureEnum GetFeature()
 	{
-		var parameter = GetFeatureParameter();
+		var parameter = GetParameter();
 
-		if ( parameter.IsValid )
+		if ( parameter != null )
 		{
-			var featureEnum = new ShaderFeatureEnum
+			var feature = new ShaderFeatureEnum
 			{
 				Name = parameter.Name,
 				Description = parameter.Description,
@@ -149,7 +131,7 @@ public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitia
 				Options = parameter.Options,
 			};
 
-			return featureEnum;
+			return feature;
 		}
 
 		return new ShaderFeatureEnum();
@@ -176,7 +158,7 @@ public sealed class EnumFeatureSwitchNode : ShaderNodePlus, BaseNodePlus.IInitia
 			}
 		}
 
-		var previewIndex = GetFeatureParameter().PreviewIndex;
+		var previewIndex = GetParameter().PreviewIndex;
 		var result = compiler.ResultFeatureSwitch( inputs, Feature, previewIndex );
 
 		return result.IsValid ? result : new NodeResult( ResultType.Float, $"1.0f" );
