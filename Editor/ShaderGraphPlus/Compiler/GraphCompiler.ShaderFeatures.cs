@@ -129,11 +129,11 @@ public sealed partial class GraphCompiler
 			ResultType.Float2x2 => "float2x2",
 			ResultType.Float3x3 => "float3x3",
 			ResultType.Float4x4 => "float4x4",
+			ResultType.Gradient => "Gradient",
 			ResultType.Sampler => "SamplerState",
 			ResultType.Texture2D => "Texture2D",
 			ResultType.TextureCube => "TextureCube",
-			ResultType.Gradient => "Gradient",
-			_ => throw new Exception( $"Unsupported ResultType `{resultType}`" ),
+			_ => throw new Exception( $"Unsupported ResultType \"{resultType}\"" ),
 		};
 		var resultTypeComponents = blockResults.Select( x => x.Result.Components ).Max();
 
