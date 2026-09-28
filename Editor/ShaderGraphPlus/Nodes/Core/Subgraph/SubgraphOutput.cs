@@ -398,7 +398,7 @@ public sealed class SubgraphOutput : BaseResult, BaseNodePlus.IInitializeNode, I
 				if ( node == this )
 					continue;
 
-				if ( node.OutputName == OutputName )
+				if ( node.ParameterIdentifier == ParameterIdentifier )
 				{
 					errors.Add( $"Duplicate subgraph output node \"{OutputName}\"" );
 
