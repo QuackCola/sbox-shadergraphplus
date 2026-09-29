@@ -52,6 +52,10 @@ file struct GroupDataEntry
 
 public partial class ShaderGraphPlus
 {
+	/// <summary>
+	/// Changes : <br/>
+	/// - Add parameter grouping.
+	/// </summary>
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 10 )]
 	internal static void Upgrader_v10( JsonObject obj )
 	{
