@@ -7,7 +7,7 @@ public partial class ShaderGraphPlus
 	/// <summary>
 	/// Changes : <br/>
 	/// - Reference Groups by name on parameters instead of guid's.<br/>
-	/// - Ungrouped parameters go into the "General" group.
+	/// - Ungrouped parameters go into the "General" group.<br/>
 	/// </summary>
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 12 )]
 	internal static void Upgrader_v12( JsonObject obj )
@@ -101,21 +101,25 @@ public partial class ShaderGraphPlus
 
 		foreach ( var group in groupsToAdd )
 		{
-			var newGroupDataObj = new JsonObject { { JsonKeys.Class, typeof( GroupData ).Name } };
-			var newGroup = new GroupData() { Name = group.Key, ParameterReferences = group.Value };
+			var groupDataJsonObj = new JsonObject
+			{
+				{ JsonKeys.Class, "GroupData" },
+				{ "Identifier", Guid.NewGuid() },
+				{ "Name", group.Key },
+				{ "ParameterReferences", JsonSerializer.SerializeToNode( group.Value, SerializerOptions() ) }
+			};
 
-			SerializeObject( newGroup, newGroupDataObj, SerializerOptions() );
-
-			newGroupDataArray.Add( newGroupDataObj );
+			newGroupDataArray.Add( groupDataJsonObj );
 		}
 
 		foreach ( var jsonNode in oldCategoryDataArray )
 		{
-			var newGroupDataObj = jsonNode.DeepClone().AsObject();
+			var groupDataJsonObj = jsonNode.DeepClone().AsObject();
 
-			JsonUtils.UpdatePropertyValue( newGroupDataObj, JsonKeys.Class, typeof( GroupData ).Name, SerializerOptions() );
+			JsonUtils.UpdatePropertyValue( groupDataJsonObj, JsonKeys.Class, "GroupData", SerializerOptions() );
+			groupDataJsonObj.Remove( "Priority" );
 
-			newGroupDataArray.Add( newGroupDataObj );
+			newGroupDataArray.Add( groupDataJsonObj );
 		}
 
 		obj.Remove( JsonKeys.ParameterArray );
