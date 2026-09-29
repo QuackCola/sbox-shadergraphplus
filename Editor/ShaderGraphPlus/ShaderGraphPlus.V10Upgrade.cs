@@ -59,7 +59,7 @@ public partial class ShaderGraphPlus
 		var updatedParameters = new List<ParameterEntry>();
 		var registeredCategoryNames = new List<string>();
 
-		static int GetGroupOrder( JsonNode node, string uiKeyName )
+		static int GetUIGroupOrder( JsonNode node, string uiKeyName )
 		{
 			if ( node[uiKeyName] is not JsonNode uiNode )
 				return -1;
@@ -187,12 +187,12 @@ public partial class ShaderGraphPlus
 
 					if ( typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) )
 					{
-						parameterPriorityInGroup = GetGroupOrder( jsonNode, "UI" );
+						parameterPriorityInGroup = GetUIGroupOrder( jsonNode, "UI" );
 						primaryGroup = GetUIGroup( jsonNode, "UI" );
 					}
 					else if ( typeDesc.TargetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) )
 					{
-						parameterPriorityInGroup = GetGroupOrder( jsonNode, "Value" );
+						parameterPriorityInGroup = GetUIGroupOrder( jsonNode, "Value" );
 						primaryGroup = GetUIGroup( jsonNode, "Value" );
 					}
 
