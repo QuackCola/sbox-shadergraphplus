@@ -50,9 +50,9 @@ public partial class ShaderGraphPlus
 					updatedNodeObject["Mode"] = "Generate";
 				}
 
-				JsonUtils.UpdatePropertyKey( updatedNodeObject, "Body", "Code" );
-				JsonUtils.UpdatePropertyKey( updatedNodeObject, "ExpressionInputs", "FunctionInputs" );
-				JsonUtils.UpdatePropertyKey( updatedNodeObject, "ExpressionOutputs", "FunctionOutputs" );
+				JsonUtils.RenamePropertyKey( updatedNodeObject, "Body", "Code" );
+				JsonUtils.RenamePropertyKey( updatedNodeObject, "ExpressionInputs", "FunctionInputs" );
+				JsonUtils.RenamePropertyKey( updatedNodeObject, "ExpressionOutputs", "FunctionOutputs" );
 
 				if ( updatedNodeObject.ContainsKey( "PixelStageOnly" ) )
 				{

@@ -25,7 +25,7 @@ public static class JsonUtils
 		return options;
 	}
 
-	public static bool UpdatePropertyKey( JsonObject obj, string oldKey, string newKey )
+	public static bool RenamePropertyKey( JsonObject obj, string oldKey, string newKey )
 	{
 		if ( obj.TryGetPropertyValue( oldKey, out var jsonNode ) )
 		{

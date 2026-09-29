@@ -33,7 +33,7 @@ public partial class ShaderGraphPlus
 
 			if ( isSubgraph & typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
 			{
-				JsonUtils.UpdatePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
+				JsonUtils.RenamePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
 
 				newParameterArray.Add( newParameterObj );
 			}

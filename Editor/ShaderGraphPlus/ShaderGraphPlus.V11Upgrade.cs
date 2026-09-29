@@ -17,6 +17,6 @@ public partial class ShaderGraphPlus
 		if ( obj[JsonKeys.NodeArray] is not JsonArray oldNodeArray )
 			throw new Exception( $"Cannot find jsonArray \"{JsonKeys.NodeArray}\"" );
 
-		JsonUtils.UpdatePropertyKey( obj, "Domain", "ShaderType" );
+		JsonUtils.RenamePropertyKey( obj, "Domain", "ShaderType" );
 	}
 }
