@@ -4,6 +4,10 @@ namespace ShaderGraphPlus;
 
 public partial class ShaderGraphPlus
 {
+	/// <summary>
+	/// Changes : <br/>
+	/// - Rename Description property of SubgraphInput and SubgraphOutput parameters.
+	/// </summary>
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 9 )]
 	internal static void Upgrader_v9( JsonObject obj )
 	{
