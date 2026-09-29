@@ -39,9 +39,11 @@ public static class JsonUtils
 
 	public static bool UpdatePropertyValue<T>( JsonObject obj, string targetKey, T newData, JsonSerializerOptions? options = null )
 	{
+		var currentIndex = obj.IndexOf( targetKey );
+
 		if ( obj.Remove( targetKey ) )
 		{
-			obj.Add( targetKey, JsonSerializer.SerializeToNode( newData, options ?? SerializerOptions() ) );
+			obj.Insert( currentIndex, targetKey, JsonSerializer.SerializeToNode( newData, options ?? SerializerOptions() ) );
 
 			return true;
 		}
