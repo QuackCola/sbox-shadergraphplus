@@ -249,7 +249,7 @@ internal static class PaintHelper
 		}
 		else if ( type == typeof( Color ) )
 		{
-			return Color.Parse( element.GetRawText() );
+			return JsonSerializer.Deserialize<Color>( element );
 		}
 		else if ( type == typeof( Sampler ) )
 		{
