@@ -41,7 +41,7 @@ public enum SubgraphPortType
 /// </summary>
 [Title( "Subgraph Input" ), Icon( "input" ), SubgraphOnly]
 [InternalNode]
-public sealed class SubgraphInput : BlackboardNode, IParameterNode, IErroringNode
+public sealed class SubgraphInput : BlackboardNode, IErroringNode
 {
 	[Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?

@@ -136,12 +136,12 @@ public abstract class BaseNodePlus : IGraphNode
 
 	public virtual void DebugInfo( Menu menu )
 	{
-		var debugInfoHeading = menu.AddHeading( "Node Debug Info" );
+		menu.AddHeading( "Node Debug Info" );
 
 		menu.AddWidget( new Label( $"Node ID : {this.Identifier}" ) );
-		if ( this is IParameterNode blackboardSyncable )
+		if ( this is IBlackboardNode blackboardNode )
 		{
-			menu.AddWidget( new Label( $"Blackboard ID : {blackboardSyncable.ParameterIdentifier}" ) ).AdjustSize();
+			menu.AddWidget( new Label( $"Blackboard ID : {blackboardNode.ParameterIdentifier}" ) ).AdjustSize();
 		}
 		menu.AddWidget( new Label( $"Preview ID : {this.PreviewID}" ) );
 		menu.AddWidget( new Label( $"IsReachable? : {this.IsReachable}" ) );
@@ -362,7 +362,7 @@ public abstract class BaseNodePlus : IGraphNode
 	{
 		if ( _graph is not null )
 		{
-			if ( Graph is ShaderGraphPlus sgp && !sgp.IsSubgraph && this is not BooleanFeatureSwitchNode && this is IParameterNode )
+			if ( Graph is ShaderGraphPlus sgp && !sgp.IsSubgraph && this is not BooleanFeatureSwitchNode && this is IBlackboardNode )
 			{
 				Inputs = new List<IPlugIn>();
 			}

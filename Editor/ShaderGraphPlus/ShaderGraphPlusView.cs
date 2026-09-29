@@ -846,11 +846,11 @@ public class ShaderGraphPlusView : GraphView
 	{
 		var node = nodePreview.Node as BaseNodePlus;
 
-		if ( node is IParameterNode parameterNode )
+		if ( node is IBlackboardNode blackboardNode )
 		{
 			if ( _currentDragEventSource == DragEventSource.ImageFile )
 			{
-				Graph.RemoveParameter( parameterNode.ParameterIdentifier );
+				Graph.RemoveParameter( blackboardNode.ParameterIdentifier );
 
 				_blackboard.RebuildFromGraph();
 			}

@@ -1,12 +1,6 @@
 ﻿namespace ShaderGraphPlus;
 
-public interface IParameterNode
-{
-	Guid ParameterIdentifier { get; set; }
-	string Name { get; }
-}
-
-public abstract class ParameterNode<T, Y> : BlackboardNode<Y>, IParameterNode where Y : BlackboardParameter
+public abstract class ParameterNode<T, Y> : BlackboardNode<Y> where Y : BlackboardParameter
 {
 	[JsonIgnore, Hide, Browsable( false )]
 	public override Color NodeTitleColor => ShaderGraphPlusTheme.NodeHeaderColors.ParameterNode;
