@@ -55,7 +55,7 @@ public partial class ShaderGraphPlus
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 10 )]
 	internal static void Upgrader_v10( JsonObject obj )
 	{
-		var groups = new Dictionary<string,GroupDataEntry>();
+		var groups = new Dictionary<string, GroupDataEntry>();
 		var updatedParameters = new List<ParameterEntry>();
 		var registeredCategoryNames = new List<string>();
 
