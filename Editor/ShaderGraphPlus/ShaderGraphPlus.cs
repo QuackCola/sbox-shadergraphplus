@@ -694,37 +694,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 		return null;
 	}
-
-	internal void UpdateGroupDataPriority( GroupData target, int newPriority )
-	{
-		var oldPriority = target.Priority;
-		target.Priority = newPriority;
-
-		if ( newPriority > oldPriority ) // Group moved down the list
-		{
-			foreach ( var kvp in _groupData )
-			{
-				if ( kvp.Value != target &&
-					kvp.Value.Priority > oldPriority &&
-					kvp.Value.Priority <= newPriority )
-				{
-					kvp.Value.Priority--;
-				}
-			}
-		}
-		else if ( newPriority < oldPriority ) // Group moved up the list
-		{
-			foreach ( var kvp in _groupData )
-			{
-				if ( kvp.Value != target &&
-					kvp.Value.Priority >= newPriority &&
-					kvp.Value.Priority < oldPriority )
-				{
-					kvp.Value.Priority++;
-				}
-			}
-		}
-	}
 }
 
 [AssetType( Name = ShaderGraphPlusGlobals.SubgraphAssetTypeName, Extension = ShaderGraphPlusGlobals.SubgraphAssetTypeExtension, Flags = AssetTypeFlags.NoEmbedding )]
