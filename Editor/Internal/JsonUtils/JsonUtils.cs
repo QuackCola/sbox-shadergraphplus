@@ -27,9 +27,12 @@ public static class JsonUtils
 
 	public static bool UpdatePropertyKey( JsonObject obj, string oldKey, string newKey )
 	{
-		if ( obj.TryGetPropertyValue( oldKey, out var jsonNode ) && obj.Remove( oldKey ) )
+		if ( obj.TryGetPropertyValue( oldKey, out var jsonNode ) )
 		{
-			obj.Add( newKey, jsonNode );
+			var oldKeyIndex = obj.IndexOf( oldKey );
+
+			obj.Remove( oldKey );
+			obj.Insert( oldKeyIndex, newKey, jsonNode );
 
 			return true;
 		}
@@ -39,11 +42,11 @@ public static class JsonUtils
 
 	public static bool UpdatePropertyValue<T>( JsonObject obj, string targetKey, T newData, JsonSerializerOptions? options = null )
 	{
-		var currentIndex = obj.IndexOf( targetKey );
+		var targetKeyIndex = obj.IndexOf( targetKey );
 
 		if ( obj.Remove( targetKey ) )
 		{
-			obj.Insert( currentIndex, targetKey, JsonSerializer.SerializeToNode( newData, options ?? SerializerOptions() ) );
+			obj.Insert( targetKeyIndex, targetKey, JsonSerializer.SerializeToNode( newData, options ?? SerializerOptions() ) );
 
 			return true;
 		}
