@@ -8,6 +8,8 @@ public interface IBlackboardParameter
 
 	DisplayInfo DisplayInfo { get; }
 
+	public bool IsValid { get; }
+
 	string Name { get; set; }
 
 	public object GetValue();
