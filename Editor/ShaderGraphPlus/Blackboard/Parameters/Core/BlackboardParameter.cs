@@ -1,4 +1,5 @@
 ﻿using Editor;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -21,9 +22,13 @@ internal sealed class ParameterAvailableInAttribute : Attribute
 
 public interface IGroupableBlackboardParameter : IBlackboardParameter
 {
-	Guid GroupReference { get; set; }
+	string Group { get; set; }
 
-	public bool IsGrouped { get; }
+	/// <summary>
+	/// Get a non null, empty or just whitespace version of the <see cref="Group"/>.
+	/// </summary>
+	/// <returns>The <see cref="Group"/> if it isnt null, empty or just whitespace, otherwise the empty group name.</returns>
+	public string GetGroupTitle();
 }
 
 public interface IBlackboardMaterialParameter : IGroupableBlackboardParameter
@@ -57,14 +62,12 @@ public interface IBlackboardSubgraphInputParameter : IBlackboardSubgraphParamete
 
 public interface IBlackboardSubgraphOutputParameter : IBlackboardSubgraphParameter
 {
-	bool IsValid { get; }
-
 	SubgraphOutputPreviewType Preview { get; set; }
 
 	bool CannotPreviewOutputType { get; }
 }
 
-public abstract class BlackboardParameter : IBlackboardParameter, IValid
+public abstract class BlackboardParameter : IGroupableBlackboardParameter, IValid
 {
 	[Hide, Browsable( false )]
 	public Guid Identifier { get; set; }
@@ -81,17 +84,21 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 
 	public virtual string Name { get; set; }
 
+	[Hide]
+	public string Group { get; set; }
+
 	public BlackboardParameter()
 	{
 		DisplayInfo = DisplayInfo.For( this );
 		NewIdentifier();
 
 		Name = "";
+		Group = "";
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public Guid NewIdentifier()
@@ -99,6 +106,12 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 		Identifier = Guid.NewGuid();
 		return Identifier;
 	}
+
+	/// <summary>
+	/// Get a non null, empty or just whitespace version of the <see cref="Group"/>.
+	/// </summary>
+	/// <returns>The <see cref="Group"/> if it isnt null, empty or just whitespace, otherwise the empty group name.</returns>
+	public string GetGroupTitle() => string.IsNullOrWhiteSpace( Group ) ? BlackboardGlobals.EmptyGroupName : Group;
 
 	public abstract object GetValue();
 
@@ -127,6 +140,11 @@ public abstract class BlackboardParameter : IBlackboardParameter, IValid
 
 		var cleanedName = Name.Replace( " ", "" );
 		//var prefix = GetParameterPrefix( this.GetType() );
+
+		if ( BlackboardRegex.InvalidCharacters.IsMatch( cleanedName ) )
+		{
+			issues.Add( $"Parameter name \"{Name}\" contains invalid characters!" );
+		}
 
 		// Check if parameter name conflicts with an existing Global or potential Globals included by an .hlsl include 
 		if ( GraphCompiler.ReservedGlobalParameters.ContainsKey( cleanedName ) )
@@ -235,12 +253,6 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 	[InlineEditor( Label = false ), Group( "UI" )]
 	public Y UI { get; set; }
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	public bool IsAttribute { get; set; }
 
 	public BlackboardMaterialParameter() : base()
@@ -250,7 +262,7 @@ public abstract class BlackboardMaterialParameter<T, Y> : BlackboardParameter, I
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()
@@ -297,12 +309,6 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 	[Hide, JsonIgnore]
 	public int PortOrder => Graph is ShaderGraphPlus graph ? graph.GetParameterIndex( this ) : 0;
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	[Hide, JsonIgnore]
 	public abstract SubgraphPortType PortType { get; }
 
@@ -312,7 +318,7 @@ public abstract class BlackboardSubgraphInputParameter<T> : BlackboardParameter,
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()
@@ -362,12 +368,6 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 	[Hide, JsonIgnore]
 	public abstract SubgraphPortType PortType { get; }
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	[HideIf( nameof( CannotPreviewOutputType ), true )]
 	public SubgraphOutputPreviewType Preview { get; set; }
 
@@ -394,7 +394,7 @@ public abstract class BlackboardSubgraphOutputParameter<T> : BlackboardParameter
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()
@@ -430,19 +430,13 @@ public abstract class BlackboardTextureMaterialParameter : BlackboardParameter, 
 		}
 	}
 
-	[Hide]
-	public Guid GroupReference { get; set; } = Guid.Empty;
-
-	[Hide]
-	public bool IsGrouped => GroupReference != default || GroupReference != Guid.Empty;
-
 	public BlackboardTextureMaterialParameter() : base()
 	{
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine( Name, GroupReference );
+		return HashCode.Combine( Name, Group );
 	}
 
 	public override object GetValue()

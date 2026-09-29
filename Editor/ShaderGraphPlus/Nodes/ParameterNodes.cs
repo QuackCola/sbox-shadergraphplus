@@ -378,7 +378,7 @@ public sealed class SamplerStateParameterNode : ParameterNode<Sampler, SamplerSt
 /// </summary>
 [Title( "Texture 2D" ), Category( "Parameters" ), Icon( "image" ), Order( 7 )]
 [Hide]
-public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>, IParameterNode//, IBlackboardNode
+public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -410,10 +410,8 @@ public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>,
 			var parameter = GetParameter();
 			var parameterOrder = graph.GetParameterIndex( parameter );
 
-			if ( parameter.IsGrouped )
+			if ( graph.TryFindGroupData( parameter.Group, out var targetGroup ) )
 			{
-				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
-
 				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
 				input.PrimaryGroup = input.PrimaryGroup with
 				{
@@ -434,7 +432,7 @@ public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>,
 /// </summary>
 [Title( "Texture Cube" ), Category( "Parameters" ), Icon( "image" ), Order( 8 )]
 [Hide]
-public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParameter>, IParameterNode
+public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParameter>
 {
 	[JsonIgnore, Hide]
 	public override string Title => string.IsNullOrWhiteSpace( Name ) ?
@@ -466,10 +464,8 @@ public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParamet
 			var parameter = GetParameter();
 			var parameterOrder = graph.GetParameterIndex( parameter );
 
-			if ( parameter.IsGrouped )
+			if ( graph.TryFindGroupData( parameter.Group, out var targetGroup ) )
 			{
-				var targetGroup = graph.CategoryData.FirstOrDefault( x => x.Identifier == parameter.GroupReference );
-
 				input.Priority = targetGroup.ParameterReferences.IndexOf( parameter.Identifier );
 				input.PrimaryGroup = input.PrimaryGroup with
 				{

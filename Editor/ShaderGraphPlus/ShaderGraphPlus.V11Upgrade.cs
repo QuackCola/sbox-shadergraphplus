@@ -5,7 +5,8 @@ namespace ShaderGraphPlus;
 public partial class ShaderGraphPlus
 {
 	/// <summary>
-	/// Replace Domain with ShaderType
+	/// Changes : <br/>
+	/// - Replace Domain with ShaderType.
 	/// </summary>
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 11 )]
 	internal static void Upgrader_v11( JsonObject obj )

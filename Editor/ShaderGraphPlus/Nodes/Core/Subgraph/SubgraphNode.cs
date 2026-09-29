@@ -1,4 +1,5 @@
 ﻿using Editor;
+using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 
 namespace ShaderGraphPlus;
 
@@ -51,7 +52,6 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 
 		if ( SubgraphPath != null )
 		{
-
 			Subgraph = new ShaderGraphPlus();
 			if ( !Editor.FileSystem.Content.FileExists( SubgraphPath ) ) return;
 			var json = Editor.FileSystem.Content.ReadAllText( SubgraphPath );
@@ -66,7 +66,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 	}
 
 	[Hide, JsonIgnore]
-	internal Dictionary<IPlugIn, (SubgraphInput inputNode, Type inputNodeValueType)> InputReferences = new();
+	internal Dictionary<IPlugIn, (IBlackboardSubgraphInputParameter inputParameter, Type inputValueType)> InputReferences = new();
 
 	public void CreateInputs()
 	{
@@ -74,16 +74,13 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 		var defaults = new Dictionary<Type, int>();
 		InputReferences.Clear();
 
-		// Get all SubgraphInput nodes
-		var subgraphInputs = Subgraph.Nodes.OfType<SubgraphInput>()
-			.Where( x => !string.IsNullOrWhiteSpace( x.Name ) )
-			.OrderBy( x => x.PortOrder )
-			.GroupBy( x => x.Name )
-			.Select( x => x.First() );
+		// Get all Subgraph input parameters
+		var subgraphInputs = Subgraph.Parameters.OfType<IBlackboardSubgraphInputParameter>()
+			.Where( x => !string.IsNullOrWhiteSpace( x.Name ) );
 
 		foreach ( var subgraphInput in subgraphInputs )
 		{
-			var type = subgraphInput.PortType switch
+			var inputType = subgraphInput.PortType switch
 			{
 				SubgraphPortType.Bool => typeof( bool ),
 				SubgraphPortType.Int => typeof( int ),
@@ -105,15 +102,15 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 			var info = new PlugInfo()
 			{
 				Name = subgraphInput.Name,
-				Type = type,
+				Type = inputType,
 				DisplayInfo = new DisplayInfo()
 				{
 					Name = subgraphInput.Name,
-					Fullname = type.FullName
+					Fullname = inputType.FullName
 				}
 			};
 
-			var plug = new BasePlugIn( this, info, type );
+			var plug = new BasePlugIn( this, info, inputType );
 			var oldPlug = InternalInputs.FirstOrDefault( x => x is BasePlugIn plugIn && plugIn.Info.Name == info.Name && plugIn.Info.Type == info.Type ) as BasePlugIn;
 			if ( oldPlug is not null )
 			{
@@ -123,24 +120,26 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				plug = oldPlug;
 			}
 			plugs.Add( plug );
-			InputReferences[plug] = (subgraphInput, type);
+			InputReferences[plug] = (subgraphInput, inputType);
 
 			if ( !DefaultValues.ContainsKey( plug.Identifier ) )
 			{
-				DefaultValues[plug.Identifier] = subgraphInput.DefaultValue;
+				DefaultValues[plug.Identifier] = subgraphInput.GetValue();
 			}
 		}
 
 		InternalInputs = plugs;
 	}
 
-	[Hide, JsonIgnore]
-	internal Dictionary<IPlugOut, IPlugIn> OutputReferences = new();
 	public void CreateOutputs()
 	{
 		var plugs = new List<IPlugOut>();
 
-		foreach ( var subgraphOutput in Subgraph.Nodes.OfType<SubgraphOutput>().OrderBy( x => x.PortOrder ) )
+		// Get all Subgraph output parameters
+		var subgraphOutputs = Subgraph.Parameters.OfType<IBlackboardSubgraphOutputParameter>()
+			.Where( x => !string.IsNullOrWhiteSpace( x.Name ) );
+
+		foreach ( var subgraphOutput in subgraphOutputs )
 		{
 			var outputType = subgraphOutput.PortType switch
 			{
@@ -158,28 +157,31 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				SubgraphPortType.SamplerState => typeof( Sampler ),
 				SubgraphPortType.Texture2DObject => typeof( Texture ),
 				SubgraphPortType.TextureCubeObject => typeof( Texture ),
-				_ => throw new NotImplementedException( $"Unknown PortType \"{subgraphOutput.PortType}\"" )
+				_ => throw new NotImplementedException( $"Unknown PortType \'{subgraphOutput.PortType}\'" )
 			};
 
 			if ( outputType is null ) continue;
 			var info = new PlugInfo()
 			{
-				Name = subgraphOutput.OutputName,
+				Name = subgraphOutput.Name,
 				Type = outputType,
 				DisplayInfo = new DisplayInfo()
 				{
-					Name = subgraphOutput.OutputName,
+					Name = subgraphOutput.Name,
 					Fullname = outputType.FullName,
-					Description = subgraphOutput.OutputDescription
+					Description = subgraphOutput.Description
 				}
 			};
+
 			var plug = new BasePlugOut( this, info, outputType );
 			var oldPlug = InternalOutputs.FirstOrDefault( x => x is BasePlugOut plugOut && plugOut.Info.Name == info.Name && plugOut.Info.Type == info.Type ) as BasePlugOut;
+
 			if ( oldPlug is not null )
 			{
 				oldPlug.Info.Name = info.Name;
 				oldPlug.Info.Type = info.Type;
 				oldPlug.Info.DisplayInfo = info.DisplayInfo;
+
 				plugs.Add( oldPlug );
 			}
 			else
@@ -187,6 +189,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 				plugs.Add( plug );
 			}
 		}
+
 		InternalOutputs = plugs;
 	}
 
@@ -226,7 +229,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 		foreach ( var input in InputReferences )
 		{
 			var plug = input.Key;
-			var parameterNode = input.Value.inputNode;
+			var parameterNode = input.Value.inputParameter;
 			var inputName = parameterNode.Name;
 			if ( string.IsNullOrWhiteSpace( inputName ) ) inputName = input.Key.DisplayInfo.Name;
 			if ( IsSubgraph && plug.Type == typeof( Texture ) && plug.ConnectedOutput is null )
@@ -285,11 +288,21 @@ internal class SubgraphNodeControlWidget : ControlWidget
 	{
 		Sheet.Clear( true );
 
+		var groups = new Dictionary<string, List<SerializedProperty>>();
+
 		foreach ( var inputRef in Node.InputReferences )
 		{
 			var name = inputRef.Key.Identifier;
-			var type = inputRef.Value.inputNodeValueType;
-			var inputType = inputRef.Value.inputNode.PortType;
+			var type = inputRef.Value.inputValueType;
+			var groupName = inputRef.Value.inputParameter.GetGroupTitle();
+
+			//if ( groupName != BlackboardGlobals.EmptyGroupName && !groups.ContainsKey( groupName ) )
+			if ( !groups.ContainsKey( groupName ) )
+			{
+				groups.Add( groupName, new List<SerializedProperty>() );
+			}
+
+			var inputType = inputRef.Value.inputParameter.PortType;
 			var getter = () =>
 			{
 				if ( Node.DefaultValues.ContainsKey( name ) )
@@ -298,19 +311,20 @@ internal class SubgraphNodeControlWidget : ControlWidget
 				}
 				else
 				{
-					var val = inputRef.Value.inputNode.DefaultValue;
+					var val = inputRef.Value.inputParameter.GetValue();
 					if ( val is JsonElement el ) return el.GetDouble();
 					return val;
 				}
 			};
 
 			var attributes = new List<Attribute>();
-			var properties = new List<SerializedProperty>();
 			var displayName = $"Default {name}";
+
+			SerializedProperty property = null;
 
 			if ( type == typeof( bool ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<bool>(
+				property = TypeLibrary.CreateProperty<bool>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -323,11 +337,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (bool)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( int ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<int>(
+				property = TypeLibrary.CreateProperty<int>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -340,11 +354,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (int)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( float ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<float>(
+				property = TypeLibrary.CreateProperty<float>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -357,11 +371,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (float)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Vector2 ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<Vector2>(
+				property = TypeLibrary.CreateProperty<Vector2>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -374,11 +388,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Vector2)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Vector3 ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<Vector3>(
+				property = TypeLibrary.CreateProperty<Vector3>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -391,11 +405,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Vector3)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Vector4 ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<Vector4>(
+				property = TypeLibrary.CreateProperty<Vector4>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -408,11 +422,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Vector4)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Color ) )
 			{
-				Sheet.AddRow( TypeLibrary.CreateProperty<Color>(
+				property = TypeLibrary.CreateProperty<Color>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -425,11 +439,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Color)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Float2x2 ) )
 			{
-				Sheet.AddRow( EditorTypeLibrary.CreateProperty<Float2x2>(
+				property = EditorTypeLibrary.CreateProperty<Float2x2>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -442,11 +456,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Float2x2)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Float3x3 ) )
 			{
-				Sheet.AddRow( EditorTypeLibrary.CreateProperty<Float3x3>(
+				property = EditorTypeLibrary.CreateProperty<Float3x3>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -459,11 +473,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Float3x3)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( type == typeof( Float4x4 ) )
 			{
-				Sheet.AddRow( EditorTypeLibrary.CreateProperty<Float4x4>(
+				property = EditorTypeLibrary.CreateProperty<Float4x4>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -476,12 +490,11 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Float4x4)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
-			//else if ( !Node.IsSubgraph && type == typeof( Gradient ) )
 			else if ( type == typeof( Gradient ) )
 			{
-				Sheet.AddRow( EditorTypeLibrary.CreateProperty<Gradient>(
+				property = EditorTypeLibrary.CreateProperty<Gradient>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -494,12 +507,13 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Gradient)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
+				);
 			}
 			else if ( !Node.IsSubgraph && type == typeof( Sampler ) )
 			{
 				attributes.Add( new InlineEditorAttribute() { Label = false } );
-				properties.Add( EditorTypeLibrary.CreateProperty<Sampler>(
+
+				property = EditorTypeLibrary.CreateProperty<Sampler>(
 					displayName, () =>
 					{
 						var val = getter();
@@ -512,57 +526,26 @@ internal class SubgraphNodeControlWidget : ControlWidget
 						return (Sampler)val;
 					}, x => SetDefaultValue( name, x ),
 					attributes.ToArray()
-				) );
-
-				Sheet.AddGroup( displayName, properties.ToArray() );
+				);
 			}
-			/*
-			else if ( !Node.IsSubgraph && type == typeof( Texture2DObject ) )
+
+			if ( property != null )
 			{
-				attributes.Add( new InlineEditorAttribute() { Label = false } );
-				properties.Add( EditorTypeLibrary.CreateProperty<TextureInput>(
-					displayName, () =>
-					{
-						var val = getter();
-
-						if ( val is JsonElement el )
-						{
-							return JsonSerializer.Deserialize<TextureInput>( el, ShaderGraphPlus.SerializerOptions() )! with { ShowName = true, Type = TextureType.Tex2D };
-						}
-
-						return ((TextureInput)val) with { ShowName = true, Type = TextureType.Tex2D };
-					}, x => SetDefaultValue( name, x ),
-					attributes.ToArray()
-				) );
-
-				Sheet.AddGroup( displayName, properties.ToArray() );
+				//if ( groupName != BlackboardGlobals.EmptyGroupName )
+				//{
+				groups[groupName].Add( property );
+				//}
+				//else
+				//{
+				//	Sheet.AddRow( property );
+				//}
 			}
-			else if ( !Node.IsSubgraph && type == typeof( TextureCubeObject ) )
-			{
-				attributes.Add( new InlineEditorAttribute() { Label = false } );
-				properties.Add( EditorTypeLibrary.CreateProperty<TextureInput>(
-					displayName, () =>
-					{
-						var val = getter();
-
-						if ( val is JsonElement el )
-						{
-							return JsonSerializer.Deserialize<TextureInput>( el, ShaderGraphPlus.SerializerOptions() )! with { ShowName = true, Type = TextureType.TexCube };
-						}
-
-						return ((TextureInput)val) with { ShowName = true, Type = TextureType.TexCube };
-					}, x =>
-					{
-						SetDefaultValue( name, x );
-					},
-					attributes.ToArray()
-				) );
-
-				Sheet.AddGroup( displayName, properties.ToArray() );
-			}
-			*/
 		}
 
+		foreach ( var group in groups )
+		{
+			Sheet.AddGroup( group.Key, group.Value.ToArray() );
+		}
 	}
 
 	private void SetDefaultValue( string name, object value )

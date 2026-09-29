@@ -1040,7 +1040,7 @@ public sealed partial class GraphCompiler
 				case Type t when t == typeof( Sampler ):
 					return new Sampler();
 				case Type t when t == typeof( Texture ):
-					var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.PortType;
+					var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputParameter.Name == name ).Value.inputParameter.PortType;
 
 					return new TextureInput() { Type = (inputType == SubgraphPortType.Texture2DObject ? TextureType.Tex2D : TextureType.TexCube) };
 			}
@@ -1095,7 +1095,7 @@ public sealed partial class GraphCompiler
 			}
 			else if ( type == typeof( Texture ) )
 			{
-				var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputNode.Name == name ).Value.inputNode.PortType;
+				var inputType = node.InputReferences.FirstOrDefault( x => x.Value.inputParameter.Name == name ).Value.inputParameter.PortType;
 				var textureInput = JsonSerializer.Deserialize<TextureInput>( el, ShaderGraphPlus.SerializerOptions() );
 
 				value = textureInput with { Type = (inputType == SubgraphPortType.Texture2DObject ? TextureType.Tex2D : TextureType.TexCube) };
@@ -1124,7 +1124,6 @@ public sealed partial class GraphCompiler
 		{
 			isAttribute = materialParameter.IsAttribute;
 
-			// Getting the Priority from the OrderedDictionary now :3
 			var newUI = materialParameter.UI;
 			newUI.Priority = priority;
 			parameterUI = newUI;
@@ -1132,19 +1131,16 @@ public sealed partial class GraphCompiler
 
 		if ( parameter is IGroupableBlackboardParameter groupableParameter )
 		{
-			if ( groupableParameter.IsGrouped )
+			if ( Graph.TryFindGroupData( string.IsNullOrWhiteSpace( groupableParameter.Group ) ? "General" : groupableParameter.Group, out var groupData ) )
 			{
-				if ( Graph.TryFindCategoryData( groupableParameter.GroupReference, out var category ) )
+				parameterUI.Priority = groupData.ParameterReferences.IndexOf( parameter.Identifier );
+				parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
 				{
-					parameterUI.Priority = category.ParameterReferences.IndexOf( parameter.Identifier );
-					parameterUI.PrimaryGroup = parameterUI.PrimaryGroup with
-					{
-						Name = category.Name,
-						Priority = category.Priority
-					};
+					Name = groupData.Name,
+					Priority = Graph.GetGroupDataIndex( groupData )//groupData.Priority
+				};
 
-					//Log.Info( $"TEST Category '{targetGroup.Name}' with Priorty '{parameterUI.PrimaryGroup.Priority}'" );
-				}
+				//SGPLogger.Info( $"Group \"{groupData.Name}\" with Priority \"{parameterUI.PrimaryGroup.Priority}\"" );
 			}
 		}
 
@@ -1345,13 +1341,13 @@ public sealed partial class GraphCompiler
 				}
 				else
 				{
-					value = GetDefaultValue( lastNodeEntered, inputNode.Name, parentInput.Value.inputNodeValueType );
+					value = GetDefaultValue( lastNodeEntered, inputNode.Name, parentInput.Value.inputValueType );
 
 					SubgraphStack.Add( lastStack );
 					Subgraph = lastSubgraph;
 					SubgraphNode = lastNode;
 
-					var inputNodeInputType = parentInput.Value.inputNode.PortType;
+					var inputNodeInputType = parentInput.Value.inputParameter.PortType;
 					if ( inputNodeInputType == SubgraphPortType.Texture2DObject || inputNodeInputType == SubgraphPortType.TextureCubeObject )
 					{
 						var resultType = (inputNodeInputType == SubgraphPortType.Texture2DObject ? ResultType.Texture2D : ResultType.TextureCube);

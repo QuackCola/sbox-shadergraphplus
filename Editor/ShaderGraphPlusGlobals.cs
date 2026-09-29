@@ -7,6 +7,11 @@ internal static class ShaderGraphPlusGlobals
 		internal const int NoNodePreviewID = 0;
 	}
 
+	internal static class BlackboardGlobals
+	{
+		internal const string EmptyGroupName = "General";
+	}
+
 	internal static class ControlWidgetCustomEditors
 	{
 		internal const string UIGroupEditor = "sgp.UiGroupEditor";
@@ -21,6 +26,12 @@ internal static class ShaderGraphPlusGlobals
 		internal const string ShaderGraphPlusEditorCreated = "sgp.EditorCreatedEvent";
 		internal const string SubgraphUpdate = "sgp.UpdateSubgraphEvent";
 		internal const string ShaderTemplateUpdate = "sgp.ShaderTemplateUpdateEvent";
+	}
+
+	internal static class EditorCookieNames
+	{
+		internal const string ShaderGraphPlusBlackboardCollapsedGroupsCookie = "sgp.Blackboard.ParameterGroups.Collapsed";
+		internal const string ShaderGraphPlusGridWires = "sgp.GraphView.Gridwires";
 	}
 
 	internal const string CleanName = "ShaderGraphPlus";
