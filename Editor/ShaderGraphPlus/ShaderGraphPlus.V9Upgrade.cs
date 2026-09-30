@@ -4,6 +4,10 @@ namespace ShaderGraphPlus;
 
 public partial class ShaderGraphPlus
 {
+	/// <summary>
+	/// Changes : <br/>
+	/// - Rename Description property of SubgraphInput and SubgraphOutput parameters.
+	/// </summary>
 	[SGPJsonUpgrader( typeof( ShaderGraphPlus ), 9 )]
 	internal static void Upgrader_v9( JsonObject obj )
 	{
@@ -33,7 +37,7 @@ public partial class ShaderGraphPlus
 
 			if ( isSubgraph & typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphParameter ) ) )
 			{
-				JsonUtils.UpdatePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
+				JsonUtils.RenamePropertyKey( newParameterObj, typeDesc.TargetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) ? "InputDescription" : "OutputDescription", "Description" );
 
 				newParameterArray.Add( newParameterObj );
 			}

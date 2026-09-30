@@ -15,12 +15,6 @@ public class GroupData
 	public string Name { get; set; }
 
 	/// <summary>
-	/// Priority of this category
-	/// </summary>
-	[Hide]
-	public int Priority { get; set; } = 0;
-
-	/// <summary>
 	/// Parameters that belong to this category stored as guid references.
 	/// </summary>
 	[Hide]
@@ -48,7 +42,6 @@ public class GroupData
 		HashCode hc = new HashCode();
 
 		hc.Add( Name );
-		hc.Add( Priority );
 
 		foreach ( var reference in ParameterReferences )
 		{

@@ -416,7 +416,7 @@ public sealed class Texture2DParameterNode : BlackboardNode<Texture2DParameter>
 				input.PrimaryGroup = input.PrimaryGroup with
 				{
 					Name = targetGroup.Name,
-					Priority = targetGroup.Priority
+					Priority = graph.GetGroupDataIndex( targetGroup )
 				};
 			}
 		}
@@ -470,7 +470,7 @@ public sealed class TextureCubeParameterNode : BlackboardNode<TextureCubeParamet
 				input.PrimaryGroup = input.PrimaryGroup with
 				{
 					Name = targetGroup.Name,
-					Priority = targetGroup.Priority
+					Priority = graph.GetGroupDataIndex( targetGroup )
 				};
 			}
 		}

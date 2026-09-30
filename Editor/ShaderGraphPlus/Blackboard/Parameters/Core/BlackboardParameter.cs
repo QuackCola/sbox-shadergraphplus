@@ -141,7 +141,7 @@ public abstract class BlackboardParameter : IGroupableBlackboardParameter, IVali
 		var cleanedName = Name.Replace( " ", "" );
 		//var prefix = GetParameterPrefix( this.GetType() );
 
-		if ( BlackboardRegex.InvalidCharacters.IsMatch( cleanedName ) )
+		if ( !BlackboardRegex.AllowedCharacters.IsMatch( cleanedName ) )
 		{
 			issues.Add( $"Parameter name \"{Name}\" contains invalid characters!" );
 		}
