@@ -36,25 +36,6 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndObject();
 	}
 
-	private static void WriteProperty( Utf8JsonWriter writer, string propertyName, object propertyValue, JsonSerializerOptions options )
-	{
-		writer.WritePropertyName( propertyName );
-		JsonSerializer.Serialize( writer, propertyValue, options );
-	}
-
-	private static void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> onArrayEntryWrite )
-	{
-		writer.WritePropertyName( propertyName );
-		writer.WriteStartArray();
-
-		foreach ( var item in items )
-		{
-			onArrayEntryWrite?.Invoke( item );
-		}
-
-		writer.WriteEndArray();
-	}
-
 	private static void SerializeObject( Utf8JsonWriter writer, object obj, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = obj.GetType();
@@ -100,6 +81,25 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 				} ), options );
 			}
 		}
+	}
+
+	private static void WriteProperty( Utf8JsonWriter writer, string propertyName, object propertyValue, JsonSerializerOptions options )
+	{
+		writer.WritePropertyName( propertyName );
+		JsonSerializer.Serialize( writer, propertyValue, options );
+	}
+
+	private static void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> onArrayEntryWrite )
+	{
+		writer.WritePropertyName( propertyName );
+		writer.WriteStartArray();
+
+		foreach ( var item in items )
+		{
+			onArrayEntryWrite?.Invoke( item );
+		}
+
+		writer.WriteEndArray();
 	}
 
 	private static void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
