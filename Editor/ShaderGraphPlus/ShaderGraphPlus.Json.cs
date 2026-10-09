@@ -37,14 +37,14 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		JsonSerializer.Serialize( writer, propertyValue, options );
 	}
 
-	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> entryWrite )
+	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> onArrayEntryWrite )
 	{
 		writer.WritePropertyName( propertyName );
 		writer.WriteStartArray();
 
 		foreach ( var item in items )
 		{
-			entryWrite?.Invoke( item );
+			onArrayEntryWrite?.Invoke( item );
 		}
 
 		writer.WriteEndArray();
