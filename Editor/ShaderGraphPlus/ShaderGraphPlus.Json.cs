@@ -50,52 +50,6 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndArray();
 	}
 
-	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
-	{
-		var type = node.GetType();
-	
-		writer.WriteStartObject();
-	
-		WriteProperty( writer, JsonKeys.Class, type.Name, options );
-	
-		if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
-		{
-			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
-		}
-	
-		SerializeObject( writer, node, options, identifiers );
-	
-		writer.WriteEndObject();
-	}
-
-	private void WriteParameterArrayEntry( Utf8JsonWriter writer, IBlackboardParameter parameter, JsonSerializerOptions options )
-	{
-		var type = parameter.GetType();
-
-		writer.WriteStartObject();
-
-		WriteProperty( writer, JsonKeys.Class, type.Name, options );
-		WriteProperty( writer, JsonKeys.Identifier, parameter.Identifier, options );
-
-		SerializeObject( writer, parameter, options );
-
-		writer.WriteEndObject();
-	}
-
-	private void WriteGroupDataArrayEntry( Utf8JsonWriter writer, GroupData groupData, JsonSerializerOptions options )
-	{
-		var type = groupData.GetType();
-
-		writer.WriteStartObject();
-
-		WriteProperty( writer, JsonKeys.Class, type.Name, options );
-		WriteProperty( writer, JsonKeys.Identifier, groupData.Identifier, options );
-
-		SerializeObject( writer, groupData, options );
-
-		writer.WriteEndObject();
-	}
-
 	private static void SerializeObject( Utf8JsonWriter writer, object obj, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = obj.GetType();
@@ -141,5 +95,51 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 				} ), options );
 			}
 		}
+	}
+
+	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
+	{
+		var type = node.GetType();
+	
+		writer.WriteStartObject();
+	
+		WriteProperty( writer, JsonKeys.Class, type.Name, options );
+	
+		if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
+		{
+			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
+		}
+	
+		SerializeObject( writer, node, options, identifiers );
+	
+		writer.WriteEndObject();
+	}
+
+	private void WriteParameterArrayEntry( Utf8JsonWriter writer, IBlackboardParameter parameter, JsonSerializerOptions options )
+	{
+		var type = parameter.GetType();
+
+		writer.WriteStartObject();
+
+		WriteProperty( writer, JsonKeys.Class, type.Name, options );
+		WriteProperty( writer, JsonKeys.Identifier, parameter.Identifier, options );
+
+		SerializeObject( writer, parameter, options );
+
+		writer.WriteEndObject();
+	}
+
+	private void WriteGroupDataArrayEntry( Utf8JsonWriter writer, GroupData groupData, JsonSerializerOptions options )
+	{
+		var type = groupData.GetType();
+
+		writer.WriteStartObject();
+
+		WriteProperty( writer, JsonKeys.Class, type.Name, options );
+		WriteProperty( writer, JsonKeys.Identifier, groupData.Identifier, options );
+
+		SerializeObject( writer, groupData, options );
+
+		writer.WriteEndObject();
 	}
 }
