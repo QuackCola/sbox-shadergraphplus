@@ -131,12 +131,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 	[Hide, JsonIgnore]
 	private readonly OrderedDictionary<Guid, GroupData> _groupData = new();
 
-	/// <summary>
-	///	Custom key-value storage for this project.
-	/// </summary>
-	[Hide]
-	public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
-
 	[Hide]
 	public bool IsSubgraph { get; set; }
 
