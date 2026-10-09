@@ -41,7 +41,15 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 			WriteProperty( writer, propertyName, propertyValue, options );
 		}
 
-		WriteNodesArray( writer, graph.Nodes, options );
+		//WriteNodesArray( writer, graph.Nodes, options );
+
+		var identifiers = new Dictionary<string, string>();
+		foreach ( var node in graph.Nodes )
+		{
+			identifiers.Add( node.Identifier, $"{identifiers.Count}" );
+		}
+
+		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, options, ( x ) => { WriteNodeArrayEntry( writer, (IGraphNode)x, options, identifiers ); } );
 
 		writer.WriteEndObject();
 	}
@@ -52,23 +60,14 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		JsonSerializer.Serialize( writer, propertyValue, options );
 	}
 
-	private void WriteNodesArray( Utf8JsonWriter writer, IEnumerable<IGraphNode> nodes, JsonSerializerOptions options )
+	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, JsonSerializerOptions options, Action<object> entryWrite )
 	{
-		var identifiers = new Dictionary<string, string>();
-		foreach ( var node in nodes )
-		{
-			identifiers.Add( node.Identifier, $"{identifiers.Count}" );
-		}
-
-		writer.WritePropertyName( JsonKeys.NodeArray );
+		writer.WritePropertyName( propertyName );
 		writer.WriteStartArray();
 
-		foreach ( var node in nodes )
+		foreach ( var item in items )
 		{
-			if ( node is DummyNode )
-				continue;
-
-			WriteNodeArrayEntry( writer, node, options, identifiers );
+			entryWrite?.Invoke( item );
 		}
 
 		writer.WriteEndArray();
@@ -77,18 +76,18 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = node.GetType();
-
+	
 		writer.WriteStartObject();
-
+	
 		WriteProperty( writer, JsonKeys.Class, type.Name, options );
-
+	
 		if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
 		{
 			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
 		}
-
+	
 		SerializeObject( node, writer, options, identifiers );
-
+	
 		writer.WriteEndObject();
 	}
 
