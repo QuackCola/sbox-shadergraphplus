@@ -49,8 +49,8 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 			identifiers.Add( node.Identifier, $"{identifiers.Count}" );
 		}
 
-		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, options, ( x ) => { WriteNodeArrayEntry( writer, (IGraphNode)x, options, identifiers ); } );
-		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, options, ( x ) => { WriteParameterArrayEntry( writer, (IBlackboardParameter)x, options ); } );
+		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, options, ( x ) => WriteNodeArrayEntry( writer, (IGraphNode)x, options, identifiers ) );
+		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, options, ( x ) => WriteParameterArrayEntry( writer, (IBlackboardParameter)x, options ) );
 
 		writer.WriteEndObject();
 	}
