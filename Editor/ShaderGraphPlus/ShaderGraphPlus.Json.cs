@@ -14,7 +14,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 	{
 		writer.WriteStartObject();
 
-		SerializeObject( graph, writer, options );
+		SerializeObject( writer, graph, options );
 
 		var identifiers = new Dictionary<string, string>();
 		foreach ( var node in graph.Nodes )
@@ -63,7 +63,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
 		}
 	
-		SerializeObject( node, writer, options, identifiers );
+		SerializeObject( writer, node, options, identifiers );
 	
 		writer.WriteEndObject();
 	}
@@ -77,7 +77,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		WriteProperty( writer, JsonKeys.Class, type.Name, options );
 		WriteProperty( writer, JsonKeys.Identifier, parameter.Identifier, options );
 
-		SerializeObject( parameter, writer, options );
+		SerializeObject( writer, parameter, options );
 
 		writer.WriteEndObject();
 	}
@@ -91,12 +91,12 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		WriteProperty( writer, JsonKeys.Class, type.Name, options );
 		WriteProperty( writer, JsonKeys.Identifier, groupData.Identifier, options );
 
-		SerializeObject( groupData, writer, options );
+		SerializeObject( writer, groupData, options );
 
 		writer.WriteEndObject();
 	}
 
-	private static void SerializeObject( object obj, Utf8JsonWriter writer, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
+	private static void SerializeObject( Utf8JsonWriter writer, object obj, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = obj.GetType();
 		var properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public )
