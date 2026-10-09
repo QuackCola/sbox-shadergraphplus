@@ -38,8 +38,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 
 			var propertyValue = property.GetValue( graph );
 
-			writer.WritePropertyName( propertyName );
-			JsonSerializer.Serialize( writer, propertyValue, options );
+			WriteProperty( writer, propertyName, propertyValue, options );
 		}
 
 		WriteNodesArray( writer, graph.Nodes, options );
@@ -47,8 +46,96 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndObject();
 	}
 
+	private void WriteProperty( Utf8JsonWriter writer, string propertyName, object propertyValue, JsonSerializerOptions options )
+	{
+		writer.WritePropertyName( propertyName );
+		JsonSerializer.Serialize( writer, propertyValue, options );
+	}
+
 	private void WriteNodesArray( Utf8JsonWriter writer, IEnumerable<IGraphNode> nodes, JsonSerializerOptions options )
 	{
+		var identifiers = new Dictionary<string, string>();
+		foreach ( var node in nodes )
+		{
+			identifiers.Add( node.Identifier, $"{identifiers.Count}" );
+		}
 
+		writer.WritePropertyName( JsonKeys.NodeArray );
+		writer.WriteStartArray();
+
+		foreach ( var node in nodes )
+		{
+			if ( node is DummyNode )
+				continue;
+
+			WriteNodeArrayEntry( writer, node, options, identifiers );
+		}
+
+		writer.WriteEndArray();
+	}
+
+	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
+	{
+		var type = node.GetType();
+
+		writer.WriteStartObject();
+
+		WriteProperty( writer, JsonKeys.Class, type.Name, options );
+
+		if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
+		{
+			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
+		}
+
+		SerializeObject( node, writer, options, identifiers );
+
+		writer.WriteEndObject();
+	}
+
+	private static void SerializeObject( object obj, Utf8JsonWriter writer, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
+	{
+		var type = obj.GetType();
+		var properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public )
+			.Where( x => x.GetSetMethod() != null );
+
+		foreach ( var property in properties )
+		{
+			if ( !property.CanRead )
+				continue;
+
+			if ( property.PropertyType == typeof( NodeInput ) )
+				continue;
+
+			if ( property.Name == JsonKeys.Identifier )
+				continue;
+
+			if ( property.IsDefined( typeof( JsonIgnoreAttribute ) ) )
+				continue;
+
+			var propertyName = property.Name;
+			if ( property.GetCustomAttribute<JsonPropertyNameAttribute>() is { } jpna )
+				propertyName = jpna.Name;
+
+			var propertyValue = property.GetValue( obj );
+
+			writer.WritePropertyName( propertyName );
+			JsonSerializer.Serialize( writer, propertyValue, options );
+		}
+
+		if ( obj is IGraphNode node )
+		{
+			foreach ( var input in node.Inputs )
+			{
+				if ( input.ConnectedOutput is not { } output )
+					continue;
+
+				writer.WritePropertyName( input.Identifier );
+				JsonSerializer.Serialize( writer, JsonSerializer.SerializeToNode( new NodeInput
+				{
+					Identifier = identifiers?.TryGetValue( output.Node.Identifier, out var newIdent ) ?? false ? newIdent : output.Node.Identifier,
+					Output = output.Identifier,
+				} ), options );
+			}
+		}
 	}
 }
