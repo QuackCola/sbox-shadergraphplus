@@ -42,8 +42,13 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 			JsonSerializer.Serialize( writer, propertyValue, options );
 		}
 
+		WriteNodesArray( writer, graph.Nodes, options );
 
 		writer.WriteEndObject();
-		//throw new NotImplementedException();
+	}
+
+	private void WriteNodesArray( Utf8JsonWriter writer, IEnumerable<IGraphNode> nodes, JsonSerializerOptions options )
+	{
+
 	}
 }
