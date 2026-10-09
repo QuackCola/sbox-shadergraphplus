@@ -49,8 +49,8 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 			identifiers.Add( node.Identifier, $"{identifiers.Count}" );
 		}
 
-		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, options, ( x ) => WriteNodeArrayEntry( writer, (IGraphNode)x, options, identifiers ) );
-		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, options, ( x ) => WriteParameterArrayEntry( writer, (IBlackboardParameter)x, options ) );
+		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, ( item ) => WriteNodeArrayEntry( writer, (IGraphNode)item, options, identifiers ) );
+		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, ( item ) => WriteParameterArrayEntry( writer, (IBlackboardParameter)item, options ) );
 
 		writer.WriteEndObject();
 	}
@@ -61,7 +61,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		JsonSerializer.Serialize( writer, propertyValue, options );
 	}
 
-	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, JsonSerializerOptions options, Action<object> entryWrite )
+	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> entryWrite )
 	{
 		writer.WritePropertyName( propertyName );
 		writer.WriteStartArray();
