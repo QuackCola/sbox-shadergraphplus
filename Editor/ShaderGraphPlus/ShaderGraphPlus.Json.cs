@@ -105,18 +105,18 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = node.GetType();
-	
+
 		writer.WriteStartObject();
-	
+
 		WriteProperty( writer, JsonKeys.Class, type.Name, options );
-	
+
 		if ( identifiers.TryGetValue( node.Identifier, out var newIdentifier ) )
 		{
 			WriteProperty( writer, JsonKeys.Identifier, newIdentifier, options );
 		}
-	
+
 		SerializeObject( writer, node, options, identifiers );
-	
+
 		writer.WriteEndObject();
 	}
 
