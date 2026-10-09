@@ -77,6 +77,24 @@ partial class ShaderGraphPlus
 
 	}
 
+	public void Deserialize( JsonNode jsonNode, string subgraphPath = null, string fileName = "" )
+	{
+		using var doc = JsonDocument.Parse( jsonNode.ToString() );
+		var root = doc.RootElement;
+		var options = SerializerOptions();
+		var fileVersion = GetGraphVersion( root );
+
+		if ( HandleGraphUpgrades( fileVersion, Json.ParseToJsonObject( jsonNode.ToString() ), options, out JsonElement upgradedElement ) )
+		{
+			root = upgradedElement;
+		}
+
+		DeserializeObject( this, root, options );
+		DeserializeGroupData( root, options );
+		DeserializeParameters( root, options );
+		DeserializeNodes( root, options, subgraphPath, fileVersion );
+	}
+
 	private bool HandleGraphUpgrades( int fileVersion, JsonObject json, JsonSerializerOptions options, out JsonElement upgradedElement )
 	{
 		upgradedElement = default;

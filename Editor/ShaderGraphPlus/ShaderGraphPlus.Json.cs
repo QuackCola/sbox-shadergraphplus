@@ -7,7 +7,12 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 {
 	public override ShaderGraphPlus Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
 	{
-		throw new NotImplementedException();
+		var graph = new ShaderGraphPlus();
+		var node = JsonSerializer.Deserialize<JsonNode>( ref reader, options )!;
+
+		graph.Deserialize( node );
+
+		return graph;
 	}
 
 	public override void Write( Utf8JsonWriter writer, ShaderGraphPlus graph, JsonSerializerOptions options )
