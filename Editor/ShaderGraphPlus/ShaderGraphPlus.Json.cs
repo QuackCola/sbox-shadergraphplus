@@ -36,13 +36,13 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndObject();
 	}
 
-	private void WriteProperty( Utf8JsonWriter writer, string propertyName, object propertyValue, JsonSerializerOptions options )
+	private static void WriteProperty( Utf8JsonWriter writer, string propertyName, object propertyValue, JsonSerializerOptions options )
 	{
 		writer.WritePropertyName( propertyName );
 		JsonSerializer.Serialize( writer, propertyValue, options );
 	}
 
-	private void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> onArrayEntryWrite )
+	private static void WriteArray( Utf8JsonWriter writer, string propertyName, IEnumerable<object> items, Action<object> onArrayEntryWrite )
 	{
 		writer.WritePropertyName( propertyName );
 		writer.WriteStartArray();
@@ -102,7 +102,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		}
 	}
 
-	private void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
+	private static void WriteNodeArrayEntry( Utf8JsonWriter writer, IGraphNode node, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = node.GetType();
 
@@ -120,7 +120,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndObject();
 	}
 
-	private void WriteParameterArrayEntry( Utf8JsonWriter writer, IBlackboardParameter parameter, JsonSerializerOptions options )
+	private static void WriteParameterArrayEntry( Utf8JsonWriter writer, IBlackboardParameter parameter, JsonSerializerOptions options )
 	{
 		var type = parameter.GetType();
 
@@ -134,7 +134,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		writer.WriteEndObject();
 	}
 
-	private void WriteGroupDataArrayEntry( Utf8JsonWriter writer, GroupData groupData, JsonSerializerOptions options )
+	private static void WriteGroupDataArrayEntry( Utf8JsonWriter writer, GroupData groupData, JsonSerializerOptions options )
 	{
 		var type = groupData.GetType();
 
