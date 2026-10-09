@@ -14,34 +14,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 	{
 		writer.WriteStartObject();
 
-		var graphType = graph.GetType();
-		var properties = graphType.GetProperties( BindingFlags.Instance | BindingFlags.Public )
-			.Where( x => x.GetSetMethod() != null );
-
-		foreach ( var property in properties )
-		{
-			if ( !property.CanRead )
-				continue;
-
-			if ( property.PropertyType == typeof( NodeInput ) )
-				continue;
-
-			if ( property.Name == JsonKeys.Identifier )
-				continue;
-
-			if ( property.IsDefined( typeof( JsonIgnoreAttribute ) ) )
-				continue;
-
-			var propertyName = property.Name;
-			if ( property.GetCustomAttribute<JsonPropertyNameAttribute>() is { } jpna )
-				propertyName = jpna.Name;
-
-			var propertyValue = property.GetValue( graph );
-
-			WriteProperty( writer, propertyName, propertyValue, options );
-		}
-
-		//WriteNodesArray( writer, graph.Nodes, options );
+		SerializeObject( graph, writer, options );
 
 		var identifiers = new Dictionary<string, string>();
 		foreach ( var node in graph.Nodes )
