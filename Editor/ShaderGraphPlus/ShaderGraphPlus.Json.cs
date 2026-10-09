@@ -53,6 +53,8 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, ( item ) => WriteParameterArrayEntry( writer, (IBlackboardParameter)item, options ) );
 		WriteArray( writer, JsonKeys.GroupDataArray, graph.GroupData, ( item ) => WriteGroupDataArrayEntry( writer, (GroupData)item, options ) );
 
+		WriteProperty( writer, JsonKeys.Version, graph.Version, options );
+
 		writer.WriteEndObject();
 	}
 
