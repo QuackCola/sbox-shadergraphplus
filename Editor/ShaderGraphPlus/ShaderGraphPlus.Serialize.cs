@@ -43,21 +43,6 @@ partial class ShaderGraphPlus
 		return options;
 	}
 
-	public string Serialize()
-	{
-		var doc = new JsonObject();
-		var options = SerializerOptions( true );
-
-		SerializeObject( this, doc, options );
-		SerializeNodes( Nodes, doc, options );
-		SerializeParameters( Parameters, doc, options );
-		SerializeGroupData( GroupData, doc, options );
-
-		doc.Add( JsonKeys.Version, JsonSerializer.SerializeToNode( Version, options ) );
-
-		return doc.ToJsonString( options );
-	}
-
 	public void Deserialize( string json, string subgraphPath = null, string fileName = "" )
 	{
 		using var doc = JsonDocument.Parse( json );
@@ -77,7 +62,7 @@ partial class ShaderGraphPlus
 
 	}
 
-	public void Deserialize( JsonNode jsonNode, string subgraphPath = null, string fileName = "" )
+	internal void Deserialize( JsonNode jsonNode, string subgraphPath = null, string fileName = "" )
 	{
 		using var doc = JsonDocument.Parse( jsonNode.ToString() );
 		var root = doc.RootElement;
@@ -109,7 +94,7 @@ partial class ShaderGraphPlus
 		return true;
 	}
 
-	public IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
+	internal IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
@@ -301,7 +286,7 @@ partial class ShaderGraphPlus
 		return nodes.Values;
 	}
 
-	public IEnumerable<BlackboardParameter> DeserializeParameters( string json )
+	internal IEnumerable<BlackboardParameter> DeserializeParameters( string json )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
@@ -343,7 +328,7 @@ partial class ShaderGraphPlus
 		return parameters.Values;
 	}
 
-	public IEnumerable<GroupData> DeserializeGroupData( string json )
+	internal IEnumerable<GroupData> DeserializeGroupData( string json )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
@@ -379,7 +364,7 @@ partial class ShaderGraphPlus
 		return data.Values;
 	}
 
-	public string UndoStackSerialize()
+	internal string UndoStackSerialize()
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions();
@@ -390,12 +375,7 @@ partial class ShaderGraphPlus
 		return SerializeGroupData( GroupData, doc ).ToJsonString( options );
 	}
 
-	public string SerializeNodes()
-	{
-		return SerializeNodes( Nodes );
-	}
-
-	public string SerializeNodes( IEnumerable<BaseNodePlus> nodes )
+	private string SerializeNodes( IEnumerable<BaseNodePlus> nodes )
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions();
@@ -405,7 +385,7 @@ partial class ShaderGraphPlus
 		return doc.ToJsonString( options );
 	}
 
-	public JsonObject SerializeNodes( IEnumerable<BaseNodePlus> nodes, JsonObject doc )
+	private JsonObject SerializeNodes( IEnumerable<BaseNodePlus> nodes, JsonObject doc )
 	{
 		var options = SerializerOptions();
 
@@ -493,11 +473,6 @@ partial class ShaderGraphPlus
 		doc.Add( JsonKeys.NodeArray, nodeArray );
 	}
 
-	public string SerializeParameters()
-	{
-		return SerializeParameters( Parameters );
-	}
-
 	private string SerializeParameters( IEnumerable<BlackboardParameter> parameters )
 	{
 		var doc = new JsonObject();
@@ -538,21 +513,6 @@ partial class ShaderGraphPlus
 		doc.Add( JsonKeys.ParameterArray, parameterArray );
 	}
 
-	public string SerializeGroupData()
-	{
-		return SerializeGroupData( GroupData );
-	}
-
-	private string SerializeGroupData( IEnumerable<GroupData> data )
-	{
-		var doc = new JsonObject();
-		var options = SerializerOptions();
-
-		SerializeGroupData( data, doc, options );
-
-		return doc.ToJsonString( options );
-	}
-
 	private JsonObject SerializeGroupData( IEnumerable<GroupData> data, JsonObject doc )
 	{
 		var options = SerializerOptions();
@@ -582,5 +542,4 @@ partial class ShaderGraphPlus
 
 		doc.Add( JsonKeys.GroupDataArray, groupDataArray );
 	}
-
 }
