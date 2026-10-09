@@ -51,6 +51,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 
 		WriteArray( writer, JsonKeys.NodeArray, graph.Nodes, ( item ) => WriteNodeArrayEntry( writer, (IGraphNode)item, options, identifiers ) );
 		WriteArray( writer, JsonKeys.ParameterArray, graph.Parameters, ( item ) => WriteParameterArrayEntry( writer, (IBlackboardParameter)item, options ) );
+		WriteArray( writer, JsonKeys.GroupDataArray, graph.GroupData, ( item ) => WriteGroupDataArrayEntry( writer, (GroupData)item, options ) );
 
 		writer.WriteEndObject();
 	}
@@ -102,6 +103,20 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		WriteProperty( writer, JsonKeys.Identifier, parameter.Identifier, options );
 
 		SerializeObject( parameter, writer, options );
+
+		writer.WriteEndObject();
+	}
+
+	private void WriteGroupDataArrayEntry( Utf8JsonWriter writer, GroupData groupData, JsonSerializerOptions options )
+	{
+		var type = groupData.GetType();
+
+		writer.WriteStartObject();
+
+		WriteProperty( writer, JsonKeys.Class, type.Name, options );
+		WriteProperty( writer, JsonKeys.Identifier, groupData.Identifier, options );
+
+		SerializeObject( groupData, writer, options );
 
 		writer.WriteEndObject();
 	}
