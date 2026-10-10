@@ -19,7 +19,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 	public override void Write( Utf8JsonWriter writer, ShaderGraphPlus graph, JsonSerializerOptions options )
 	{
 		JsonSerializer.Serialize( writer, graph.Serialize(), options );
-		
+
 		/*
 		writer.WriteStartObject();
 
