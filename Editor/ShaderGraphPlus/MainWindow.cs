@@ -1564,7 +1564,7 @@ public class MainWindow : DockWindow
 		}
 
 		// Write serialized graph to asset file
-		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize( _graph, ShaderGraphPlus.SerializerOptions() ) );
+		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize( _graph, ShaderGraphPlus.SerializerOptions( true ) ) );
 
 		if ( saveAs )
 		{
