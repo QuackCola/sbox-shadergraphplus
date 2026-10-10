@@ -109,15 +109,16 @@ public sealed partial class GraphCompiler
 		if ( !blockResults.Any() )
 			return default;
 
+		var featureNameClean = CleanName( shaderFeature.Name );
 		var resultType = blockResults.Select( x => x.Result.ResultType ).Where( x => x != ResultType.Invalid && !((int)x > 6) ).Max();
 		var id = 0;
 
-		while ( ShaderResult.ShaderFeatureResultStrings.Contains( $"{shaderFeature.Name}_result{id}" ) )
+		while ( ShaderResult.ShaderFeatureResultStrings.Contains( $"{featureNameClean}_result{id}" ) )
 		{
 			id++;
 		}
 
-		var resultAssignmentLocal = $"{shaderFeature.Name}_result{id}";
+		var resultAssignmentLocal = $"{featureNameClean}_result{id}";
 		var resultDataType = resultType switch
 		{
 			ResultType.Bool => "bool",
@@ -152,11 +153,11 @@ public sealed partial class GraphCompiler
 
 				if ( shaderFeature is ShaderFeatureBoolean boolFeature )
 				{
-					sb.AppendLine( $"#if ( {(IsPreview ? "D" : "S")}_{shaderFeature.Name.ToUpper()} == SWITCH_TRUE )" );
+					sb.AppendLine( $"#if ( {(IsPreview ? "D" : "S")}_{featureNameClean.ToUpper()} == SWITCH_TRUE )" );
 				}
 				else
 				{
-					sb.AppendLine( $"#if ( {(IsPreview ? "D" : "S")}_{shaderFeature.Name.ToUpper()} == {index} )" );
+					sb.AppendLine( $"#if ( {(IsPreview ? "D" : "S")}_{featureNameClean.ToUpper()} == {index} )" );
 				}
 
 				BuildSwitchBlock( sb, result.GeneratedLocals, resultAssignmentLocal, lastResult );
@@ -175,19 +176,19 @@ public sealed partial class GraphCompiler
 			{
 				if ( index != 0 && index != blockResults.Count - 1 )
 				{
-					sb.AppendLine( $"#elif ( {(IsPreview ? "D" : "S")}_{shaderFeature.Name.ToUpper()} == {index} )" );
+					sb.AppendLine( $"#elif ( {(IsPreview ? "D" : "S")}_{featureNameClean.ToUpper()} == {index} )" );
 					BuildSwitchBlock( sb, result.GeneratedLocals, resultAssignmentLocal, lastResult );
 				}
 				else if ( index == blockResults.Count - 1 )
 				{
-					sb.AppendLine( $"#elif ( {(IsPreview ? "D" : "S")}_{shaderFeature.Name.ToUpper()} == {index} )" );
+					sb.AppendLine( $"#elif ( {(IsPreview ? "D" : "S")}_{featureNameClean.ToUpper()} == {index} )" );
 					BuildSwitchBlock( sb, result.GeneratedLocals, resultAssignmentLocal, lastResult );
 					sb.AppendLine( $"#endif" );
 				}
 			}
 		}
 
-		//SGPLog.Info( $"Generated Switch D_{shaderFeature.Name.ToUpper()}: \n {sb.ToString()}" );
+		//SGPLog.Info( $"Generated Switch D_{featureNameClean.ToUpper()}: \n {sb.ToString()}" );
 
 		// TODO : Once SceneObject.Attributes.SetFeature is added. Replace SetComboPreview with something like SetFeaturePreview.
 		if ( IsPreview )
