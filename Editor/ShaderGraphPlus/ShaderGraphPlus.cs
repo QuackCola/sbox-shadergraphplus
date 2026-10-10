@@ -1,5 +1,7 @@
 using Editor;
+using ShaderGraphPlus.Internal.JsonConvert;
 using ShaderGraphPlus.Nodes;
+
 using static Editor.SceneViewportWidget;
 using static ShaderGraphPlus.ShaderGraphPlusGlobals;
 using static ShaderGraphPlus.ShaderTemplate;
@@ -98,6 +100,7 @@ public class PreviewSettings
 	public Color Tint { get; set; } = Color.White;
 }
 
+[JsonConverter( typeof( ShaderGraphPlusConverter ) )]
 [AssetType( Name = ShaderGraphPlusGlobals.AssetTypeName, Extension = ShaderGraphPlusGlobals.AssetTypeExtension, Flags = AssetTypeFlags.NoEmbedding ), Icon( "account_tree" )]
 public partial class ShaderGraphPlus : IBlackboardNodeGraph
 {
@@ -127,12 +130,6 @@ public partial class ShaderGraphPlus : IBlackboardNodeGraph
 
 	[Hide, JsonIgnore]
 	private readonly OrderedDictionary<Guid, GroupData> _groupData = new();
-
-	/// <summary>
-	///	Custom key-value storage for this project.
-	/// </summary>
-	[Hide]
-	public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
 
 	[Hide]
 	public bool IsSubgraph { get; set; }

@@ -1369,8 +1369,7 @@ public class MainWindow : DockWindow
 			return;
 		}
 
-		var graph = new ShaderGraphPlus();
-		graph.Deserialize( System.IO.File.ReadAllText( path ), null, Path.GetFileName( path ) );
+		var graph = JsonSerializer.Deserialize<ShaderGraphPlus>( System.IO.File.ReadAllText( path ), ShaderGraphPlus.SerializerOptions() );
 		graph.Path = asset.RelativePath;
 		graph.IsSubgraph = IsSubgraph;
 
@@ -1565,7 +1564,7 @@ public class MainWindow : DockWindow
 		}
 
 		// Write serialized graph to asset file
-		System.IO.File.WriteAllText( savePath, _graph.Serialize() );
+		System.IO.File.WriteAllText( savePath, JsonSerializer.Serialize( _graph, ShaderGraphPlus.SerializerOptions( true ) ) );
 
 		if ( saveAs )
 		{
