@@ -59,7 +59,6 @@ partial class ShaderGraphPlus
 		DeserializeGroupData( root, options );
 		DeserializeParameters( root, options );
 		DeserializeNodes( root, options, subgraphPath, fileVersion );
-
 	}
 
 	internal void Deserialize( JsonNode jsonNode, string subgraphPath = null, string fileName = "" )
