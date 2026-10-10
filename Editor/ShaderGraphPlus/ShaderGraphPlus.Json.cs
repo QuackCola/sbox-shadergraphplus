@@ -62,8 +62,7 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 
 			var propertyValue = property.GetValue( obj );
 
-			writer.WritePropertyName( propertyName );
-			JsonSerializer.Serialize( writer, propertyValue, options );
+			WriteProperty( writer, propertyName, propertyValue, options );
 		}
 
 		if ( obj is IGraphNode node )
@@ -73,12 +72,11 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 				if ( input.ConnectedOutput is not { } output )
 					continue;
 
-				writer.WritePropertyName( input.Identifier );
-				JsonSerializer.Serialize( writer, JsonSerializer.SerializeToNode( new NodeInput
+				WriteProperty( writer, input.Identifier, new NodeInput
 				{
 					Identifier = identifiers?.TryGetValue( output.Node.Identifier, out var newIdent ) ?? false ? newIdent : output.Node.Identifier,
 					Output = output.Identifier,
-				} ), options );
+				}, options );
 			}
 		}
 	}
