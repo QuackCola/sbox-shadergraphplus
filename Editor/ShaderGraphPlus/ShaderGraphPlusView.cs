@@ -79,8 +79,7 @@ public class ShaderGraphPlusView : GraphView
 	public void AddNodeType( string subgraphPath )
 	{
 		var subgraphTxt = Editor.FileSystem.Content.ReadAllText( subgraphPath );
-		var subgraph = new ShaderGraphPlus();
-		subgraph.Deserialize( subgraphTxt );
+		var subgraph = JsonSerializer.Deserialize<ShaderGraphPlus>( subgraphTxt, ShaderGraphPlus.SerializerOptions() );
 		if ( !subgraph.AddToNodeLibrary ) return;
 		var nodeType = new SubgraphNodeType( subgraphPath, EditorTypeLibrary.GetType<SubgraphNode>() );
 		nodeType.SetDisplayInfo( subgraph );

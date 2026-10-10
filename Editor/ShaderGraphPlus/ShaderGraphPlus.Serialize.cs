@@ -43,7 +43,7 @@ partial class ShaderGraphPlus
 		return options;
 	}
 
-	public string Serialize()
+	public JsonNode Serialize()
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions( true );
@@ -55,7 +55,7 @@ partial class ShaderGraphPlus
 
 		doc.Add( JsonKeys.Version, JsonSerializer.SerializeToNode( Version, options ) );
 
-		return doc.ToJsonString( options );
+		return doc;
 	}
 
 	public void Deserialize( string json, string subgraphPath = null, string fileName = "" )
@@ -74,7 +74,24 @@ partial class ShaderGraphPlus
 		DeserializeGroupData( root, options );
 		DeserializeParameters( root, options );
 		DeserializeNodes( root, options, subgraphPath, fileVersion );
+	}
 
+	internal void Deserialize( JsonNode jsonNode, string subgraphPath = null, string fileName = "" )
+	{
+		using var doc = JsonDocument.Parse( jsonNode.ToString() );
+		var root = doc.RootElement;
+		var options = SerializerOptions();
+		var fileVersion = GetGraphVersion( root );
+
+		if ( HandleGraphUpgrades( fileVersion, Json.ParseToJsonObject( jsonNode.ToString() ), options, out JsonElement upgradedElement ) )
+		{
+			root = upgradedElement;
+		}
+
+		DeserializeObject( this, root, options );
+		DeserializeGroupData( root, options );
+		DeserializeParameters( root, options );
+		DeserializeNodes( root, options, subgraphPath, fileVersion );
 	}
 
 	private bool HandleGraphUpgrades( int fileVersion, JsonObject json, JsonSerializerOptions options, out JsonElement upgradedElement )
@@ -89,15 +106,6 @@ partial class ShaderGraphPlus
 		upgradedElement = JsonSerializer.Deserialize<JsonElement>( json.ToJsonString(), options );
 
 		return true;
-	}
-
-	public IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
-	{
-		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
-		var root = doc.RootElement;
-		var fileVersion = GetGraphVersion( root, useCurrentVersion );
-
-		return DeserializeNodes( root, SerializerOptions(), null, fileVersion );
 	}
 
 	private static void DeserializeObject( object obj, JsonElement doc, JsonSerializerOptions options )
@@ -159,6 +167,15 @@ partial class ShaderGraphPlus
 
 			propertyInfo.SetValue( obj, JsonSerializer.Deserialize( jsonProperty.Value.GetRawText(), propertyInfo.PropertyType, options ) );
 		}
+	}
+
+	internal IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
+	{
+		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
+		var root = doc.RootElement;
+		var fileVersion = GetGraphVersion( root, useCurrentVersion );
+
+		return DeserializeNodes( root, SerializerOptions(), null, fileVersion );
 	}
 
 	private IEnumerable<BaseNodePlus> DeserializeNodes( JsonElement doc, JsonSerializerOptions options, string subgraphPath = null, int graphFileVersion = -1 )
@@ -283,7 +300,7 @@ partial class ShaderGraphPlus
 		return nodes.Values;
 	}
 
-	public IEnumerable<BlackboardParameter> DeserializeParameters( string json )
+	internal IEnumerable<BlackboardParameter> DeserializeParameters( string json )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
@@ -325,7 +342,7 @@ partial class ShaderGraphPlus
 		return parameters.Values;
 	}
 
-	public IEnumerable<GroupData> DeserializeGroupData( string json )
+	internal IEnumerable<GroupData> DeserializeGroupData( string json )
 	{
 		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
 		var root = doc.RootElement;
@@ -361,7 +378,7 @@ partial class ShaderGraphPlus
 		return data.Values;
 	}
 
-	public string UndoStackSerialize()
+	internal string UndoStackSerialize()
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions();
@@ -372,12 +389,7 @@ partial class ShaderGraphPlus
 		return SerializeGroupData( GroupData, doc ).ToJsonString( options );
 	}
 
-	public string SerializeNodes()
-	{
-		return SerializeNodes( Nodes );
-	}
-
-	public string SerializeNodes( IEnumerable<BaseNodePlus> nodes )
+	private string SerializeNodes( IEnumerable<BaseNodePlus> nodes )
 	{
 		var doc = new JsonObject();
 		var options = SerializerOptions();
@@ -387,7 +399,7 @@ partial class ShaderGraphPlus
 		return doc.ToJsonString( options );
 	}
 
-	public JsonObject SerializeNodes( IEnumerable<BaseNodePlus> nodes, JsonObject doc )
+	private JsonObject SerializeNodes( IEnumerable<BaseNodePlus> nodes, JsonObject doc )
 	{
 		var options = SerializerOptions();
 
@@ -475,11 +487,6 @@ partial class ShaderGraphPlus
 		doc.Add( JsonKeys.NodeArray, nodeArray );
 	}
 
-	public string SerializeParameters()
-	{
-		return SerializeParameters( Parameters );
-	}
-
 	private string SerializeParameters( IEnumerable<BlackboardParameter> parameters )
 	{
 		var doc = new JsonObject();
@@ -520,21 +527,6 @@ partial class ShaderGraphPlus
 		doc.Add( JsonKeys.ParameterArray, parameterArray );
 	}
 
-	public string SerializeGroupData()
-	{
-		return SerializeGroupData( GroupData );
-	}
-
-	private string SerializeGroupData( IEnumerable<GroupData> data )
-	{
-		var doc = new JsonObject();
-		var options = SerializerOptions();
-
-		SerializeGroupData( data, doc, options );
-
-		return doc.ToJsonString( options );
-	}
-
 	private JsonObject SerializeGroupData( IEnumerable<GroupData> data, JsonObject doc )
 	{
 		var options = SerializerOptions();
@@ -564,5 +556,4 @@ partial class ShaderGraphPlus
 
 		doc.Add( JsonKeys.GroupDataArray, groupDataArray );
 	}
-
 }
