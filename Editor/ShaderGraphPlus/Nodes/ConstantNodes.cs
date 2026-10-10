@@ -301,16 +301,17 @@ public sealed class Float4ConstantNode : ConstantNode<Vector4>, IRangedConstantN
 
 	[Group( "Range" )] public Vector4 Min { get; set; }
 	[Group( "Range" )] public Vector4 Max { get; set; }
+
 	public float Step { get; set; } = 0.0f;
 
 	[Hide] public float MinX => Min.x;
 	[Hide] public float MinY => Min.y;
 	[Hide] public float MinZ => Min.z;
-	[Hide] public float MinW => Min.z;
+	[Hide] public float MinW => Min.w;
 	[Hide] public float MaxX => Max.x;
 	[Hide] public float MaxY => Max.y;
 	[Hide] public float MaxZ => Max.z;
-	[Hide] public float MaxW => Max.z;
+	[Hide] public float MaxW => Max.w;
 
 	public Float4ConstantNode() : base()
 	{
