@@ -43,6 +43,21 @@ partial class ShaderGraphPlus
 		return options;
 	}
 
+	public JsonNode Serialize()
+	{
+		var doc = new JsonObject();
+		var options = SerializerOptions( true );
+
+		SerializeObject( this, doc, options );
+		SerializeNodes( Nodes, doc, options );
+		SerializeParameters( Parameters, doc, options );
+		SerializeGroupData( GroupData, doc, options );
+
+		doc.Add( JsonKeys.Version, JsonSerializer.SerializeToNode( Version, options ) );
+
+		return doc;
+	}
+
 	public void Deserialize( string json, string subgraphPath = null, string fileName = "" )
 	{
 		using var doc = JsonDocument.Parse( json );

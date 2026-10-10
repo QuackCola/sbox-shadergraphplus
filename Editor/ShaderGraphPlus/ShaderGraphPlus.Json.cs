@@ -1,11 +1,12 @@
 using System.Text.Json.Nodes;
-using static ShaderGraphPlus.ShaderGraphPlus;
 
 namespace ShaderGraphPlus.Internal.JsonConvert;
 
+#nullable enable
+
 internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 {
-	public override ShaderGraphPlus Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+	public override ShaderGraphPlus? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
 	{
 		var graph = new ShaderGraphPlus();
 		var node = JsonSerializer.Deserialize<JsonNode>( ref reader, options )!;
@@ -17,6 +18,9 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 
 	public override void Write( Utf8JsonWriter writer, ShaderGraphPlus graph, JsonSerializerOptions options )
 	{
+		JsonSerializer.Serialize( writer, graph.Serialize(), options );
+		
+		/*
 		writer.WriteStartObject();
 
 		SerializeObject( writer, graph, options );
@@ -34,8 +38,10 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 		WriteProperty( writer, JsonKeys.Version, graph.Version, options );
 
 		writer.WriteEndObject();
+		*/
 	}
 
+	/*
 	private static void SerializeObject( Utf8JsonWriter writer, object obj, JsonSerializerOptions options, Dictionary<string, string> identifiers = null )
 	{
 		var type = obj.GetType();
@@ -145,4 +151,5 @@ internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 
 		writer.WriteEndObject();
 	}
+	*/
 }
