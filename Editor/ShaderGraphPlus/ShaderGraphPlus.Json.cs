@@ -2,11 +2,9 @@ using System.Text.Json.Nodes;
 
 namespace ShaderGraphPlus.Internal.JsonConvert;
 
-#nullable enable
-
 internal class ShaderGraphPlusConverter : JsonConverter<ShaderGraphPlus>
 {
-	public override ShaderGraphPlus? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+	public override ShaderGraphPlus Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
 	{
 		var graph = new ShaderGraphPlus();
 		var node = JsonSerializer.Deserialize<JsonNode>( ref reader, options )!;
