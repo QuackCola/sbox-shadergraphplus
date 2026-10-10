@@ -108,15 +108,6 @@ partial class ShaderGraphPlus
 		return true;
 	}
 
-	internal IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
-	{
-		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
-		var root = doc.RootElement;
-		var fileVersion = GetGraphVersion( root, useCurrentVersion );
-
-		return DeserializeNodes( root, SerializerOptions(), null, fileVersion );
-	}
-
 	private static void DeserializeObject( object obj, JsonElement doc, JsonSerializerOptions options )
 	{
 		var type = obj.GetType();
@@ -176,6 +167,15 @@ partial class ShaderGraphPlus
 
 			propertyInfo.SetValue( obj, JsonSerializer.Deserialize( jsonProperty.Value.GetRawText(), propertyInfo.PropertyType, options ) );
 		}
+	}
+
+	internal IEnumerable<BaseNodePlus> DeserializeNodes( string json, bool useCurrentVersion = false )
+	{
+		using var doc = JsonDocument.Parse( json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip } );
+		var root = doc.RootElement;
+		var fileVersion = GetGraphVersion( root, useCurrentVersion );
+
+		return DeserializeNodes( root, SerializerOptions(), null, fileVersion );
 	}
 
 	private IEnumerable<BaseNodePlus> DeserializeNodes( JsonElement doc, JsonSerializerOptions options, string subgraphPath = null, int graphFileVersion = -1 )
