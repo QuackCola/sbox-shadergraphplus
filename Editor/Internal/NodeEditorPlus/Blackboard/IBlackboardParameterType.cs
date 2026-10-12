@@ -4,5 +4,5 @@ public interface IBlackboardParameterType
 {
 	public TypeDescription Type { get; }
 
-	IBlackboardParameter CreateParameter( INodeGraph graph, string name = "" );
+	IBlackboardParameter CreateParameter( IBlackboardNodeGraph graph, string name = "" );
 }
