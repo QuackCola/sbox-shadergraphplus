@@ -108,7 +108,7 @@ public interface IGraphNode
 	/// A CSS cursor for <paramref name="position"/>, in node units, such as "pointer" over something
 	/// <see cref="OnClick"/> acts on. Null for the node's own.
 	/// </summary>
-	string CursorAt( Vector2 position ) => null;
+	string CursorAt( Vector2 position );
 	bool HasTitleBar { get; }
 	bool HasSubtitle { get; }
 	bool HasError { get; set; }
