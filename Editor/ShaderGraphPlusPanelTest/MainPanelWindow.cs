@@ -68,8 +68,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	public ShaderGraphPlusPanelTest() : base()
 	{
 		StyleSheet.AddInline( ShaderGraphPlusStyleSheets.ShaderGraphPlusScss, "shadergraphplus_style" );
-		StyleSheet.Load( ShaderGraphPlusStyleSheets.EditorScss );
-		StyleSheet.Load( ShaderGraphPlusStyleSheets.GalleryScss );
+
 		Style.FlexDirection = FlexDirection.Column;
 
 		_graph = new ShaderGraphPlus.ShaderGraphPlus()
