@@ -271,9 +271,9 @@ public partial class NodeGraphPanel : CanvasPanel
 		painter.Fill = NodeTheme.Canvas;
 		painter.Stroke = Stroke.None;
 		painter.Rect( viewport );
-		
-		var alpha = FadeOutBackground ? Math.Clamp( ( Zoom - 0.3f ) / 0.3f, 0f, 1f ) : 1f;
-		
+
+		var alpha = FadeOutBackground ? Math.Clamp( (Zoom - 0.3f) / 0.3f, 0f, 1f ) : 1f;
+
 		if ( alpha > 0f )
 		{
 			switch ( GridStyle )
@@ -327,9 +327,9 @@ public partial class NodeGraphPanel : CanvasPanel
 	private void DrawDotGrid( Painter painter, Rect viewport, float alpha )
 	{
 		var step = GridSize * 2f;
-		var tile = step * ( CanvasToScreen( Vector2.One ) - CanvasToScreen( Vector2.Zero ) ).x;
+		var tile = step * (CanvasToScreen( Vector2.One ) - CanvasToScreen( Vector2.Zero )).x;
 		var origin = CanvasToScreen( Vector2.Zero ) - viewport.Position - new Vector2( tile * 0.5f );
-		var offset = new Vector2( ( origin.x % tile + tile ) % tile, ( origin.y % tile + tile ) % tile );
+		var offset = new Vector2( (origin.x % tile + tile) % tile, (origin.y % tile + tile) % tile );
 
 		painter.Fill = Fill.Image( DotTexture(), Color.White.WithAlpha( 0.1f * alpha ), Length.Pixels( tile ), Length.Pixels( tile ),
 			Length.Pixels( offset.x ), Length.Pixels( offset.y ), BackgroundRepeat.Repeat );
@@ -349,7 +349,7 @@ public partial class NodeGraphPanel : CanvasPanel
 		{
 			step *= 2;
 		}
-			
+
 		var major = Math.Max( step, GridSize * majorEvery );
 		var minorColor = Color.White.WithAlpha( 0.04f * alpha );
 		var majorColor = Color.White.WithAlpha( 0.09f * alpha );
@@ -358,7 +358,7 @@ public partial class NodeGraphPanel : CanvasPanel
 		{
 			DrawLines( painter, min, max, step, major, minorColor );
 		}
-			
+
 		DrawLines( painter, min, max, major, 0, majorColor );
 	}
 
@@ -370,7 +370,7 @@ public partial class NodeGraphPanel : CanvasPanel
 		{
 			if ( skipEvery > 0 && IsMultiple( x, skipEvery ) )
 				continue;
-			
+
 			painter.Line( CanvasToScreen( new Vector2( x, min.y ) ), CanvasToScreen( new Vector2( x, max.y ) ) );
 		}
 
