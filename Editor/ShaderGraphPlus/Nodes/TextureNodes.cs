@@ -45,15 +45,13 @@ public abstract class Texture2DSamplerBase : PreviewableNode, IErroringNode
 	[Hide]
 	public bool ShowPreview
 	{
-		get => _showPreview;
+		get;
 		set
 		{
-			_showPreview = value;
+			field = value;
 			ExpandSize = new Vector2( ExpandSize.x, value ? PreviewSpace : ToggleHeight );
 		}
-	}
-
-	bool _showPreview = true;
+	} = true;
 
 	protected Texture2DSamplerBase() : base()
 	{
@@ -796,15 +794,13 @@ public sealed class SampleTextureCubeNode : ShaderNodePlus
 	[Hide]
 	public bool ShowPreview
 	{
-		get => _showPreview;
+		get;
 		set
 		{
-			_showPreview = value;
+			field = value;
 			ExpandSize = new Vector2( ExpandSize.x, value ? Texture2DSamplerBase.PreviewSpace : Texture2DSamplerBase.ToggleHeight );
 		}
-	}
-
-	bool _showPreview = true;
+	} = true;
 
 	[JsonIgnore, Hide] Rect _nodeRect;
 
