@@ -140,6 +140,7 @@ public abstract class Texture2DSamplerBase : PreviewableNode, IErroringNode
 		else
 		{
 			_internalImage = "materials/dev/white_color.tga";
+			_asset = null;
 		}
 
 		var ui = PreviewUI with { DefaultTexture = _internalImage };
@@ -170,7 +171,9 @@ public abstract class Texture2DSamplerBase : PreviewableNode, IErroringNode
 			return true;
 		}
 
-		//InternalImage = "materials/dev/white_color.tga";
+		//_internalImage = "materials/dev/white_color.tga";
+		//_asset = null;
+
 		errorResult = NodeResult.MissingInput( "Texture2D" );
 
 		return false;
