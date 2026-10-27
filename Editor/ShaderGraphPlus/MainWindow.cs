@@ -124,7 +124,6 @@ public class MainWindow : DockWindow
 	public MainWindow()
 	{
 		DeleteOnClose = true;
-
 		Title = FileType;
 		Size = new Vector2( 1700, 1050 );
 

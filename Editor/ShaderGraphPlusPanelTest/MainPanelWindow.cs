@@ -5,6 +5,7 @@ using Sandbox.UI;
 using Sandbox.UI.Construct;
 using ShaderGraphPlus;
 using ShaderGraphPlus.Internal;
+using EditorExtras;
 
 namespace ShaderGraphPlusPanelTest;
 
@@ -67,7 +68,8 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	public ShaderGraphPlusPanelTest() : base()
 	{
 		StyleSheet.AddInline( ShaderGraphPlusStyleSheets.ShaderGraphPlusScss, "shadergraphplus_style" );
-
+		StyleSheet.Load( ShaderGraphPlusStyleSheets.EditorScss );
+		StyleSheet.Load( ShaderGraphPlusStyleSheets.GalleryScss );
 		Style.FlexDirection = FlexDirection.Column;
 
 		_graph = new ShaderGraphPlus.ShaderGraphPlus()
@@ -78,7 +80,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_recentFiles = Editor.FileSystem.Temporary.ReadJsonOrDefault( "shadergraphplus_recentfiles.json", _recentFiles )
 			.Where( x => System.IO.File.Exists( x ) ).ToList();
-
+		
 		BuildMenuBar();
 		CreateToolBar();
 		CreateUI();
@@ -124,15 +126,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	private void BuildMenuBar()
 	{
-		var bar = Add.Panel( "titlebar window-drag" );
-
-		bar.Add.Label( "s&", "brand" );
-
-		// Menus live in the title bar, same as the editor's
-		var menus = bar.AddChild( new Sandbox.UI.MenuBar() );
-		menus.AddClass( "window-nodrag" );
-
-		var file = menus.AddMenu( "File" );
+		var file = MenuBar.AddMenu( "File" );
 
 		Option( file, "New", "note_add", "Ctrl+N", New );
 		Option( file, "Open", "file_open", "Ctrl+O", Open );
@@ -155,7 +149,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		Option( file, "Quit", "logout", "Alt+F4", Quit );
 
-		var edit = menus.AddMenu( "Edit" );
+		var edit = MenuBar.AddMenu( "Edit" );
 
 		Option( edit, "Undo", "undo", "Ctrl+Z", Undo );
 		Option( edit, "Redo", "redo", "Ctrl+Y", Redo );
@@ -167,7 +161,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		Option( edit, "Paste", "content_paste", "Ctrl+V", PasteSelection );
 		Option( edit, "Select All", "select_all", "Ctrl+A", SelectAll );
 
-		var view = menus.AddMenu( "View" );
+		var view = MenuBar.AddMenu( "View" );
 
 		Option( view, "Graph", "account_tree", action: () => ShowDock( "graph" ) );
 		Option( view, "Palette", "palette", action: () => ShowDock( "palette" ) );
@@ -184,25 +178,9 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		view.AddSeparator();
 
-		Option( view, "Full Screen", "F11", "", () => { Window?.ToggleMaximized(); UpdateMaximizeIcon(); } );
+		Option( view, "Full Screen", "F11", "", () => { Window?.ToggleMaximized(); OnMaximize(); } );
 
 		RefreshRecentFiles();
-
-		bar.Add.Panel( "grow" );
-
-		// Centred over the bar, so the menus on the left don't push it off centre
-		var titleWrap = bar.Add.Panel( "titlewrap" );
-		WindowTitle = titleWrap.Add.Label( "", "title" );
-
-		WindowButton( bar, "remove", null, () => Window?.Minimize() );
-		_maximizeIcon = WindowButton( bar, "crop_square", null, () =>
-		{
-			Window?.ToggleMaximized();
-			UpdateMaximizeIcon();
-		} );
-		WindowButton( bar, "close", "close", Quit );
-
-		Add.Panel( "accentline" );
 
 		UpdateTitle();
 	}
@@ -617,7 +595,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		return true;
 	}
 
-	private void Quit()
+	protected override void Quit()
 	{
 		if ( !_dirty )
 		{
@@ -810,7 +788,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	private void UpdateTitle()
 	{
-		WindowTitle.Text = $"Shader Graph Plus - {_asset?.Path ?? "untitled"}{(_dirty ? "*" : "")}";
+		WindowTitle = $"Shader Graph Plus - {_asset?.Path ?? "untitled"}{(_dirty ? "*" : "")}";
 	}
 
 	public void ShowStatusBarMessage( string text, float seconds = 5f )

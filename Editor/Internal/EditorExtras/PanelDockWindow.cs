@@ -1,24 +1,39 @@
 ﻿using Editor;
 using Sandbox.UI;
+using Sandbox.UI.Construct;
+using ShaderGraphPlusPanelTest;
 
-namespace ShaderGraphPlusPanelTest;
+namespace EditorExtras;
 
 /// <summary>
 /// A window that is built from docking windows.
 /// </summary>
 public class PanelDockWindow : Panel
 {
-	protected Sandbox.UI.Label _maximizeIcon;
+	private readonly List<RootPanel> _floatingRoots = new();
+
+	private Sandbox.UI.Label _maximizeIcon;
+	private Sandbox.UI.Label _windowLabel;
+	private Sandbox.UI.Label _titleBarLabel;
 
 	protected string _defaultLayout;
 	protected string _savedLayout;
 
-	private readonly List<RootPanel> _floatingRoots = new();
-
-	public Sandbox.UI.Label WindowTitle { get; set; }
-
 	public DockHost DockHost { get; private set; }
 	public PanelDockWindows DockWindows { get; private set; }
+	public virtual Sandbox.UI.MenuBar MenuBar { get; set; }
+
+	public string WindowTitle
+	{
+		get
+		{
+			return _windowLabel.Text;
+		}
+		set
+		{
+			_windowLabel.Text = value;
+		}
+	}
 
 	/// <summary>
 	/// The window this panel is shown in. Looked up rather than stored, so it survives hotload.
@@ -29,10 +44,46 @@ public class PanelDockWindow : Panel
 	{
 		AddClass( "editor-window" );
 
-		StyleSheet.Load( ShaderGraphPlusStyleSheets.EditorScss );
-		StyleSheet.Load( ShaderGraphPlusStyleSheets.GalleryScss );
+		StyleSheet.Load( "/styles/editor.scss" );
+		StyleSheet.Load( "/styles/gallery.scss" );
 
 		EditorEvent.Register( this );
+
+		Init();
+	}
+
+	private void Init()
+	{
+		var titleBar = Add.Panel( "titlebar window-drag" );
+		_titleBarLabel = titleBar.Add.Label( "s&", "brand" );
+
+		// Menus live in the title bar, same as the editor's
+		MenuBar = titleBar.AddChild( new Sandbox.UI.MenuBar() );
+		MenuBar.AddClass( "window-nodrag" );
+
+		titleBar.Add.Panel( "grow" );
+
+		// Centred over the bar, so the menus on the left don't push it off centre
+		var titleWrap = titleBar.Add.Panel( "titlewrap" );
+		_windowLabel = titleWrap.Add.Label( "", "title" );
+
+		WindowButton( titleBar, "remove", null, () => Window?.Minimize() );
+		_maximizeIcon = WindowButton( titleBar, "crop_square", null, () =>
+		{
+			Window?.ToggleMaximized();
+			OnMaximize();
+		} );
+		WindowButton( titleBar, "close", "close", Quit );
+
+		Add.Panel( "accentline" );
+	}
+
+	public void SetWindowIcon( string name )
+	{
+		if ( _titleBarLabel is not null )
+		{
+			_titleBarLabel.Text = name;
+		}
 	}
 
 	protected virtual void CreateUI()
@@ -53,18 +104,13 @@ public class PanelDockWindow : Panel
 		PanelWindow.FromPanel( host )?.Focus();
 	}
 
-	protected void Close()
-	{
-		Window?.Dispose();
-	}
-
 	private void ConfigureFloatingWindow( RootPanel root )
 	{
 		root.AddClass( "mock-editor-surface" );
 		root.AddClass( "editor-window" );
-		root.StyleSheet.Load( ShaderGraphPlusStyleSheets.GalleryScss );
+		
+		root.StyleSheet.Load( "/styles/gallery.scss" );
 		_floatingRoots.Add( root );
-
 
 		// A floated tool no longer bubbles keys through EditorWindow.
 		var host = root.Children.OfType<DockHost>().Single();
@@ -72,7 +118,7 @@ public class PanelDockWindow : Panel
 		host.Parent = shortcuts;
 	}
 
-	public void UpdateMaximizeIcon()
+	public void OnMaximize()
 	{
 		if ( Window is not { } window )
 			return;
@@ -80,21 +126,17 @@ public class PanelDockWindow : Panel
 		_maximizeIcon.Text = window.IsMaximized ? "filter_none" : "crop_square";
 	}
 
-	public override void OnDeleted()
-	{
-		// Registered in the constructor - a closed window mustn't keep getting events like hotload
-		EditorEvent.Unregister( this );
-		DockWindows?.Dispose();
-		_floatingRoots.Clear();
-		base.OnDeleted();
-	}
-
 	/// <summary>
 	/// Take a key pressed while this window, or a tool floated out of it, has focus. True when it
-	/// did something. <paramref name="scope"/> is the panel the key came through, so a text field in
-	/// it can keep its own keys.
+	/// did something.
 	/// </summary>
-	protected internal virtual bool HandleShortcut( ButtonEvent e, Panel scope ) => false;
+	/// <param name="e"></param>
+	/// <param name="scope">The panel the key came through</param>
+	/// <returns></returns>
+	protected internal virtual bool HandleShortcut( ButtonEvent e, Panel scope )
+	{
+		return false;
+	}
 
 	public override void OnButtonTyped( ButtonEvent e )
 	{
@@ -105,6 +147,25 @@ public class PanelDockWindow : Panel
 		}
 
 		base.OnButtonTyped( e );
+	}
+
+	protected virtual void Quit()
+	{
+		Close();
+	}
+
+	protected void Close()
+	{
+		Window?.Dispose();
+	}
+
+	public override void OnDeleted()
+	{
+		EditorEvent.Unregister( this );
+		DockWindows?.Dispose();
+		_floatingRoots.Clear();
+
+		base.OnDeleted();
 	}
 
 	/// <summary>
