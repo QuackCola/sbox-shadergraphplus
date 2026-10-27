@@ -29,15 +29,45 @@ public abstract class Texture2DSamplerBase : PreviewableNode, IErroringNode
 		DefaultColor = Color.White,
 	};
 
+	/// <summary>
+	/// Height of the strip at the bottom that shows or hides the preview.
+	/// </summary>
+	internal const float ToggleHeight = 16f;
+
+	/// <summary>
+	/// Height added under the plug rows for the 130 unit preview and its strip, so it never covers them.
+	/// </summary>
+	internal const float PreviewSpace = 144f + ToggleHeight;
+
+	/// <summary>
+	/// Whether the preview is open. Hidden leaves only the strip to open it again.
+	/// </summary>
+	[Hide]
+	public bool ShowPreview
+	{
+		get => _showPreview;
+		set
+		{
+			_showPreview = value;
+			ExpandSize = new Vector2( ExpandSize.x, value ? PreviewSpace : ToggleHeight );
+		}
+	}
+
+	bool _showPreview = true;
+
 	protected Texture2DSamplerBase() : base()
 	{
 		_internalImage = "materials/default/default.tga";
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
+		ExpandSize = new Vector2( 0, PreviewSpace );
 	}
 
 	public override void OnPaint<T>( T paint, Rect rect )
 	{
-		rect = rect.Align( 130, TextFlag.LeftBottom ).Shrink( 3 );
+		_nodeRect = rect;
+		DrawPreviewToggle( paint, rect, ShowPreview );
+		if ( !ShowPreview ) return;
+
+		rect = PreviewRect( rect );
 
 		paint.SetBrush( Texture.Load( "/image/transparent-small.png" ) );
 		paint.DrawRect( rect.Shrink( 2 ), 2 );
@@ -49,6 +79,42 @@ public abstract class Texture2DSamplerBase : PreviewableNode, IErroringNode
 		{
 			paint.Draw( rect.Shrink( 2 ), Texture.Load( _asset.RelativePath ) );
 		}
+	}
+
+	public override void OnClick( Vector2 position )
+	{
+		if ( !ToggleRect( _nodeRect ).IsInside( position ) ) return;
+
+		ShowPreview = !ShowPreview;
+		Update();
+	}
+
+	public override string CursorAt( Vector2 position ) => ToggleRect( _nodeRect ).IsInside( position ) ? "pointer" : null;
+
+	/// <summary>
+	/// The whole node as last painted, to tell a click on the strip.
+	/// </summary>
+	[JsonIgnore, Hide] Rect _nodeRect;
+
+	/// <summary>
+	/// The 130 unit square centred above the strip.
+	/// </summary>
+	internal static Rect PreviewRect( Rect node ) => node.Shrink( 0, 0, 0, ToggleHeight ).Align( 130, TextFlag.CenterBottom ).Shrink( 3 );
+
+	internal static Rect ToggleRect( Rect node ) => new( node.Left, node.Bottom - ToggleHeight, node.Width, ToggleHeight );
+
+	/// <summary>
+	/// A chevron and "Preview" in the strip, left so the error badge in the middle doesn't cover it.
+	/// </summary>
+	internal static void DrawPreviewToggle<T>( T paint, Rect node, bool shown ) where T : EngineNodeGraph.INodePaint, allows ref struct
+	{
+		var strip = ToggleRect( node ).Shrink( 8, 0, 8, 2 );
+		var color = Theme.TextControl.WithAlpha( paint.HasMouseOver ? 0.7f : 0.4f );
+
+		paint.SetPen( color );
+		paint.DrawIcon( strip, shown ? "expand_less" : "expand_more", 12, TextFlag.LeftCenter );
+		paint.SetDefaultFont( 7 );
+		paint.DrawText( strip.Shrink( 14, 0, 0, 0 ), "Preview", TextFlag.LeftCenter );
 	}
 
 	public override void EvaluatePreview( GraphCompiler compiler )
@@ -143,11 +209,6 @@ public sealed class SampleTexture2DNode : Texture2DSamplerBase
 
 	[InlineEditor( Label = false ), Group( "Default Sampler" ), Order( 2 )]
 	public Sampler SamplerState { get; set; } = new Sampler();
-
-	public SampleTexture2DNode() : base()
-	{
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
-	}
 
 	/// <summary>
 	/// RGBA color result
@@ -244,11 +305,6 @@ public sealed class SampleTexture2DLodNode : Texture2DSamplerBase
 	[InputDefault( nameof( LODInput ) ), Order( 3 )]
 	public int LODLevel { get; set; } = 0;
 
-	public SampleTexture2DLodNode() : base()
-	{
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
-	}
-
 	/// <summary>
 	/// RGBA color result
 	/// </summary>
@@ -344,11 +400,6 @@ public sealed class SampleTexture2DGradientNode : Texture2DSamplerBase
 
 	[InputDefault( nameof( DDYInput ) ), Order( 4 )]
 	public Vector2 DDY { get; set; } = 0;
-
-	public SampleTexture2DGradientNode() : base()
-	{
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
-	}
 
 	/// <summary>
 	/// RGBA color result
@@ -460,11 +511,6 @@ public sealed class SampleTexture2DTriplanarNode : Texture2DSamplerBase
 
 	[InputDefault( nameof( BlendFactorInput ) )]
 	public float DefaultBlendFactor { get; set; } = 4.0f;
-
-	public SampleTexture2DTriplanarNode() : base()
-	{
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
-	}
 
 	[JsonIgnore, Hide]
 	protected override TextureInput PreviewUI => new TextureInput
@@ -615,7 +661,7 @@ public sealed class SampleTexture2DNormalMapTriplanarNode : Texture2DSamplerBase
 
 	public SampleTexture2DNormalMapTriplanarNode() : base()
 	{
-		ExpandSize = new Vector2( 56, 12 + Inputs.Count() * 24 );
+		ExpandSize = new Vector2( 56, PreviewSpace );
 	}
 
 	/// <summary>
@@ -741,15 +787,47 @@ public sealed class SampleTextureCubeNode : ShaderNodePlus
 		DefaultColor = Color.White,
 	};
 
+	/// <summary>
+	/// Whether the preview is open. Hidden leaves only the strip to open it again.
+	/// </summary>
+	[Hide]
+	public bool ShowPreview
+	{
+		get => _showPreview;
+		set
+		{
+			_showPreview = value;
+			ExpandSize = new Vector2( ExpandSize.x, value ? Texture2DSamplerBase.PreviewSpace : Texture2DSamplerBase.ToggleHeight );
+		}
+	}
+
+	bool _showPreview = true;
+
+	[JsonIgnore, Hide] Rect _nodeRect;
+
 	public SampleTextureCubeNode() : base()
 	{
 		Texture = "materials/skybox/skybox_workshop.vtex";
-		ExpandSize = new Vector2( 0, 8 + Inputs.Count() * 24 );
+		ExpandSize = new Vector2( 0, Texture2DSamplerBase.PreviewSpace );
 	}
+
+	public override void OnClick( Vector2 position )
+	{
+		if ( !Texture2DSamplerBase.ToggleRect( _nodeRect ).IsInside( position ) ) return;
+
+		ShowPreview = !ShowPreview;
+		Update();
+	}
+
+	public override string CursorAt( Vector2 position ) => Texture2DSamplerBase.ToggleRect( _nodeRect ).IsInside( position ) ? "pointer" : null;
 
 	public override void OnPaint<T>( T paint, Rect rect )
 	{
-		rect = rect.Align( 130, TextFlag.LeftBottom ).Shrink( 3 );
+		_nodeRect = rect;
+		Texture2DSamplerBase.DrawPreviewToggle( paint, rect, ShowPreview );
+		if ( !ShowPreview ) return;
+
+		rect = Texture2DSamplerBase.PreviewRect( rect );
 
 		paint.SetBrush( Sandbox.Texture.Load( "/image/transparent-small.png" ) );
 		paint.DrawRect( rect.Shrink( 2 ), 2 );

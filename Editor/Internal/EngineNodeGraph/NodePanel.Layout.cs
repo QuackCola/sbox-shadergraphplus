@@ -102,9 +102,15 @@ public partial class NodePanel
 	static float HeaderIconWidth( bool twoLines ) => twoLines ? 25f : 20f;
 
 	/// <summary>
-	/// Width the header needs for its icon, title and subtitle, in the fonts they're drawn with.
+	/// Width an auto-size node's header asks for, measured as the qt graph does so nodes come out
+	/// the same width in both.
 	/// </summary>
-	float HeaderWidth()
+	float HeaderWidth() => NodePaint.Measure( DisplayInfo.Name, 7f, 500 ).x + 44f;
+
+	/// <summary>
+	/// Width the header takes as it's drawn: icon, title and subtitle in their own fonts, with padding.
+	/// </summary>
+	float DrawnHeaderWidth()
 	{
 		var text = NodePaint.Measure( DisplayInfo.Name, 8f, 600 ).x;
 
@@ -113,7 +119,7 @@ public partial class NodePanel
 			text = MathF.Max( text, NodePaint.Measure( Node.Subtitle, 7f ).x );
 		}
 
-		return HeaderPadLeft + (DisplayInfo.Icon is null ? 0f : HeaderIconWidth( Node.HasSubtitle )) + text + HeaderPadRight;
+		return HeaderPadLeft + (DisplayInfo.Icon is null ? 0f : HeaderIconWidth( Node.HasSubtitle )) + MathF.Ceiling( text ) + HeaderPadRight;
 	}
 
 	protected virtual void Layout()
@@ -140,9 +146,6 @@ public partial class NodePanel
 			titleWidth += 24f;
 		}
 
-		// A fixed-size node still grows to fit its title, rather than drawing it past its edge
-		totalWidth = MathF.Max( totalWidth, titleWidth );
-
 		if ( Node.AutoSize )
 		{
 			inputWidth = Inputs
@@ -156,6 +159,10 @@ public partial class NodePanel
 
 			totalWidth = Math.Max( 24f, Math.Max( titleWidth, inputWidth + outputWidth + thumbnailSize + (Node.HasTitleBar ? 8f : 0f) ) );
 		}
+
+		// Auto-size nodes carry names people type - parameters, subgraphs - so they fit the title as
+		// drawn rather than having it cut. Fixed-size nodes keep the qt width and elide, unless asked.
+		var minWidth = (Node.AutoSize || Graph.FitNodeTitles) && Node.HasTitleBar ? DrawnHeaderWidth() : 0f;
 
 		// The card's plugs are unlabelled, so the image takes the whole width
 		if ( IsThumbnailCard )
@@ -184,8 +191,9 @@ public partial class NodePanel
 			(totalWidth, totalHeight) = (Math.Max( 36f, size ), size);
 		}
 
-		// Up, not to nearest, so the header keeps its right padding
-		totalWidth = MathF.Ceiling( totalWidth / Graph.GridSize ) * Graph.GridSize;
+		// To nearest, like the qt graph, so nodes come out the same width in both
+		totalWidth = totalWidth.SnapToGrid( Graph.GridSize );
+		totalWidth = MathF.Max( totalWidth, MathF.Ceiling( minWidth / Graph.GridSize ) * Graph.GridSize );
 		totalHeight = totalHeight.SnapToGrid( Graph.GridSize );
 
 		var top = TitleHeight + (verticalCenter ? totalHeight - inputHeight : 0f) * 0.5f;

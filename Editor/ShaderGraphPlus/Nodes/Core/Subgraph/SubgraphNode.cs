@@ -41,7 +41,7 @@ public sealed class SubgraphNode : ShaderNodePlus, IErroringNode, IWarningNode
 	[Hide]
 	public override DisplayInfo DisplayInfo => new()
 	{
-		Name = Subgraph?.Title ?? (string.IsNullOrEmpty( Subgraph.Title ) ? "Untitled Subgraph" : Subgraph.Title),
+		Name = string.IsNullOrEmpty( Subgraph?.Title ) ? "Untitled Subgraph" : Subgraph.Title,
 		Description = Subgraph?.Description ?? "",
 		Icon = Subgraph?.Icon ?? ""
 	};

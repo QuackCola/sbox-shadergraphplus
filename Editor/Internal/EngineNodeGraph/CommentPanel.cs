@@ -50,6 +50,9 @@ public partial class CommentPanel : NodePanel
 
 	protected override float TitleHeight => HeaderHeight;
 
+	// The title is already written on the box
+	public override bool HasTooltip => false;
+
 	/// <summary>
 	/// Where the comment was last tick, to tell when something else moved it.
 	/// </summary>
@@ -235,6 +238,18 @@ public partial class CommentPanel : NodePanel
 			outer.RefreshMemberIds();
 			outer.Grow( dragging );
 		}
+	}
+
+	/// <summary>
+	/// Grow around the members and write that to the node now, rather than on the next tick. Not
+	/// while selected: it moved with the drag, and its members only catch up on its next tick.
+	/// </summary>
+	internal void CommitGrowth()
+	{
+		if ( IsPreview || _following || Selected ) return;
+
+		RefreshMemberIds();
+		Grow( false );
 	}
 
 	/// <summary>

@@ -33,7 +33,7 @@ public partial class NodeGraphPanel
 		}
 		else if ( RerouteNodeType is not null )
 		{
-			menu.AddOption( "Add Reroute", "route", () => CreateNewNode( RerouteNodeType, position - new Vector2( ReroutePanel.Diameter * 0.5f ), targetPlug ) );
+			menu.AddOption( "Add Reroute", "route", () => CreateNewNode( RerouteNodeType, position, targetPlug ) );
 		}
 	}
 

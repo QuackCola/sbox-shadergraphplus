@@ -97,6 +97,18 @@ public interface IGraphNode
 	Pixmap? Thumbnail { get; }
 	void OnPaint<T>( T paint, Rect rect ) where T : EngineNodeGraph.INodePaint, allows ref struct;
 	void OnDoubleClick( MouseEvent e );
+
+	/// <summary>
+	/// Pressed and released without moving. <paramref name="position"/> is in node units, like
+	/// <see cref="OnPaint"/>'s rect.
+	/// </summary>
+	void OnClick( Vector2 position ) { }
+
+	/// <summary>
+	/// A CSS cursor for <paramref name="position"/>, in node units, such as "pointer" over something
+	/// <see cref="OnClick"/> acts on. Null for the node's own.
+	/// </summary>
+	string CursorAt( Vector2 position ) => null;
 	bool HasTitleBar { get; }
 	bool HasSubtitle { get; }
 	bool HasError { get; set; }

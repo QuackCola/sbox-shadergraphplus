@@ -85,6 +85,18 @@ public interface INode
 	void OnDoubleClick( NodePanel panel, MousePanelEvent e ) { }
 
 	/// <summary>
+	/// Pressed and released without moving. <paramref name="position"/> is in node units, like
+	/// <see cref="OnPaint"/>'s rect, so a node can make part of what it draws clickable.
+	/// </summary>
+	void OnClick( NodePanel panel, Vector2 position ) { }
+
+	/// <summary>
+	/// A CSS cursor for <paramref name="position"/>, in node units, such as "pointer" over something
+	/// <see cref="OnClick"/> acts on. Null for the node's own.
+	/// </summary>
+	string CursorAt( Vector2 position ) => null;
+
+	/// <summary>
 	/// Extra right-click entries, shown as a submenu of the graph's menu: set its
 	/// <see cref="Menu.Text"/>. Null for none.
 	/// </summary>

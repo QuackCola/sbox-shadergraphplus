@@ -43,7 +43,7 @@ public partial class NodePanel
 		{
 			if ( !node.IsValid() ) continue;
 
-			var position = (start + delta).SnapToGrid( Graph.GridSize );
+			var position = (start + delta + node.Origin).SnapToGrid( Graph.GridSize ) - node.Origin;
 
 			// Once per drag, before the first change: comments write their members as they move
 			if ( !_pushedMove && position != node.Position )
@@ -75,6 +75,11 @@ public partial class NodePanel
 		{
 			_pushedMove = false;
 			Graph.PushRedo();
+		}
+		else if ( !cancelled && !IsPreview )
+		{
+			// Nothing moved, so this was a click
+			Node.OnClick( this, Graph.MouseCanvas - Position );
 		}
 	}
 

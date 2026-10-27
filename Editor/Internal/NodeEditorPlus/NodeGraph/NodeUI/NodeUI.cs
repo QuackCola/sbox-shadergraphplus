@@ -151,6 +151,13 @@ public partial class NodeUI : GraphicsItem
 		base.OnHoverEnter( e );
 	}
 
+	protected override void OnHoverMove( GraphicsHoverEvent e )
+	{
+		base.OnHoverMove( e );
+
+		Cursor = Node.CursorAt( e.LocalPosition ) is null ? CursorShape.SizeAll : CursorShape.Finger;
+	}
+
 	private void UpdatePlugs( bool firstTime )
 	{
 		if ( !IsValid )
@@ -596,14 +603,20 @@ public partial class NodeUI : GraphicsItem
 		}
 	}
 
+	Vector2 _pressPosition;
+
 	protected override void OnMousePressed( GraphicsMouseEvent e )
 	{
+		_pressPosition = Position;
 		Graph?.MoveablePressed();
 	}
 
 	protected override void OnMouseReleased( GraphicsMouseEvent e )
 	{
 		Graph?.MoveableReleased();
+
+		// Nothing moved, so this was a click
+		if ( e.LeftMouseButton && Position == _pressPosition ) Node.OnClick( e.LocalPosition );
 	}
 
 	internal void DraggingPlug( NodePlug plug, Vector2 scenePosition, Connection source = null )

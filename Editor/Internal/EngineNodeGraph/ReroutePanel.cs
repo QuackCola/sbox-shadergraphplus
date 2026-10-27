@@ -17,6 +17,11 @@ public class ReroutePanel : NodePanel
 
 	const float PlugSize = 14f;
 
+	/// <summary>
+	/// The panel is bigger than the dot, so the ring around the plugs is easier to grab and drag.
+	/// </summary>
+	const float HitSize = 24f;
+
 	public IRerouteNode Reroute => (IRerouteNode)Node;
 
 	public ReroutePanel( NodeGraphPanel graph, INode node, bool isPreview = false ) : base( graph, node, isPreview )
@@ -27,18 +32,23 @@ public class ReroutePanel : NodePanel
 	public override bool HasTooltip => false;
 
 	/// <summary>
+	/// The node's position is the dot's centre, so that's what sits on the grid.
+	/// </summary>
+	protected internal override Vector2 Origin => new( HitSize * 0.5f );
+
+	/// <summary>
 	/// Whether an input is fed, so a press should pull a wire out of the output.
 	/// </summary>
 	bool PreferOutput => Inputs.Any( x => x.IsConnected );
 
 	protected override void Layout()
 	{
-		Size = new Vector2( Diameter );
-		Style.Width = Diameter;
-		Style.Height = Diameter;
+		Size = new Vector2( HitSize );
+		Style.Width = HitSize;
+		Style.Height = HitSize;
 
 		var preferOutput = PreferOutput;
-		var offset = (Diameter - PlugSize) * 0.5f;
+		var offset = (HitSize - PlugSize) * 0.5f;
 
 		foreach ( var input in Inputs )
 		{
@@ -121,7 +131,7 @@ public class ReroutePanel : NodePanel
 
 		paint.SetPen( NodeTheme.Canvas, 2f );
 		paint.SetBrush( Selected ? Graph.SelectionColor : color );
-		paint.DrawRect( new Rect( 0f, Size ), Diameter * 0.5f );
+		paint.DrawRect( new Rect( (HitSize - Diameter) * 0.5f, Diameter ), Diameter * 0.5f );
 
 		DrawComment( ref paint );
 	}
@@ -134,7 +144,7 @@ public class ReroutePanel : NodePanel
 		if ( string.IsNullOrWhiteSpace( Reroute.Comment ) ) return;
 
 		var text = Reroute.Comment;
-		var center = Diameter * 0.5f;
+		var center = HitSize * 0.5f;
 
 		paint.SetDefaultFont( 10f );
 
