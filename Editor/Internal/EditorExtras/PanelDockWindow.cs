@@ -168,6 +168,26 @@ public class PanelDockWindow : Panel
 		base.OnDeleted();
 	}
 
+	[EditorEvent.Hotload]
+	private void OnHotloadInternal()
+	{
+		// A closed window can still be registered - one closed by the old code, before this hotload
+		if ( !IsValid || IsDeleting )
+			return;
+
+		// Rebuilding adds a new title bar, toolbar and dock host, so drop the old ones and their floating windows first
+		DockWindows?.Dispose();
+		DeleteChildren( true );
+
+		Init();
+
+		OnHotload();
+	}
+
+	protected virtual void OnHotload()
+	{
+	}
+
 	/// <summary>
 	/// A row with a shortcut shown beside it. Rows with nothing to do are just there to look at.
 	/// </summary>

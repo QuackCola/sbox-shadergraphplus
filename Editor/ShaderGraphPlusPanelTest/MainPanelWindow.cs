@@ -925,17 +925,9 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	}
 
 	// For Development only
-	[EditorEvent.Hotload]
-	private void OnHotload()
+	protected override void OnHotload()
 	{
-		// A closed window can still be registered - one closed by the old code, before this hotload
-		if ( !IsValid || IsDeleting ) return;
-
 		StyleSheet.AddInline( ShaderGraphPlusStyleSheets.ShaderGraphPlusScss, "shadergraphplus_style" );
-
-		// Rebuilding adds a new title bar, toolbar and dock host, so drop the old ones and their floating windows first
-		DockWindows?.Dispose();
-		DeleteChildren( true );
 
 		BuildMenuBar();
 		CreateToolBar();
@@ -943,6 +935,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		Compile();
 
+		_preview.Model = string.IsNullOrWhiteSpace( _graph.Model ) ? null : Model.Load( _graph.Model );
 		_preview.LoadSettings( _graph.PreviewSettings );
 
 		SGPLogger.Info( "ShaderGraphPlus hotloaded!" );
