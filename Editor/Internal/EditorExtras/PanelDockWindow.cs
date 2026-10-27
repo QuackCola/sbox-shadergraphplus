@@ -80,10 +80,7 @@ public class PanelDockWindow : Panel
 
 	public void SetWindowIcon( string name )
 	{
-		if ( _titleBarLabel is not null )
-		{
-			_titleBarLabel.Text = name;
-		}
+		_titleBarLabel.Text = name;
 	}
 
 	protected virtual void CreateUI()
