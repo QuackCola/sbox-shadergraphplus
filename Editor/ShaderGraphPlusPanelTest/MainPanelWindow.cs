@@ -670,7 +670,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	/// <summary>
 	/// Put the graph back to a snapshot from <see cref="ShaderGraphPlus.ShaderGraphPlus.UndoStackSerialize"/>,
-	/// like the Qt editor's undo. Nodes and parameters are new objects afterwards, so both views rebuild
+	/// Nodes and parameters are new objects afterwards, so both views rebuild
 	/// and the properties stop showing what was replaced.
 	/// </summary>
 	private void RestoreGraph( string buffer )
