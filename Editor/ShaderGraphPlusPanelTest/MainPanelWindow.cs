@@ -905,14 +905,11 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	protected internal override bool HandleShortcut( ButtonEvent e, Panel scope )
 	{
-		//if ( !e.HasCtrl || scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
-		//	return false;
-
 		if ( e.HasCtrl || !scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
 		{
 			switch ( e.Button )
 			{
-				// File MenuBar options
+				// File options
 				case "n":
 					New();
 					return true;
@@ -926,7 +923,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 					Save();
 					return true;
 
-				// Edit MenuBar options
+				// Edit options
 				case "z":
 					Undo();
 					return true;
@@ -947,7 +944,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 					return true;
 			}
 		}
-		
+
 		if ( e.HasAlt && e.Button == "f4" )
 		{
 			Quit();
@@ -978,7 +975,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_preview.LoadSettings( _graph.PreviewSettings );
 
-		Log.Info( "ShaderGraphPlus hotloaded!" );
+		SGPLogger.Info( "ShaderGraphPlus hotloaded!" );
 	}
 
 	public override void Tick()
