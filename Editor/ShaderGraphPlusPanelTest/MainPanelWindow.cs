@@ -875,7 +875,11 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	protected internal override bool HandleShortcut( ButtonEvent e, Panel scope )
 	{
-		if ( e.HasCtrl || !scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
+		// Dont bother if a TextEntry currently has focus.
+		if ( scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
+			return false;
+
+		if ( e.HasCtrl )
 		{
 			switch ( e.Button )
 			{
