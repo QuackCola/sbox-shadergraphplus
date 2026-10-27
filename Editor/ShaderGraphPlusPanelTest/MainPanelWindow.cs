@@ -690,28 +690,6 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		SetDirty();
 	}
 
-	/// <summary>
-	/// Ctrl+Z undoes, Ctrl+Y and Ctrl+Shift+Z redo - unless a text field has the keys, which undoes its own typing.
-	/// </summary>
-	protected internal override bool HandleShortcut( ButtonEvent e, Panel scope )
-	{
-		if ( !e.HasCtrl || scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
-			return false;
-
-		switch ( e.Button )
-		{
-			case "z" when e.HasShift:
-			case "y":
-				Redo();
-				return true;
-			case "z":
-				Undo();
-				return true;
-		}
-
-		return false;
-	}
-
 	private void CutSelection()
 	{
 		_graphView.CutSelection();
@@ -729,7 +707,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	private void SelectAll()
 	{
-		SGPLogger.Info( $"TODO : Select All" );
+		_graphView.SelectAll();
 	}
 
 	private void OnAttribute( string name, object value )
@@ -923,6 +901,60 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	private void SaveRecentFiles()
 	{
 		Editor.FileSystem.Temporary.WriteJson( "shadergraphplus_recentfiles.json", _recentFiles );
+	}
+
+	protected internal override bool HandleShortcut( ButtonEvent e, Panel scope )
+	{
+		//if ( !e.HasCtrl || scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
+		//	return false;
+
+		if ( e.HasCtrl || !scope.Descendants.OfType<Sandbox.UI.TextEntry>().Any( x => x.HasFocus ) )
+		{
+			switch ( e.Button )
+			{
+				// File MenuBar options
+				case "n":
+					New();
+					return true;
+				case "o":
+					Open();
+					return true;
+				case "s" when e.HasShift:
+					SaveAs();
+					return true;
+				case "s":
+					Save();
+					return true;
+
+				// Edit MenuBar options
+				case "z":
+					Undo();
+					return true;
+				case "y":
+					Redo();
+					return true;
+				case "x":
+					CutSelection();
+					return true;
+				case "c":
+					CopySelection();
+					return true;
+				case "v":
+					PasteSelection();
+					return true;
+				case "a":
+					SelectAll();
+					return true;
+			}
+		}
+		
+		if ( e.HasAlt && e.Button == "f4" )
+		{
+			Quit();
+			return true;
+		}
+
+		return false;
 	}
 
 	// For Development only
