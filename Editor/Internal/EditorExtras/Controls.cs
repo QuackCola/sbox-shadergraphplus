@@ -2,7 +2,7 @@
 using Sandbox.UI;
 using Sandbox.UI.Construct;
 
-namespace ShaderGraphPlusPanelTest;
+namespace EditorExtras;
 
 // Taken from PanelGallery. Remove this stuff when it gets shipped with s&box - QuackCola
 
