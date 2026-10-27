@@ -109,12 +109,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 			if ( _autoCompile )
 			{
-				SGPLogger.Info( "Enabled AutoCompile" );
 				Compile();
-			}
-			else
-			{
-				SGPLogger.Info( "Disabled AutoCompile" );
 			}
 		} );
 
