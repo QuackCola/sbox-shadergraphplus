@@ -108,7 +108,7 @@ public class PanelDockWindow : Panel
 	{
 		root.AddClass( "mock-editor-surface" );
 		root.AddClass( "editor-window" );
-		
+
 		root.StyleSheet.Load( "/styles/gallery.scss" );
 		_floatingRoots.Add( root );
 

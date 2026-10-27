@@ -1,8 +1,6 @@
 using Editor;
-using NodeEditorPlusTest;
 using Sandbox.Rendering;
 using Sandbox.UI;
-using Sandbox.UI.Construct;
 using ShaderGraphPlus;
 using ShaderGraphPlus.Internal;
 using EditorExtras;
@@ -79,7 +77,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_recentFiles = Editor.FileSystem.Temporary.ReadJsonOrDefault( "shadergraphplus_recentfiles.json", _recentFiles )
 			.Where( x => System.IO.File.Exists( x ) ).ToList();
-		
+
 		BuildMenuBar();
 		CreateToolBar();
 		CreateUI();
