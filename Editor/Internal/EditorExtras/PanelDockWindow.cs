@@ -1,7 +1,6 @@
 ﻿using Editor;
 using Sandbox.UI;
 using Sandbox.UI.Construct;
-using ShaderGraphPlusPanelTest;
 
 namespace EditorExtras;
 
