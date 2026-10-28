@@ -12,7 +12,7 @@ internal static class LabelExtentions
 	internal static void InsertTextAndMoveCaret( this Label label, string text, int pos, int? endpos = null )
 	{
 		StringInfo stringInfo = new StringInfo( label.Text );
-	
+
 		pos = Math.Clamp( pos, 0, label.TextLength );
 		var insertionEnd = (pos > 0 ? stringInfo.SubstringByTextElements( 0, pos ).Length : 0) + (text?.Length ?? 0);
 		label.InsertText( text, pos, endpos );

@@ -8,12 +8,12 @@ namespace ShaderGraphPlusPanelTest;
 public sealed partial class OutputPanel : Panel
 {
 	private BaseVirtualPanel _issueList;
-	
+
 	public List<GraphCompiler.GraphIssue> Issues
 	{
 		get;
 		set
-		{ 
+		{
 			field = value;
 
 			_issueList.Items = value.Cast<object>();
@@ -32,7 +32,7 @@ public sealed partial class OutputPanel : Panel
 		};
 
 		AddChild( _issueList );
-		
+
 		// Test
 		AddTestIssues( 12 );
 	}
@@ -41,7 +41,7 @@ public sealed partial class OutputPanel : Panel
 	{
 		var issue = (GraphCompiler.GraphIssue)value;
 		var issuePanel = new IssuePanel( issue );
-		
+
 		cell.AddChild( issuePanel );
 
 		// Test
@@ -62,8 +62,8 @@ public sealed partial class OutputPanel : Panel
 
 		for ( int i = 0; i < count; i++ )
 		{
-			testItems.Add( new GraphCompiler.GraphIssue() 
-			{ 
+			testItems.Add( new GraphCompiler.GraphIssue()
+			{
 				IsWarning = (i % 2) == 0,
 				Message = $"TestIssue {i}"
 			} );
