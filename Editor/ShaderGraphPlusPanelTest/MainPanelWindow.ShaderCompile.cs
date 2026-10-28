@@ -145,7 +145,7 @@ public sealed partial class ShaderGraphPlusPanelTest
 			SGPLogger.Error( $"Compile failed in {_timeSinceCompile}" );
 
 			// TODO
-			//_output.GraphIssues = _shaderCompileErrors.Select( x => new ShaderGraphPlus.GraphCompiler.GraphIssue { Message = x } ).ToList();
+			_output.Issues = _shaderCompileErrors.Select( x => new ShaderGraphPlus.GraphCompiler.GraphIssue { Message = x } ).ToList();
 
 			DockHost.Activate( "output" );
 

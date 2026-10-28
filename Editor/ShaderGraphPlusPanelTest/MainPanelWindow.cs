@@ -419,9 +419,8 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		_generatedCode = "";
 		_generatedCodeView.Code = "";
 
-		// TODO
-		//_output.ClearErrors();
-		//_output.ClearWarnings();
+		_output.ClearErrors();
+		_output.ClearWarnings();
 
 		if ( !IsSubgraph )
 		{
@@ -507,8 +506,8 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		_generatedCodeView.Code = "";
 		//Selection.Set( _graph );
 
-		//_output.ClearErrors();
-		//_output.ClearWarnings();
+		_output.ClearErrors();
+		_output.ClearWarnings();
 
 		ClearAttributes();
 

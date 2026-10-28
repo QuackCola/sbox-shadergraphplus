@@ -66,7 +66,7 @@ public sealed partial class ShaderGraphPlusPanelTest
 
 	private void OnError( IEnumerable<GraphCompiler.GraphIssue> issues )
 	{
-		//_output.GraphIssues = issues.ToList();
+		_output.Issues = issues.ToList();
 		DockHost.Activate( "output" );
 
 		_generatedCode = null;
@@ -77,7 +77,7 @@ public sealed partial class ShaderGraphPlusPanelTest
 
 	private void OnWarning( IEnumerable<GraphCompiler.GraphIssue> issues )
 	{
-		//_output.GraphIssues = issues.ToList();
+		_output.Issues = issues.ToList();
 		DockHost.Activate( "output" );
 	}
 
@@ -307,7 +307,7 @@ public sealed partial class ShaderGraphPlusPanelTest
 		}
 		else
 		{
-			//_output.ClearWarnings();
+			_output.ClearWarnings();
 		}
 
 		if ( nodeErrors.Any() )
@@ -318,7 +318,7 @@ public sealed partial class ShaderGraphPlusPanelTest
 		}
 		else
 		{
-			//_output.ClearErrors();
+			_output.ClearErrors();
 		}
 
 		if ( _generatedCode != code )
