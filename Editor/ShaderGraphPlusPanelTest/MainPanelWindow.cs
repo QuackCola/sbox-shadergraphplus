@@ -421,6 +421,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_output.ClearErrors();
 		_output.ClearWarnings();
+		_output.Rebuild();
 
 		if ( !IsSubgraph )
 		{
@@ -508,6 +509,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_output.ClearErrors();
 		_output.ClearWarnings();
+		_output.Rebuild();
 
 		ClearAttributes();
 

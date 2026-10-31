@@ -321,6 +321,8 @@ public sealed partial class ShaderGraphPlusPanelTest
 			_output.ClearErrors();
 		}
 
+		_output.Rebuild();
+
 		if ( _generatedCode != code )
 		{
 			_generatedCode = code;

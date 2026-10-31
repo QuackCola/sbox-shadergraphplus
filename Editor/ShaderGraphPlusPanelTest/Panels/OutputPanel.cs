@@ -1,5 +1,6 @@
 using Sandbox.UI;
 using Sandbox.UI.Construct;
+using EditorExtras;
 using ShaderGraphPlus;
 
 namespace ShaderGraphPlusPanelTest;
@@ -7,8 +8,6 @@ namespace ShaderGraphPlusPanelTest;
 [StyleSheet.Inline( "sgp_outputpanel", Styles )]
 public sealed partial class OutputPanel : Panel
 {
-	private BaseVirtualPanel _issueList;
-
 	public List<GraphCompiler.GraphIssue> Issues
 	{
 		get;
@@ -16,43 +15,29 @@ public sealed partial class OutputPanel : Panel
 		{
 			field = value;
 
-			_issueList.Items = value.Cast<object>();
-			_issueList.ScrollOffset = Vector2.Zero;
+			_listView.SetItems( value.Cast<object>() );
 		}
 	}
+
+	private ListViewPanel _listView;
 
 	public OutputPanel() : base()
 	{
 		AddClass( ShaderGraphPlusCssClasses.EditorDockPane );
-
-		_issueList = new VirtualList
-		{
-			ItemHeight = 48,
-			OnCreateCell = OnCreateCell
-		};
-
-		AddChild( _issueList );
+	
+		_listView = new ListViewPanel();
+		_listView.OnCreateRow += OnCreateListRow;
+		AddChild( _listView );
 
 		// Test
 		AddTestIssues( 12 );
+
+		_listView.Rebuild();
 	}
 
-	private void OnCreateCell( Panel cell, object value )
+	private Panel OnCreateListRow( object item )
 	{
-		var issue = (GraphCompiler.GraphIssue)value;
-		var issuePanel = new IssuePanel( issue );
-
-		cell.AddChild( issuePanel );
-
-		// Test
-		if ( !issue.IsWarning )
-		{
-			SGPLogger.Info( $"Error \"{issue.Message}\"" );
-		}
-		else
-		{
-			SGPLogger.Info( $"Warning \"{issue.Message}\"" );
-		}
+		return new IssuePanel( (GraphCompiler.GraphIssue)item );
 	}
 
 	// Test
@@ -80,18 +65,23 @@ public sealed partial class OutputPanel : Panel
 
 	public void ClearErrors()
 	{
-		//foreach ( var error in _issueList.Children.Where( x => x is IssuePanel issuePanel && issuePanel.Issue.IsWarning == false ) )
-		//{
-		//	_issueList.RemoveItem( error );
-		//}
+		foreach ( var error in _listView.Items.Where( x => x is GraphCompiler.GraphIssue issue && issue.IsWarning == false ) )
+		{
+			_listView.RemoveItem( error );
+		}
 	}
 
 	public void ClearWarnings()
 	{
-		//foreach ( var warning in _issueList.Children.Where( x => x is IssuePanel issuePanel && issuePanel.Issue.IsWarning == true ) )
-		//{
-		//	_issueList.RemoveItem( warning );
-		//}
+		foreach ( var warning in _listView.Items.Where( x => x is GraphCompiler.GraphIssue issue && issue.IsWarning == true ) )
+		{
+			_listView.RemoveItem( warning );
+		}
+	}
+
+	public void Rebuild()
+	{
+		_listView.Rebuild();
 	}
 }
 
@@ -102,5 +92,10 @@ sealed class IssuePanel : Panel
 	public IssuePanel( GraphCompiler.GraphIssue issue ) : base()
 	{
 		Issue = issue;
+
+		AddClass( "treerow" );
+
+		Style.Height = 48;
+		Add.Label( issue.Message, "name" );
 	}
 }
