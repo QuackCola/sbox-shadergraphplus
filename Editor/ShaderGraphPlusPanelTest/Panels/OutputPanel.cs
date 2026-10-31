@@ -8,6 +8,8 @@ namespace ShaderGraphPlusPanelTest;
 [StyleSheet.Inline( "sgp_outputpanel", Styles )]
 public sealed partial class OutputPanel : Panel
 {
+	private ListViewPanel _listView;
+
 	public List<GraphCompiler.GraphIssue> Issues
 	{
 		get;
@@ -18,8 +20,6 @@ public sealed partial class OutputPanel : Panel
 			_listView.SetItems( value.Cast<object>() );
 		}
 	}
-
-	private ListViewPanel _listView;
 
 	public OutputPanel() : base()
 	{
