@@ -18,7 +18,7 @@ public sealed partial class PropertiesPanel : Panel
 	private readonly Panel _body;
 
 	private Label _title;
-	private object _target;
+	
 	private bool _builtSlider;
 
 	/// <summary>
@@ -26,12 +26,13 @@ public sealed partial class PropertiesPanel : Panel
 	/// </summary>
 	public object Target
 	{
-		get => _target;
+		get;
 		set
 		{
-			if ( value == _target ) return;
+			if ( value == field )
+				return;
 
-			_target = value;
+			field = value;
 			Rebuild();
 		}
 	}
@@ -58,7 +59,7 @@ public sealed partial class PropertiesPanel : Panel
 	{
 		base.Tick();
 
-		if ( _target is not FloatParameter parameter )
+		if ( Target is not FloatParameter parameter )
 			return;
 
 		// Switching between Default and Slider swaps the Value control
@@ -84,10 +85,10 @@ public sealed partial class PropertiesPanel : Panel
 		_title = null;
 		_builtSlider = false;
 
-		_heading.Style.Display = _target is null ? DisplayMode.None : DisplayMode.Flex;
-		_body.SetClass( "is-empty", _target is null );
+		_heading.Style.Display = Target is null ? DisplayMode.None : DisplayMode.Flex;
+		_body.SetClass( "is-empty", Target is null );
 
-		if ( _target is null )
+		if ( Target is null )
 		{
 			_body.Add.Label( "Nothing selected", "empty" );
 			return;
@@ -95,18 +96,18 @@ public sealed partial class PropertiesPanel : Panel
 
 		BuildHeading();
 
-		var serialized = EditorTypeLibrary.GetSerializedObject( _target );
+		var serialized = EditorTypeLibrary.GetSerializedObject( Target );
 
 		// Also fires for edits inside nested structs
 		serialized.OnPropertyChanged += property =>
 		{
-			if ( _title is not null && _target is BlackboardParameter p ) _title.Text = p.Name;
+			if ( _title is not null && Target is BlackboardParameter p ) _title.Text = p.Name;
 			PropertyUpdated?.Invoke( property );
 		};
 
 		var properties = serialized.Where( x => !x.IsMethod ).ToList();
 
-		if ( _target is FloatParameter floatParameter && UsesSlider( floatParameter ) )
+		if ( Target is FloatParameter floatParameter && UsesSlider( floatParameter ) )
 		{
 			var index = properties.FindIndex( x => x.Name == nameof( FloatParameter.Value ) );
 			if ( index >= 0 ) properties[index] = new SliderValueProperty( properties[index], floatParameter );
@@ -131,7 +132,7 @@ public sealed partial class PropertiesPanel : Panel
 	{
 		string description = null;
 
-		switch ( _target )
+		switch ( Target )
 		{
 			case BlackboardParameter parameter:
 				ParameterRow.AddTypeChip( _headingRow, ParameterRow.TypeConfig( parameter ) );
@@ -153,7 +154,7 @@ public sealed partial class PropertiesPanel : Panel
 				break;
 
 			default:
-				var info = DisplayInfo.For( _target );
+				var info = DisplayInfo.For( Target );
 				AddTitle( info.Icon ?? "settings", info.Name ?? "Properties" );
 				description = info.Description;
 				break;

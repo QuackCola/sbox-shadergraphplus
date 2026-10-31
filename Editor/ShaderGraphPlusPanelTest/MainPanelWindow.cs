@@ -415,10 +415,11 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		_preview.Model = null;
 		_preview.Tint = Color.White;
+		_properties.Target = _graph;
 		_undoStack.Clear();
 		_generatedCode = "";
 		_generatedCodeView.Code = "";
-
+	
 		_output.ClearErrors();
 		_output.ClearWarnings();
 		_output.Rebuild();

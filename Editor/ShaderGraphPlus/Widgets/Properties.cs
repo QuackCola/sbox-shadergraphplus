@@ -12,16 +12,15 @@ public class Properties : Widget
 
 	private PropertiesHeader _header;
 
-	private object _target;
 	public object Target
 	{
-		get => _target;
+		get;
 		set
 		{
-			if ( value == _target )
+			if ( value == field )
 				return;
 
-			_target = value;
+			field = value;
 			Rebuild();
 			TargetChanged?.Invoke();
 		}
@@ -94,7 +93,7 @@ public class Properties : Widget
 
 	private void UpdateHeader()
 	{
-		switch ( _target )
+		switch ( Target )
 		{
 			case ShaderGraphPlus:
 				_header.Text = "Graph Settings";
@@ -130,7 +129,7 @@ public class Properties : Widget
 
 	private void RebuildSheet()
 	{
-		if ( _scroller is null || _target is null )
+		if ( _scroller is null || Target is null )
 			return;
 
 		var previousCanvas = _scroller.Canvas;
@@ -148,7 +147,7 @@ public class Properties : Widget
 
 		try
 		{
-			var so = _target.GetSerialized();
+			var so = Target.GetSerialized();
 			so.OnPropertyChanged += p =>
 			{
 				PropertyUpdated?.Invoke( p );
@@ -186,7 +185,7 @@ public class Properties : Widget
 	{
 		_filterText = filter;
 		_sheet.Clear( true );
-		_sheet.AddObject( _target.GetSerialized(), PropertyFilter );
+		_sheet.AddObject( Target.GetSerialized(), PropertyFilter );
 		_scroller.Update();
 	}
 
