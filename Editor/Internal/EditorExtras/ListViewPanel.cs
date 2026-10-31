@@ -2,7 +2,7 @@
 
 namespace EditorExtras;
 
-public class ListViewPanel : Panel
+internal class ListViewPanel : Panel
 {
 	private readonly List<object> _items = new List<object>();
 
