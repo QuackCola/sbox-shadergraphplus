@@ -16,7 +16,7 @@ namespace ShaderGraphPlusPanelTest;
 /// Parameters and groups reorder by dragging, and parameters rename in place.
 /// </summary>
 [StyleSheet.Inline( "sgp_blackboardpanel", Styles )]
-public sealed partial class BlackboardPanel : Panel
+public sealed partial class BlackboardPanel : EditorDockPanel
 {
 	private TextInput _searchFilter;
 	private string _filter = "";
@@ -95,7 +95,6 @@ public sealed partial class BlackboardPanel : Panel
 	{
 		_collapsedGroups = EditorCookie.Get<List<string>>( CollapsedGroupsCookie, [] ).ToHashSet( StringComparer.OrdinalIgnoreCase );
 
-		AddClass( ShaderGraphPlusCssClasses.EditorDockPane );
 		AddClass( "sg-blackboard" );
 
 		// For F2 and Delete: a click anywhere in the blackboard lands the focus here

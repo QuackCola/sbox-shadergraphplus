@@ -1,9 +1,10 @@
+using EditorExtras;
 using Sandbox.UI;
 using static Editor.Label;
 
 namespace ShaderGraphPlusPanelTest;
 
-public sealed class GeneratedCodePanel : Panel
+public sealed class GeneratedCodePanel : EditorDockPanel
 {
 	private ReadOnlyScriptControl _scriptControl;
 
@@ -27,8 +28,6 @@ public sealed class GeneratedCodePanel : Panel
 
 	public GeneratedCodePanel() : base()
 	{
-		AddClass( ShaderGraphPlusCssClasses.EditorDockPane );
-
 		_scriptControl = AddChild<ReadOnlyScriptControl>();
 		_scriptControl.Style.Set( "width: 100%; height: 250px; flex-shrink: 0;" );
 	}

@@ -6,7 +6,7 @@ using ShaderGraphPlus;
 namespace ShaderGraphPlusPanelTest;
 
 [StyleSheet.Inline( "sgp_palettepanel", Styles )]
-public sealed partial class PalettePanel : Panel
+public sealed partial class PalettePanel : EditorDockPanel
 {
 	private TextInput _searchFilter;
 	private readonly Sandbox.UI.TreeView<PaletteTreeNode> _tree;
@@ -17,8 +17,6 @@ public sealed partial class PalettePanel : Panel
 	public PalettePanel( bool isSubgraph ) : base()
 	{
 		_isSubgraph = isSubgraph;
-
-		AddClass( ShaderGraphPlusCssClasses.EditorDockPane );
 
 		BuildToolbar();
 

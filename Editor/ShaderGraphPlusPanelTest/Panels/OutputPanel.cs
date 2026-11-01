@@ -6,7 +6,7 @@ using ShaderGraphPlus;
 namespace ShaderGraphPlusPanelTest;
 
 [StyleSheet.Inline( "sgp_outputpanel", Styles )]
-public sealed partial class OutputPanel : Panel
+public sealed partial class OutputPanel : EditorDockPanel
 {
 	private ListViewPanel _listView;
 
@@ -23,8 +23,6 @@ public sealed partial class OutputPanel : Panel
 
 	public OutputPanel() : base()
 	{
-		AddClass( ShaderGraphPlusCssClasses.EditorDockPane );
-	
 		_listView = new ListViewPanel();
 		_listView.OnCreateRow += OnCreateListRow;
 		AddChild( _listView );
