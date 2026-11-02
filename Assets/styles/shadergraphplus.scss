@@ -1,0 +1,13 @@
+@import "editor.scss";
+
+.listViewBackground
+{
+    position: absolute;
+    top: 3;
+    right: 3;
+    bottom: 3;
+    left: 3;
+
+    color: black;
+    background-color: $surface;
+}

@@ -5,7 +5,6 @@ using ShaderGraphPlus;
 
 namespace ShaderGraphPlusPanelTest;
 
-[StyleSheet.Inline( "sgp_outputpanel", Styles )]
 public sealed partial class OutputPanel : EditorDockPanel
 {
 	private ListViewPanel _listView;
@@ -24,6 +23,7 @@ public sealed partial class OutputPanel : EditorDockPanel
 	public OutputPanel() : base()
 	{
 		_listView = new ListViewPanel();
+		_listView.StyleSheet.Load( "/styles/outputpanel.scss" );
 		_listView.OnCreateRow += OnCreateListRow;
 		AddChild( _listView );
 
@@ -91,9 +91,9 @@ sealed class IssuePanel : Panel
 	{
 		Issue = issue;
 
-		AddClass( "treerow" );
-
-		Style.Height = 48;
+		Add.Icon( "error" );
+		AddClass( Issue.IsWarning ? "warningItem" : "errorItem" );
+	
 		Add.Label( issue.Message, "name" );
 	}
 }

@@ -1,0 +1,17 @@
+@import "editor.scss";
+
+.warningItem
+{	
+	height: 48px;
+	
+	font-color: white;
+	background-color: #E6DB74;
+}
+
+.errorItem
+{	
+	height: 48px;
+ 
+	font-color: white;
+    background-color: #FB5A5A;
+}
