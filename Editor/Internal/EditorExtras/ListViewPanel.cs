@@ -21,8 +21,7 @@ internal class ListViewPanel : Panel
 
 	public ListViewPanel()
 	{
-		AddClass( "listViewBackground" );
-		AddClass( "scroll" );
+		AddClass( "listview" );
 	}
 
 	public void Rebuild()

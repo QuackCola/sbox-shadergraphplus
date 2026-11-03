@@ -1,13 +1,19 @@
 @import "editor.scss";
 
-.listViewBackground
-{
-    position: absolute;
-    top: 3;
-    right: 3;
-    bottom: 3;
-    left: 3;
+/* 
+    Simple colorable background with a transparent even border. 
+*/
+@mixin background( $background-color, $background-border-width )
+{    
+    background-color: $background-color;
+    border: $background-border-width solid transparent; 
+    background-clip: padding-box;
+}
 
-    color: black;
-    background-color: $surface;
+.listview
+{
+	@include background( $surface, 2 );
+
+    flex-direction: column;
+    flex-grow: 1;
 }

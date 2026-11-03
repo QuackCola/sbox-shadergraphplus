@@ -1,17 +1,51 @@
 @import "editor.scss";
 
-.warningItem
-{	
+$output-item-icon-size: 24px;
+$output-item-icon-padding: 12px;
+
+@mixin output-item( $background-color )
+{
 	height: 48px;
-	
+	align-items: center;
+	padding-left: $output-item-icon-padding;
+
 	font-color: white;
-	background-color: #E6DB74;
+	background-color: rgba( $background-color, 0.1 );
+
+	&:hover
+	{
+		background-color: rgba( $background-color, 0.2 );
+	}
+
+	> .output-item-text { padding-left: $output-item-icon-padding; }
 }
 
-.errorItem
+@mixin output-item-icon( $background-color )
+{ 
+	font-size: $output-item-icon-size; 
+	color: rgba( $background-color, 1 );
+	&:hover
+	{
+		color: rgba( $background-color, 0.7 );
+	}
+}
+
+.warningitem
 {	
-	height: 48px;
- 
-	font-color: white;
-    background-color: #FB5A5A;
+	@include output-item( #E6DB74 );
+}
+
+.erroritem
+{	
+	@include output-item( #FB5A5A );
+}
+
+.warningitem-icon
+{	
+	@include output-item-icon( #E6DB74 );
+}
+
+.erroritem-icon
+{	
+	@include output-item-icon( #FB5A5A );
 }

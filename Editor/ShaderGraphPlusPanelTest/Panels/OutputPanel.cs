@@ -28,7 +28,7 @@ public sealed partial class OutputPanel : EditorDockPanel
 		AddChild( _listView );
 
 		// Test
-		AddTestIssues( 12 );
+		AddTestIssues( 4 );
 
 		_listView.Rebuild();
 	}
@@ -91,9 +91,9 @@ sealed class IssuePanel : Panel
 	{
 		Issue = issue;
 
-		Add.Icon( "error" );
-		AddClass( Issue.IsWarning ? "warningItem" : "errorItem" );
-	
-		Add.Label( issue.Message, "name" );
+		AddClass( Issue.IsWarning ? "warningitem" : "erroritem" );
+		
+		Add.Icon( "error" ).AddClass( Issue.IsWarning ? "warningitem-icon" : "erroritem-icon" );
+		Add.Label( issue.Message, "name" ).AddClass( "output-item-text" );
 	}
 }
