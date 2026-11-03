@@ -442,7 +442,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeView.Code = "";
-	
+
 		_output.ClearErrors();
 		_output.ClearWarnings();
 		_output.Rebuild();
@@ -673,7 +673,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	private void SetUndoLevel( int level )
 	{
 		if ( _undoStack.SetUndoLevel( level ) is not UndoOp op ) return;
-	
+
 		SGPLogger.Info( $"SetUndoLevel ({op.name})" );
 		RestoreGraph( op.redoBuffer );
 	}

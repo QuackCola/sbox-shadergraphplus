@@ -21,7 +21,7 @@ public sealed class UndoHistoryPanel : EditorDockPanel
 			_redoOption.Tooltip = _undoStack.RedoName;
 			//_undoOption.StatusTip = _undoStack.UndoName;
 			//_redoOption.StatusTip = _undoStack.RedoName;
-	
+
 			if ( field == value )
 				return;
 
@@ -65,7 +65,7 @@ public sealed class UndoHistoryPanel : EditorDockPanel
 
 		_undoOption = toolbar.AddButton( "", "undo", () => OnUndo?.Invoke() );
 		_redoOption = toolbar.AddButton( "", "redo", () => OnRedo?.Invoke() );
-	
+
 		toolbar.AddSeparator();
 
 		_clearOption = toolbar.AddButton( "", "playlist_remove", Clear );

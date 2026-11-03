@@ -17,7 +17,7 @@ internal class ListViewPanel : Panel
 		}
 	}
 
-	public Func<object,Panel> OnCreateRow { get; set; }
+	public Func<object, Panel> OnCreateRow { get; set; }
 
 	public ListViewPanel()
 	{

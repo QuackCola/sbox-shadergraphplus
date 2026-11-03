@@ -18,7 +18,7 @@ public sealed partial class PropertiesPanel : Panel
 	private readonly Panel _body;
 
 	private Label _title;
-	
+
 	private bool _builtSlider;
 
 	/// <summary>

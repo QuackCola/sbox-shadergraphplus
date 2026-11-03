@@ -92,7 +92,7 @@ sealed class IssuePanel : Panel
 		Issue = issue;
 
 		AddClass( Issue.IsWarning ? "warningitem" : "erroritem" );
-		
+
 		Add.Icon( "error" ).AddClass( Issue.IsWarning ? "warningitem-icon" : "erroritem-icon" );
 		Add.Label( issue.Message, "name" ).AddClass( "output-item-text" );
 	}
