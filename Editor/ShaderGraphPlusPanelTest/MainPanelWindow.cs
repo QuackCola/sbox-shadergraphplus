@@ -18,6 +18,12 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	private readonly UndoStack _undoStack = new();
 
+	private Sandbox.UI.Button _undoOption;
+	private Sandbox.UI.Button _redoOption;
+
+	private Sandbox.UI.Menu _undoMenuOption;
+	private Sandbox.UI.Menu _redoMenuOption;
+
 	private ShaderGraphPlusViewPanel _graphView;
 	private PreviewPanel _preview;
 	private PropertiesPanel _properties;
@@ -99,6 +105,18 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		toolbar.AddSeparator();
 
+		_undoOption = toolbar.AddButton( "Undo", "undo", Undo );
+		_redoOption = toolbar.AddButton( "Redo", "redo", Redo );
+
+		toolbar.AddSeparator();
+
+		toolbar.AddButton( "Cut", Texture.Load( "/tools/images/common/cut.png" ), CutSelection );
+		toolbar.AddButton( "Copy", Texture.Load( "/tools/images/common/copy.png" ), CopySelection );
+		toolbar.AddButton( "Paste", Texture.Load( "/tools/images/common/paste.png" ), PasteSelection );
+		toolbar.AddButton( "Select All", "select_all", SelectAll );
+
+		toolbar.AddSeparator();
+
 		toolbar.AddButton( "Compile", Texture.Load( "/tools/images/common/reload.png" ), Compile );
 
 		toolbar.AddButton( "Auto Compile",
@@ -144,8 +162,8 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 		var edit = MenuBar.AddMenu( "Edit" );
 
-		Option( edit, "Undo", "undo", "Ctrl+Z", Undo );
-		Option( edit, "Redo", "redo", "Ctrl+Y", Redo );
+		_undoMenuOption = Option( edit, "Undo", "undo", "Ctrl+Z", Undo );
+		_redoMenuOption = Option( edit, "Redo", "redo", "Ctrl+Y", Redo );
 
 		edit.AddSeparator();
 
@@ -241,7 +259,10 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		_properties.Target = _graph;
 		_properties.PropertyUpdated += OnPropertyUpdated;
 
-		_undoHistory = new UndoHistoryPanel();
+		_undoHistory = new UndoHistoryPanel( _undoStack );
+		_undoHistory.OnUndo = Undo;
+		_undoHistory.OnRedo = Redo;
+		_undoHistory.OnHistorySelected = SetUndoLevel;
 
 		_output = new OutputPanel();
 		_palette = new PalettePanel( IsSubgraph );
@@ -418,6 +439,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		_preview.Tint = Color.White;
 		_properties.Target = _graph;
 		_undoStack.Clear();
+		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeView.Code = "";
 	
@@ -505,6 +527,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		UpdateTitle();
 
 		_undoStack.Clear();
+		_undoHistory.History = _undoStack.Names;
 		_generatedCode = "";
 		_generatedCodeView.Code = "";
 		//Selection.Set( _graph );
@@ -612,10 +635,16 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		return;
 	}
 
+	public void OnUndoPushed()
+	{
+		_undoHistory.History = _undoStack.Names;
+	}
+
 	private void PushUndo( string name )
 	{
 		SGPLogger.Info( $"Push Undo ({name})" );
 		_undoStack.PushUndo( name, _graph.UndoStackSerialize() );
+		OnUndoPushed();
 	}
 
 	private void PushRedo()
@@ -638,6 +667,14 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 		if ( _undoStack.Redo() is not UndoOp op ) return;
 
 		SGPLogger.Info( $"Redo ({op.name})" );
+		RestoreGraph( op.redoBuffer );
+	}
+
+	private void SetUndoLevel( int level )
+	{
+		if ( _undoStack.SetUndoLevel( level ) is not UndoOp op ) return;
+	
+		SGPLogger.Info( $"SetUndoLevel ({op.name})" );
 		RestoreGraph( op.redoBuffer );
 	}
 
@@ -951,6 +988,26 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	public override void Tick()
 	{
 		base.Tick();
+
+		_undoOption.Disabled = !_undoStack.CanUndo;
+		_redoOption.Disabled = !_undoStack.CanRedo;
+		_undoMenuOption.Enabled = _undoStack.CanUndo;
+		_redoMenuOption.Enabled = _undoStack.CanRedo;
+
+		_undoOption.Tooltip = _undoStack.UndoName;
+		_redoOption.Tooltip = _undoStack.RedoName;
+		_undoMenuOption.Text = _undoStack.UndoName ?? "Undo";
+		_redoMenuOption.Text = _undoStack.RedoName ?? "Redo";
+
+		//_undoOption.StatusTip = _undoStack.UndoName;
+		//_redoOption.StatusTip = _undoStack.RedoName;
+		//_undoMenuOption.StatusTip = _undoStack.UndoName;
+		//_redoMenuOption.StatusTip = _undoStack.RedoName;
+
+		if ( _undoHistory is not null )
+		{
+			_undoHistory.UndoLevel = _undoStack.UndoLevel;
+		}
 
 		CheckForChanges();
 	}

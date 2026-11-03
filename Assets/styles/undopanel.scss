@@ -1,0 +1,16 @@
+@import "editor.scss";
+
+$undo-item-text-padding: 8px;
+$undo-item-font-color: $surface;
+
+.undoitem
+{
+	height: 16px;
+	align-items: center;
+	padding-left: $undo-item-text-padding;
+
+	&:hover
+	{
+		background-color: lighten( $undo-item-font-color, 0.35 );
+	}
+}
