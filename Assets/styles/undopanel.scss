@@ -1,7 +1,7 @@
 @import "editor.scss";
 
 $undo-item-text-padding: 8px;
-$undo-item-font-color: $surface;
+$undo-item-background-color: $surface;
 
 .undoitem
 {
@@ -11,6 +11,6 @@ $undo-item-font-color: $surface;
 
 	&:hover
 	{
-		background-color: lighten( $undo-item-font-color, 0.35 );
+		background-color: lighten( $undo-item-background-color, 0.35 );
 	}
 }
