@@ -3,13 +3,18 @@
 $output-item-icon-size: 24px;
 $output-item-icon-padding: 12px;
 
+$output-item-font-color: $text;
+
+$warningitem-color: #E6DB74;
+$erroritem-color: #FB5A5A;
+
 @mixin output-item( $background-color )
 {
 	height: 48px;
 	align-items: center;
 	padding-left: $output-item-icon-padding;
 
-	font-color: white;
+	font-color: $font-color;
 	background-color: rgba( $background-color, 0.1 );
 
 	&:hover
@@ -23,29 +28,14 @@ $output-item-icon-padding: 12px;
 @mixin output-item-icon( $background-color )
 { 
 	font-size: $output-item-icon-size; 
-	color: rgba( $background-color, 1 );
-	&:hover
-	{
-		color: rgba( $background-color, 0.7 );
-	}
+	color: rgba( $background-color, 0.7 );
 }
 
-.warningitem
-{	
-	@include output-item( #E6DB74 );
-}
+.warningitem { @include output-item( $warningitem-color ); }
+.erroritem { @include output-item( $erroritem-color ); }
 
-.erroritem
-{	
-	@include output-item( #FB5A5A );
-}
+.warningitem:hover .warningitem-icon { color: rgba( $warningitem-color, 1.0 ); }
+.erroritem:hover .erroritem-icon { color: rgba( $erroritem-color, 1.0 ); }
 
-.warningitem-icon
-{	
-	@include output-item-icon( #E6DB74 );
-}
-
-.erroritem-icon
-{	
-	@include output-item-icon( #FB5A5A );
-}
+.warningitem-icon { @include output-item-icon( $warningitem-color ); }
+.erroritem-icon { @include output-item-icon( $erroritem-color ); }
