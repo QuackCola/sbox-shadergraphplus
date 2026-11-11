@@ -40,11 +40,9 @@ public class GenericControl : BaseControl, IControlLayout
 
 	bool _inline;
 
-	/// <inheritdoc/>
-	public bool IsWideMode => _inline;
+	public override bool IsWideMode => _inline;
 
-	/// <inheritdoc/>
-	public bool IncludeLabel => !_inline;
+	public override bool IncludeLabel => !_inline;
 
 	/// <summary>
 	/// Not primitives or readonly structs, like the editor's.
