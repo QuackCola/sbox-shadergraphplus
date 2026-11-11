@@ -56,7 +56,7 @@ internal static partial class ShaderGraphPlusTheme
 
 	public static Color GetTypeColor( BlackboardParameter parameter )
 	{
-		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue(parameter.GetType(), out var blackboardConfig ) )
+		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( parameter.GetType(), out var blackboardConfig ) )
 		{
 			return blackboardConfig.Color;
 		}

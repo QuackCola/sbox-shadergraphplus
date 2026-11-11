@@ -87,7 +87,7 @@ public class Properties : Widget
 		switch ( Target )
 		{
 			case BlackboardParameter parameter:
-				
+
 				var typeName = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
 				if ( _window.Graph.IsSubgraph )
 					typeName += $" Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}";
