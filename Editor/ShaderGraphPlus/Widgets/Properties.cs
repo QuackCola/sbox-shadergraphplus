@@ -87,11 +87,10 @@ public class Properties : Widget
 		switch ( Target )
 		{
 			case BlackboardParameter parameter:
-				var sgp = parameter.Graph as ShaderGraphPlus;
-
-				var typeName = sgp.IsSubgraph
-					? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}"
-					: parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+				
+				var typeName = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+				if ( _window.Graph.IsSubgraph )
+					typeName += $" Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}";
 
 				SetHeader( $"{typeName} Parameter", parameter.Name );
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
