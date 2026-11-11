@@ -54,13 +54,10 @@ internal static partial class ShaderGraphPlusTheme
 		};
 	}
 
-	public static Color GetTypeColor( BlackboardParameter parameter )
+	public static Color GetBlackboardTypeColor( BlackboardParameter parameter )
 	{
-		if ( ShaderGraphPlusTheme.BlackboardConfigs.TryGetValue( parameter.GetType(), out var blackboardConfig ) )
-		{
-			return blackboardConfig.Color;
-		}
-
-		return Theme.TextControl;
+		return BlackboardConfigs.TryGetValue( parameter.GetType(), out var blackboardConfig )
+			? blackboardConfig.Color
+			: Theme.TextControl;
 	}
 }

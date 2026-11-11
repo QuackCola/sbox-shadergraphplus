@@ -94,7 +94,7 @@ public class Properties : Widget
 
 				SetHeader( $"{typeName} Parameter", parameter.Name );
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
-				_header.Color = ShaderGraphPlusTheme.GetTypeColor( parameter );
+				_header.Color = ShaderGraphPlusTheme.GetBlackboardTypeColor( parameter );
 				break;
 			case GroupData:
 				_header.Text = "Group";
