@@ -70,20 +70,6 @@ public class Properties : Widget
 		_editor.Add( _sheetPanel, 1 );
 	}
 
-	public bool IsTarget<T>( out T targetValue )
-	{
-		targetValue = default;
-
-		if ( Target is T target )
-		{
-			targetValue = (T)target;
-
-			return true;
-		}
-
-		return false;
-	}
-
 	private void Rebuild()
 	{
 		UpdateHeader();
