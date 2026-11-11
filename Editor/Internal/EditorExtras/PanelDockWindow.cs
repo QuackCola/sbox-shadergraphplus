@@ -11,27 +11,23 @@ public class PanelDockWindow : Panel
 {
 	private readonly List<RootPanel> _floatingRoots = new();
 
-	private Sandbox.UI.Label _maximizeIcon;
-	private Sandbox.UI.Label _windowLabel;
-	private Sandbox.UI.Label _titleBarLabel;
+	private PanelTitleBar _titleBar;
 
 	protected string _defaultLayout;
 	protected string _savedLayout;
 
 	public DockHost DockHost { get; private set; }
 	public PanelDockWindows DockWindows { get; private set; }
-	public virtual Sandbox.UI.MenuBar MenuBar { get; set; }
 
-	public string WindowTitle
+	public string Title
 	{
-		get
-		{
-			return _windowLabel.Text;
-		}
-		set
-		{
-			_windowLabel.Text = value;
-		}
+		get => _titleBar.Title;
+		set => _titleBar.Title = value;
+	}
+
+	public Sandbox.UI.MenuBar MenuBar
+	{
+		get => _titleBar.MenuBar;
 	}
 
 	/// <summary>
@@ -53,33 +49,21 @@ public class PanelDockWindow : Panel
 
 	private void Init()
 	{
-		var titleBar = Add.Panel( "titlebar window-drag" );
-		_titleBarLabel = titleBar.Add.Label( "s&", "brand" );
-
-		// Menus live in the title bar, same as the editor's
-		MenuBar = titleBar.AddChild( new Sandbox.UI.MenuBar() );
-		MenuBar.AddClass( "window-nodrag" );
-
-		titleBar.Add.Panel( "grow" );
-
-		// Centred over the bar, so the menus on the left don't push it off centre
-		var titleWrap = titleBar.Add.Panel( "titlewrap" );
-		_windowLabel = titleWrap.Add.Label( "", "title" );
-
-		WindowButton( titleBar, "remove", null, () => Window?.Minimize() );
-		_maximizeIcon = WindowButton( titleBar, "crop_square", null, () =>
+		_titleBar = AddChild( new PanelTitleBar() );
+		_titleBar.OnMinimize = () => Window?.Minimize();
+		_titleBar.OnMaximize = () =>
 		{
 			Window?.ToggleMaximized();
 			OnMaximize();
-		} );
-		WindowButton( titleBar, "close", "close", Quit );
+		};
+		_titleBar.OnClose = () => Quit();
 
 		Add.Panel( "accentline" );
 	}
 
 	public void SetWindowIcon( string name )
 	{
-		_titleBarLabel.Text = name;
+		_titleBar.Icon = name;
 	}
 
 	protected virtual void CreateUI()
@@ -119,7 +103,7 @@ public class PanelDockWindow : Panel
 		if ( Window is not { } window )
 			return;
 
-		_maximizeIcon.Text = window.IsMaximized ? "filter_none" : "crop_square";
+		_titleBar.MaximizeControlIcon = window.IsMaximized ? "filter_none" : "crop_square";
 	}
 
 	/// <summary>
@@ -192,13 +176,6 @@ public class PanelDockWindow : Panel
 		var option = menu.AddOption( text, icon, action );
 		option.Shortcut = shortcut;
 		return option;
-	}
-
-	protected Sandbox.UI.Label WindowButton( Panel parent, string icon, string classname, Action onClick )
-	{
-		var button = parent.Clickable( "windowbutton window-nodrag", onClick );
-		if ( classname is not null ) button.AddClass( classname );
-		return button.Icon( icon );
 	}
 }
 

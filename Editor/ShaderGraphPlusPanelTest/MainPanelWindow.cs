@@ -820,7 +820,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 
 	private void UpdateTitle()
 	{
-		WindowTitle = $"Shader Graph Plus - {_asset?.Path ?? "untitled"}{(_dirty ? "*" : "")}";
+		Title = $"Shader Graph Plus - {_asset?.Path ?? "untitled"}{(_dirty ? "*" : "")}";
 	}
 
 	public void ShowStatusBarMessage( string text, float seconds = 5f )
