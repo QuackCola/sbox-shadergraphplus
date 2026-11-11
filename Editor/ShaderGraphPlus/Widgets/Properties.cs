@@ -97,15 +97,14 @@ public class Properties : Widget
 
 		switch ( Target )
 		{
-			case ShaderGraphPlus:
-				_header.Text = "Graph Settings";
-				_header.Icon = "settings";
-				break;
 			case BlackboardParameter parameter:
 				var sgp = parameter.Graph as ShaderGraphPlus;
-				var baseName = sgp.IsSubgraph ? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}" : "";
 
-				_header.Text = $"{(!string.IsNullOrWhiteSpace( baseName ) ? $"{baseName} " : "")}{parameter.DisplayInfo.Name ?? parameter.GetType().Name}";
+				var typeName = sgp.IsSubgraph
+					? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}"
+					: parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+
+				SetHeader( $"{typeName} Parameter", parameter.Name );
 				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
 				_header.Color = ShaderGraphPlusTheme.GetTypeColor( parameter );
 				break;
@@ -123,7 +122,7 @@ public class Properties : Widget
 				_header.Color = node.NodeTitleColor;
 				break;
 			default:
-				_header.Text = "Properties";
+				SetHeader( "Graph Settings" );
 				_header.Icon = "settings";
 				break;
 		}
