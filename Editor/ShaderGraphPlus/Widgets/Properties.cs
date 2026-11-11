@@ -119,7 +119,7 @@ public class Properties : Widget
 			case BaseNodePlus node:
 				_header.Text = node.DisplayInfo.Name ?? node.GetType().Name;
 				_header.Icon = node.DisplayInfo.Icon ?? "account_tree";
-				_header.Color = node.NodeTitleColor;
+				_header.Color = Color.Lerp( new Color( 0.7f, 0.7f, 0.7f ), Theme.Blue, 0.1f );
 				break;
 			default:
 				SetHeader( "Graph Settings" );
