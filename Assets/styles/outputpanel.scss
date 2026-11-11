@@ -14,7 +14,7 @@ $erroritem-color: #FB5A5A;
 	align-items: center;
 	padding-left: $output-item-icon-padding;
 
-	font-color: $font-color;
+	font-color: $output-item-font-color;
 	background-color: rgba( $background-color, 0.1 );
 
 	&:hover
