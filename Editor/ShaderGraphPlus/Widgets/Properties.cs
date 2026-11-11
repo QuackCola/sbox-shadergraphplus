@@ -5,10 +5,15 @@ namespace ShaderGraphPlus;
 
 public class Properties : Widget
 {
-	private Widget _sheetCanvas;
-	private ScrollArea _scroller;
 	private ControlSheet _sheet;
 	private string _filterText;
+
+	private readonly MainWindow _window;
+	private readonly Layout _editor;
+
+	private ScrollArea _scroller;
+	private Widget _sheetCanvas;
+	private readonly Widget _sheetPanel;
 
 	private PropertiesHeader _header;
 
@@ -26,14 +31,13 @@ public class Properties : Widget
 		}
 	}
 
-	private readonly Widget _sheetPanel;
-	private readonly Layout _editor;
-
 	public Action<SerializedProperty> PropertyUpdated { get; set; }
 	public Action TargetChanged { get; set; }
 
-	public Properties( Widget parent ) : base( parent )
+	public Properties( MainWindow window ) : base( window )
 	{
+		_window = window;
+
 		Name = "Properties";
 		WindowTitle = "Properties";
 		SetWindowIcon( "edit" );

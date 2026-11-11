@@ -48,8 +48,6 @@ public class MainWindow : DockWindow
 
 	private ShaderTemplateResource _shaderTemplate;
 
-	public string AssetPath => _asset?.Path;
-
 	private DockWidget _centralDock;
 	private Widget _graphCanvas;
 	private Widget _blackboardCanvas;
@@ -104,6 +102,9 @@ public class MainWindow : DockWindow
 	public bool EnableNodePreview => _preview.Preview.EnableNodePreview;
 
 	private Dictionary<string, ShaderFeatureBase> _registeredShaderFeatures = new();
+
+	public string AssetPath => _asset?.Path;
+	public ShaderGraphPlus Graph => _graph;
 
 	private readonly List<string> EditorErrors = new();
 	private readonly List<string> EditorWarnings = new();
