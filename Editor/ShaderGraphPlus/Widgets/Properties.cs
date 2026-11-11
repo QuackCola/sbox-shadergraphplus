@@ -70,7 +70,6 @@ public class Properties : Widget
 		_editor.Add( _sheetPanel, 1 );
 	}
 
-	[MethodImpl( MethodImplOptions.AggressiveInlining )]
 	public bool IsTarget<T>( out T targetValue )
 	{
 		targetValue = default;
@@ -111,6 +110,7 @@ public class Properties : Widget
 			case GroupData:
 				_header.Text = "Group";
 				_header.Icon = "folder";
+				_header.Color = Theme.Folder;
 				break;
 			case CommentNode commentNode:
 				_header.Text = "Comment";
