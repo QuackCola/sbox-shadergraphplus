@@ -5,10 +5,15 @@ namespace ShaderGraphPlus;
 
 public class Properties : Widget
 {
-	private Widget _sheetCanvas;
-	private ScrollArea _scroller;
 	private ControlSheet _sheet;
 	private string _filterText;
+
+	private readonly MainWindow _window;
+	private readonly Layout _editor;
+
+	private ScrollArea _scroller;
+	private Widget _sheetCanvas;
+	private readonly Widget _sheetPanel;
 
 	private PropertiesHeader _header;
 
@@ -26,13 +31,13 @@ public class Properties : Widget
 		}
 	}
 
-	private readonly Layout Editor;
-
 	public Action<SerializedProperty> PropertyUpdated { get; set; }
 	public Action TargetChanged { get; set; }
 
-	public Properties( Widget parent ) : base( parent )
+	public Properties( MainWindow window ) : base( window )
 	{
+		_window = window;
+
 		Name = "Properties";
 		WindowTitle = "Properties";
 		SetWindowIcon( "edit" );
@@ -52,37 +57,21 @@ public class Properties : Widget
 
 		_header = Layout.Add( new PropertiesHeader() );
 
-		_sheet = new ControlSheet();
+		_sheetPanel = new Widget( this ) { Layout = Layout.Column() };
+		_sheetPanel.Layout.Margin = 0;
+		_sheetPanel.OnPaintOverride = () =>
+		{
+			Paint.ClearPen();
+			Paint.SetBrush( Theme.WidgetBackground );
+			Paint.DrawRect( _sheetPanel.LocalRect, Theme.ControlRadius );
+			return true;
+		};
 
-		_scroller = new ScrollArea( this );
-		_scroller.Canvas = new Widget();
-		_scroller.Canvas.Layout = Layout.Column();
-		_scroller.Canvas.VerticalSizeMode = SizeMode.CanGrow;
-		_scroller.Canvas.HorizontalSizeMode = SizeMode.Flexible;
-		_scroller.Canvas.Layout.Add( _sheet );
-		_scroller.Canvas.Layout.AddStretchCell();
-
+		_scroller = _sheetPanel.Layout.Add( CreateScroller( _sheetPanel ), 1 );
 		_sheetCanvas = _scroller.Canvas;
 
-		Editor = Layout.AddColumn( 1 );
-		Editor.Add( _scroller );
-
-		Layout.AddStretchCell();
-	}
-
-	[MethodImpl( MethodImplOptions.AggressiveInlining )]
-	public bool IsTarget<T>( out T targetValue )
-	{
-		targetValue = default;
-
-		if ( Target is T target )
-		{
-			targetValue = (T)target;
-
-			return true;
-		}
-
-		return false;
+		_editor = Layout.AddColumn( 1 );
+		_editor.Add( _sheetPanel, 1 );
 	}
 
 	private void Rebuild()
@@ -93,11 +82,24 @@ public class Properties : Widget
 
 	private void UpdateHeader()
 	{
+		_header.Color = PropertiesHeader.DefaultIconColor;
+
 		switch ( Target )
 		{
-			case ShaderGraphPlus:
-				_header.Text = "Graph Settings";
-				_header.Icon = "settings";
+			case BlackboardParameter parameter:
+
+				var typeName = parameter.DisplayInfo.Name ?? parameter.GetType().Name;
+				if ( _window.Graph.IsSubgraph )
+					typeName += $" Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}";
+
+				SetHeader( $"{typeName} Parameter", parameter.Name );
+				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
+				_header.Color = ShaderGraphPlusTheme.GetBlackboardTypeColor( parameter );
+				break;
+			case GroupData:
+				_header.Text = "Group";
+				_header.Icon = "folder";
+				_header.Color = Theme.Folder;
 				break;
 			case CommentNode commentNode:
 				_header.Text = "Comment";
@@ -106,25 +108,24 @@ public class Properties : Widget
 			case BaseNodePlus node:
 				_header.Text = node.DisplayInfo.Name ?? node.GetType().Name;
 				_header.Icon = node.DisplayInfo.Icon ?? "account_tree";
-				break;
-			case BlackboardParameter parameter:
-				var sgp = parameter.Graph as ShaderGraphPlus;
-				var baseName = sgp.IsSubgraph ? $"Subgraph {(parameter is IBlackboardSubgraphInputParameter ? "Input" : "Output")}" : "";
-
-				_header.Text = $"{(!string.IsNullOrWhiteSpace( baseName ) ? $"{baseName} " : "")}{parameter.DisplayInfo.Name ?? parameter.GetType().Name}";
-				_header.Icon = parameter.DisplayInfo.Icon ?? "account_tree";
-				break;
-			case GroupData:
-				_header.Text = "Group";
-				_header.Icon = "folder";
+				_header.Color = Color.Lerp( new Color( 0.7f, 0.7f, 0.7f ), Theme.Blue, 0.1f );
 				break;
 			default:
-				_header.Text = "Properties";
+				SetHeader( "Graph Settings" );
 				_header.Icon = "settings";
 				break;
 		}
 
 		_header.Update();
+	}
+
+	/// <summary>
+	/// Set the header to the selection's type name plus optional instance detail.
+	/// </summary>
+	private void SetHeader( string type, string detail = null )
+	{
+		_header.Text = type;
+		_header.Detail = string.IsNullOrWhiteSpace( detail ) || detail == type ? null : detail;
 	}
 
 	private void RebuildSheet()
@@ -133,23 +134,19 @@ public class Properties : Widget
 			return;
 
 		var previousCanvas = _scroller.Canvas;
-		var nextCanvas = new Widget( _scroller )
-		{
-			Layout = Layout.Column(),
-			HorizontalSizeMode = SizeMode.Flexible,
-			VerticalSizeMode = SizeMode.CanGrow,
-			TranslucentBackground = true,
-			NoSystemBackground = true,
-			Visible = false
-		};
-
-		_sheetCanvas = nextCanvas;
+		var nextCanvas = CreateSheetCanvas( _scroller );
+		nextCanvas.Visible = false;
+		var content = CreateSheetCanvas( nextCanvas );
+		content.Layout.Margin = 4;
+		nextCanvas.Layout.Add( content );
+		_sheetCanvas = content;
 
 		try
 		{
 			var so = Target.GetSerialized();
 			so.OnPropertyChanged += p =>
 			{
+				UpdateHeader();
 				PropertyUpdated?.Invoke( p );
 			};
 
@@ -158,8 +155,9 @@ public class Properties : Widget
 
 			_sheetCanvas.Layout.Add( _sheet );
 
-			_sheetCanvas.Layout.AddStretchCell();
-			nextCanvas.AdjustSize();
+			nextCanvas.Layout.AddStretchCell();
+
+			_sheetCanvas = nextCanvas;
 		}
 		catch
 		{
@@ -212,16 +210,51 @@ public class Properties : Widget
 		}
 		return false;
 	}
+
+	private static ScrollArea CreateScroller( Widget parent )
+	{
+		var scroller = new ScrollArea( parent );
+		scroller.VerticalScrollbarMode = ScrollbarMode.Auto;
+		scroller.HorizontalScrollbarMode = ScrollbarMode.Auto;
+		scroller.TranslucentBackground = true;
+		scroller.NoSystemBackground = true;
+		// Scope to the scroll area itself, otherwise the rules cascade into every
+		// descendant - including the QToolTip popups shown for the rows inside it.
+		scroller.Name = "AnimGraphPropertiesScroll";
+		scroller.SetStyles( "#AnimGraphPropertiesScroll { border: none; background: transparent; }" );
+		scroller.Canvas = CreateSheetCanvas( scroller );
+		return scroller;
+	}
+
+	private static Widget CreateSheetCanvas( Widget parent )
+	{
+		return new Widget( parent )
+		{
+			Layout = Layout.Column(),
+			HorizontalSizeMode = SizeMode.Flexible,
+			VerticalSizeMode = SizeMode.CanGrow,
+			TranslucentBackground = true,
+			NoSystemBackground = true,
+		};
+	}
 }
 
 class PropertiesHeader : Widget
 {
+	public static readonly Color DefaultIconColor = global::Color.Parse( "#8E9199" ) ?? Theme.TextControl;
+
 	public string Text { get; set; } = "Properties";
+	public string Detail { get; set; }
 	public string Icon { get; set; } = "settings";
+	public Color Color { get; set; } = DefaultIconColor;
 
 	public PropertiesHeader() : base( null )
 	{
 		FixedHeight = Theme.RowHeight + 2;
+
+		Layout = Layout.Row();
+		Layout.Margin = new Sandbox.UI.Margin( 0, 1, 4, 1 );
+		Layout.AddStretchCell();
 	}
 
 	protected override void OnPaint()
@@ -235,21 +268,31 @@ class PropertiesHeader : Widget
 		Paint.SetBrush( Theme.SurfaceBackground );
 		Paint.DrawRect( rect );
 
-		var iconColor = Color.Parse( "#8E9199" ) ?? Theme.TextControl;
-
 		// Icon
 		if ( !string.IsNullOrEmpty( Icon ) )
 		{
 			var iconRect = new Rect( rect.Left + 4, rect.Top, 22, rect.Height );
-			Paint.SetPen( iconColor );
+			Paint.SetPen( Color );
 			Paint.DrawIcon( iconRect, Icon, 16, TextFlag.Center );
 		}
 
-		// Title
+		// Title: type tinted with the selection color, instance detail in plain text
 		var textLeft = string.IsNullOrEmpty( Icon ) ? 4f : 30f;
-		var textRect = new Rect( textLeft, rect.Top, rect.Width - textLeft, rect.Height );
-		Paint.SetPen( Theme.Text );
+		var textRight = rect.Width;
+		var textRect = new Rect( textLeft, rect.Top, textRight - textLeft, rect.Height );
 		Paint.SetHeadingFont( 11, 440, sizeInPixels: true );
-		Paint.DrawText( textRect, Text, TextFlag.LeftCenter );
+		Paint.SetPen( Color == DefaultIconColor ? Theme.Text : Color );
+		var drawn = Paint.DrawText( textRect, Text, TextFlag.LeftCenter );
+
+		if ( !string.IsNullOrEmpty( Detail ) )
+		{
+			textRect.Left = drawn.Right + 6;
+			Paint.SetPen( Theme.TextControl.WithAlpha( 0.5f ) );
+			drawn = Paint.DrawText( textRect, "·", TextFlag.LeftCenter );
+
+			textRect.Left = drawn.Right + 6;
+			Paint.SetPen( Theme.Text );
+			Paint.DrawText( textRect, Detail, TextFlag.LeftCenter );
+		}
 	}
 }

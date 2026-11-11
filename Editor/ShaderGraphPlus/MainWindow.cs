@@ -48,8 +48,7 @@ public class MainWindow : DockWindow
 
 	private ShaderTemplateResource _shaderTemplate;
 
-	public string AssetPath => _asset?.Path;
-
+	private DockWidget _centralDock;
 	private Widget _graphCanvas;
 	private Widget _blackboardCanvas;
 	private Properties _properties;
@@ -103,6 +102,9 @@ public class MainWindow : DockWindow
 	public bool EnableNodePreview => _preview.Preview.EnableNodePreview;
 
 	private Dictionary<string, ShaderFeatureBase> _registeredShaderFeatures = new();
+
+	public string AssetPath => _asset?.Path;
+	public ShaderGraphPlus Graph => _graph;
 
 	private readonly List<string> EditorErrors = new();
 	private readonly List<string> EditorWarnings = new();
@@ -1676,6 +1678,12 @@ public class MainWindow : DockWindow
 
 	public void CreateUI()
 	{
+		void AddDock( string title, string icon, Widget widget )
+		{
+			DockManager.RegisterDockType( new() { Title = title, Icon = icon, Area = DockArea.Hidden, CreateAction = () => widget } );
+			DockManager.AddDock( title, icon, widget, DockArea.Hidden ).MinimumSizeFromContent = true;
+		}
+
 		BuildMenuBar();
 
 		_graphCanvas = new Widget( this ) { WindowTitle = $"{(_asset != null ? _asset.Name : "untitled")}{(_dirty ? "*" : "")}" };
@@ -1835,27 +1843,28 @@ public class MainWindow : DockWindow
 		_palette = new PaletteWidget( this, IsSubgraph );
 		_generatedCodeTextView = new TextEditAreaWidget( this, "Generated Code", "" );
 
-		var graph = DockManager.AddDock( "Graph", "account_tree", _graphCanvas, DockArea.Center );
-		var preview = DockManager.AddDock( "Preview", "photo", _preview, DockArea.Left );
+		if ( _centralDock is null )
+		{
+			_centralDock = DockManager.SetCentralWidget( _graphCanvas );
+		}
+		else
+		{
+			var previous = _centralDock.Widget;
+			_centralDock.Widget = _graphCanvas;
+			previous.Destroy();
+		}
 
-		DockManager.AddDock( "Properties", "edit", _properties, DockArea.Bottom, relativeTo: preview );
-
-		var output = DockManager.AddDock( "Output", "notes", _output, DockArea.Bottom, relativeTo: graph );
-
-		DockManager.AddDock( "Blackboard", "format_list_bulleted", _blackboardCanvas, DockArea.Right, relativeTo: output );
+		AddDock( "Preview", "photo", _preview );
+		AddDock( "Properties", "edit", _properties );
+		AddDock( "Output", "notes", _output );
+		AddDock( "Blackboard", "format_list_bulleted", _blackboardCanvas );
 
 		if ( EditorTypeLibrary.Create( "ConsoleWidget", typeof( Widget ), new[] { this } ) is Widget console )
-			DockManager.AddDock( "Console", "text_snippet", console, DockArea.Center, relativeTo: output );
+			AddDock( "Console", "text_snippet", console );
 
-		DockManager.AddDock( "Undo History", "history", _undoHistory, DockArea.Center, relativeTo: output );
-		DockManager.AddDock( "Palette", "palette", _palette, DockArea.Center, relativeTo: output );
-		DockManager.AddDock( "Generated Code", "text_snippet", _generatedCodeTextView, DockArea.Center, relativeTo: output );
-
-		foreach ( var info in DockManager.DockTypes )
-		{
-			if ( DockManager.FindDockWidget( info.Title ) is { } dock )
-				dock.MinimumSizeFromContent = true;
-		}
+		AddDock( "Undo History", "history", _undoHistory );
+		AddDock( "Palette", "palette", _palette );
+		AddDock( "Generated Code", "text_snippet", _generatedCodeTextView );
 
 		DockManager.RaiseDock( "Output" );
 
@@ -1864,23 +1873,26 @@ public class MainWindow : DockWindow
 
 	protected override void BuildDefaultLayout()
 	{
-		var graph = DockManager.OpenDock( "Graph", DockArea.Center );
 		var preview = DockManager.OpenDock( "Preview", DockArea.Left );
-
-		DockManager.SetSplitterProportions( preview, 0.28f, 0.72f );
+		DockManager.SetSplitterProportions( preview, 0.2f, 0.8f );
 
 		var properties = DockManager.OpenDock( "Properties", DockArea.Bottom, preview );
-		var output = DockManager.OpenDock( "Output", DockArea.Bottom, graph );
+		var output = DockManager.OpenDock( "Output", DockArea.Bottom, _centralDock );
 
-		DockManager.OpenDock( "Blackboard", DockArea.Right, output );
+		var blackboard = DockManager.OpenDock( "Blackboard", DockArea.Right, output );
 		DockManager.OpenDock( "Console", DockArea.Center, output );
 		DockManager.OpenDock( "Undo History", DockArea.Center, output );
 		DockManager.OpenDock( "Palette", DockArea.Center, output );
 		DockManager.OpenDock( "Generated Code", DockArea.Center, output );
 
-		DockManager.SetSplitterProportions( properties, 0.68f, 0.32f );
-		DockManager.SetSplitterProportions( output, 0.68f, 0.32f );
+		DockManager.SetSplitterProportions( _centralDock, 0.68f, 0.32f );
+		DockManager.SetSplitterProportions( properties, 0.68f, 0.68f );
+		DockManager.SetSplitterProportions( output, 0.75f, 0.25f );
+		DockManager.SetSplitterProportions( blackboard, 0.62f, 0.38f );
+
+
 		DockManager.RaiseDock( "Output" );
+		DockManager.RaiseDock( "Blackboard" );
 	}
 
 	private void OnPropertyUpdated( SerializedProperty serializedProperty )
