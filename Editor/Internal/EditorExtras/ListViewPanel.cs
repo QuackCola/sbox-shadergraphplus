@@ -2,6 +2,9 @@
 
 namespace EditorExtras;
 
+/// <summary>
+/// Work-In-Progress ListView
+/// </summary>
 internal class ListViewPanel : Panel
 {
 	private readonly List<object> _items = new List<object>();
