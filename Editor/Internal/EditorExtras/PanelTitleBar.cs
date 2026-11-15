@@ -52,9 +52,6 @@ public class PanelTitleBar : Panel
 	/// </param>
 	public PanelTitleBar( Action<Sandbox.UI.Panel> onBuildSpecial = null ) : base()
 	{
-		if ( OperatingSystem.IsMacOS() )
-			throw new NotSupportedException( "TODO" );
-
 		AddClass( "titlebar window-drag" );
 		_titlebarIcon = Add.Label( "s&", "brand" );
 
