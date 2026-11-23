@@ -125,7 +125,7 @@ internal sealed class ParameterGroupHeader : BlackboardItem
 
 		var title = BlackboardPanel.GroupTitle( group.Name );
 
-		AddClass( "sg-group" );
+		AddClass( "parameter-group" );
 		SetClass( "collapsed", collapsed );
 		SetClass( "fixed", !collapsible );
 
@@ -276,7 +276,7 @@ internal sealed class ParameterRow : BlackboardItem
 		BuiltGroup = BlackboardPanel.GroupName( parameter );
 		BuiltName = parameter.Name;
 
-		AddClass( "sg-param" );
+		AddClass( "parameter" );
 
 		var config = TypeConfig( parameter );
 
@@ -458,7 +458,7 @@ internal sealed class ParameterRow : BlackboardItem
 	internal static void AddTypeChip( Panel parent, BlackboardConfig config )
 	{
 		// Box that centers the label vertically
-		var chip = parent.Add.Panel( "sg-type" );
+		var chip = parent.Add.Panel( "parameter-type" );
 		chip.Style.BackgroundColor = config.Color.WithAlpha( 0.12f );
 		chip.Style.BorderColor = config.Color.WithAlpha( 0.45f );
 		chip.Add.Panel( "dot" ).Style.BackgroundColor = config.Color;

@@ -15,7 +15,6 @@ namespace ShaderGraphPlusPanelTest;
 /// name, default value, and tags for the settings worth seeing at a glance (sRGB, attribute, range...).
 /// Parameters and groups reorder by dragging, and parameters rename in place.
 /// </summary>
-[StyleSheet.Inline( "sgp_blackboardpanel", Styles )]
 public sealed partial class BlackboardPanel : EditorDockPanel
 {
 	private TextInput _searchFilter;
@@ -93,16 +92,15 @@ public sealed partial class BlackboardPanel : EditorDockPanel
 
 	public BlackboardPanel( bool isSubgraph )
 	{
+		StyleSheet.Load( "/styles/blackboardpanel.scss" );
 		_collapsedGroups = EditorCookie.Get<List<string>>( CollapsedGroupsCookie, [] ).ToHashSet( StringComparer.OrdinalIgnoreCase );
-
-		AddClass( "sg-blackboard" );
 
 		// For F2 and Delete: a click anywhere in the blackboard lands the focus here
 		AcceptsFocus = true;
 
 		BuildToolbar();
 
-		_list = Add.Panel( "sg-params" );
+		_list = Add.Panel( "parameter-list" );
 
 		// Pressing empty space clears the selection
 		_list.AddEventListener( "onmousedown", OnListMouseDown );
@@ -676,7 +674,7 @@ public sealed partial class BlackboardPanel : EditorDockPanel
 			if ( collapsed )
 				continue;
 
-			var body = _list.Add.Panel( "sg-group-body" );
+			var body = _list.Add.Panel( "parameter-group-body" );
 
 			foreach ( var parameter in group )
 			{
