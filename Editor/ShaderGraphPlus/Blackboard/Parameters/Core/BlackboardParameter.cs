@@ -187,15 +187,18 @@ public abstract class BlackboardParameter : IGroupableBlackboardParameter, IVali
 		{
 			if ( x is ClassBlackboardParameterType classParameterType )
 			{
-				var attrib = classParameterType.Type.GetAttribute<ParameterAvailableInAttribute>( true );
+				var typeDescription = classParameterType.Type;
 
-				if ( attrib != null )
+				if ( typeDescription.HasAttribute<HideAttribute>() )
+					return false;
+
+				if ( typeDescription.GetAttribute<ParameterAvailableInAttribute>( true ) is { } avalibleInAttrib )
 				{
 					// Only show material parameters when not in a subgraph
-					if ( isSubgraph && attrib.Availability == ParameterAvailableIn.Material ) return false;
+					if ( isSubgraph && avalibleInAttrib.Availability == ParameterAvailableIn.Material ) return false;
 
 					// Only show subgraph input and output parameters when in a subgraph
-					if ( !isSubgraph && attrib.Availability == ParameterAvailableIn.Subgraph ) return false;
+					if ( !isSubgraph && avalibleInAttrib.Availability == ParameterAvailableIn.Subgraph ) return false;
 				}
 				else
 				{

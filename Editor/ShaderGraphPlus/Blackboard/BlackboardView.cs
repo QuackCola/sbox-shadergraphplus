@@ -676,19 +676,18 @@ public class BlackboardView : Widget
 			option.ToolTip = description;
 		}
 
+		Menu FindOrCreateMenu( Menu parent, string name, string icon )
+		{
+			var childMenu = parent.FindOrCreateMenu( name );
+			childMenu.Icon = icon;
+
+			return childMenu;
+		}
+
 		IBlackboardParameterType[] avalibleTypes = BlackboardParameter.GetRelevantParameters( _availableParameters, Graph.IsSubgraph ).ToArray();
 
 		if ( !Graph.IsSubgraph )
 		{
-			var materialParametersMenu = menu.AddMenu( "Parameter" );
-			materialParametersMenu.Icon = "edit_attributes";
-
-			var attributesMenu = menu.AddMenu( "Attribute" );
-			attributesMenu.Icon = "edit_attributes";
-
-			var materialCombosMenu = menu.AddMenu( "Combo" );
-			materialCombosMenu.Icon = "alt_route";
-
 			foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
 			{
 				var targetType = parameterType.Type.TargetType;
@@ -697,28 +696,23 @@ public class BlackboardView : Widget
 
 				if ( targetType.IsAssignableTo( typeof( IBlackboardMaterialParameter ) ) || targetType.IsAssignableTo( typeof( BlackboardTextureMaterialParameter ) ) )
 				{
-					menu = materialParametersMenu;
+					var materialParametersMenu = FindOrCreateMenu( menu, "Parameter", "edit_attributes" );
+					AddOption( materialParametersMenu, parameterType, icon, description );
 				}
 				else if ( targetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
 				{
-					menu = materialCombosMenu;
+					var materialCombosMenu = FindOrCreateMenu( menu, "Combo", "alt_route" );
+					AddOption( materialCombosMenu, parameterType, icon, description );
 				}
 				else if ( targetType == typeof( SamplerStateParameter ) )
 				{
-					menu = attributesMenu;
+					var attributesMenu = FindOrCreateMenu( menu, "Attribute", "edit_attributes" );
+					AddOption( attributesMenu, parameterType, icon, description );
 				}
-
-				AddOption( menu, parameterType, icon, description );
 			}
 		}
 		else
 		{
-			var subgraphInputsMenu = menu.AddMenu( "Input" );
-			subgraphInputsMenu.Icon = "input";
-
-			var subgraphOutputsMenu = menu.AddMenu( "Output" );
-			subgraphOutputsMenu.Icon = "output";
-
 			foreach ( var parameterType in avalibleTypes.OfType<ClassBlackboardParameterType>().OrderBy( x => x.Type.Order ) )
 			{
 				var targetType = parameterType.Type.TargetType;
@@ -727,15 +721,17 @@ public class BlackboardView : Widget
 
 				if ( targetType.IsAssignableTo( typeof( IBlackboardSubgraphInputParameter ) ) )
 				{
-					menu = subgraphInputsMenu;
+					var inputsMenu = FindOrCreateMenu( menu, "Input", "input" );
+					AddOption( inputsMenu, parameterType, icon, description );
 				}
 				else if ( targetType.IsAssignableTo( typeof( IBlackboardSubgraphOutputParameter ) ) )
 				{
-					menu = subgraphOutputsMenu;
+					var outputsMenu = FindOrCreateMenu( menu, "Output", "output" );
+					AddOption( outputsMenu, parameterType, icon, description );
 				}
-
-				AddOption( menu, parameterType, icon, description );
 			}
+
+
 		}
 	}
 
