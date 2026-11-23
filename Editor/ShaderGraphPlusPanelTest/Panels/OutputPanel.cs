@@ -35,7 +35,7 @@ public sealed partial class OutputPanel : EditorDockPanel
 
 	private Panel OnCreateListRow( object item )
 	{
-		return new IssuePanel( (GraphCompiler.GraphIssue)item );
+		return new IssueItem( (GraphCompiler.GraphIssue)item );
 	}
 
 	// Test
@@ -83,11 +83,11 @@ public sealed partial class OutputPanel : EditorDockPanel
 	}
 }
 
-sealed class IssuePanel : Panel
+sealed class IssueItem : Panel
 {
 	public GraphCompiler.GraphIssue Issue { get; init; }
 
-	public IssuePanel( GraphCompiler.GraphIssue issue ) : base()
+	public IssueItem( GraphCompiler.GraphIssue issue ) : base()
 	{
 		Issue = issue;
 
