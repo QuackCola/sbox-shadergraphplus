@@ -53,7 +53,7 @@ public sealed partial class ShaderGraphPlusPanelTest : PanelDockWindow
 	public string FileType => ShaderGraphPlusGlobals.AssetTypeName;
 	public string FileExtension => ShaderGraphPlusGlobals.AssetTypeExtension;
 
-	[Menu( "Editor", "Shader Graph Plus/NewEditorTest", "schema" )]
+	[Menu( "Editor", "Shader Graph Plus/New Editor", "schema" )]
 	public static void OpenNewEditorTest()
 	{
 		// Find the open editor instead of a static - statics don't survive hotload
