@@ -205,6 +205,14 @@ public class ShaderGraphPlusView : GraphView
 			} );
 		}
 
+		Menu FindOrCreateMenu( Menu parent, string name, string icon )
+		{
+			var childMenu = parent.FindOrCreateMenu( name );
+			childMenu.Icon = icon;
+
+			return childMenu;
+		}
+
 		base.OnPopulateNodeMenuSpecialOptions( menu, clickPos, targetPlug, filter );
 		var isSubgraph = Graph.IsSubgraph;
 
@@ -214,24 +222,23 @@ public class ShaderGraphPlusView : GraphView
 			{
 				var createParameterMenu = menu.AddMenu( $"Create Parameter", "add" );
 
-				var newMaterialParameterMenu = createParameterMenu.AddMenu( $"Material", "edit_attributes" );
-				var newAttributeMenu = createParameterMenu.AddMenu( $"Attribute", "edit_attributes" );
-				var newComboMenu = createParameterMenu.AddMenu( $"Combo", "alt_route" );
-
 				foreach ( var classType in BlackboardParameter.GetRelevantParameters( AvailableParameters, false ).OrderBy( x =>
 						x.Type.GetAttribute<OrderAttribute>().Value ) )
 				{
-					if ( classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
-					{
-						NewParameterMenuOption( newComboMenu, classType, "Add Material Shader Feature" );
-					}
 					if ( classType.Type.TargetType == typeof( SamplerStateParameter ) )
 					{
-						NewParameterMenuOption( newAttributeMenu, classType, "Add Attribute Parameter" );
+						var attributeMenu = FindOrCreateMenu( createParameterMenu, "Attribute", "edit_attributes" );
+						NewParameterMenuOption( attributeMenu, classType, "Add Attribute Parameter" );
 					}
 					else if ( !classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
 					{
-						NewParameterMenuOption( newMaterialParameterMenu, classType, "Add Material Parameter" );
+						var materialParameterMenu = FindOrCreateMenu( createParameterMenu, "Material", "edit_attributes" );
+						NewParameterMenuOption( materialParameterMenu, classType, "Add Material Parameter" );
+					}
+					else if ( classType.Type.TargetType.IsAssignableTo( typeof( IBlackboardShaderFeatureParameter ) ) )
+					{
+						var comboMenu = FindOrCreateMenu( createParameterMenu, "Combo", "alt_route" );
+						NewParameterMenuOption( comboMenu, classType, "Add Material Shader Feature" );
 					}
 				}
 			}
