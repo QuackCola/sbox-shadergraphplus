@@ -14,9 +14,13 @@ public class ClassBlackboardParameterType : IBlackboardParameterType
 		Type = type;
 
 		if ( Type is not null )
+		{
 			DisplayInfo = DisplayInfo.ForType( Type.TargetType );
+		}
 		else
+		{
 			DisplayInfo = new DisplayInfo();
+		}
 	}
 
 	public virtual IBlackboardParameter CreateParameter( IBlackboardNodeGraph graph, string name = "" )
@@ -84,7 +88,7 @@ public sealed class ShaderFeatureParameterType : ClassBlackboardParameterType
 	public override IBlackboardParameter CreateParameter( IBlackboardNodeGraph graph, string name = "" )
 	{
 		var sg = graph as ShaderGraphPlus;
-		var parameter = base.CreateParameter( graph );
+		var parameter = base.CreateParameter( graph, name );
 
 		if ( parameter is ShaderFeatureEnumParameter shaderFeatureEnum )
 		{
