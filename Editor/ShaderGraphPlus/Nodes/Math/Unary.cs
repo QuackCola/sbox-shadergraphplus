@@ -488,7 +488,7 @@ public sealed class Max : ShaderNodePlus
 /// <summary>
 /// Clamps the specified value within the range of 0 to 1
 /// </summary>
-[Title( "Saturate" ), Category( "Transform" )]
+[Title( "Saturate" ), Category( "Transform" ), Icon( "bath_soak" )]
 public sealed class Saturate : Unary
 {
 	[Hide]

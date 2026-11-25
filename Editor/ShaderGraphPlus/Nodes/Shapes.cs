@@ -48,7 +48,7 @@ public sealed class BoxShapeNode : ShaderNodePlus
 /// <summary>
 /// Basic procedural elipse shape
 /// </summary>
-[Title( "Elipse Shape" ), Category( "Procedural/Shapes" ), Icon( "category" )]
+[Title( "Elipse Shape" ), Category( "Procedural/Shapes" ), Icon( "circle" )]
 public sealed class ElipseShapeNode : ShaderNodePlus
 {
 	[JsonIgnore, Hide, Browsable( false )]
@@ -92,7 +92,7 @@ public sealed class ElipseShapeNode : ShaderNodePlus
 /// <summary>
 /// Basic procedural polygon shape.
 /// </summary>
-[Title( "Polygon Shape" ), Category( "Procedural/Shapes" ), Icon( "category" )]
+[Title( "Polygon Shape" ), Category( "Procedural/Shapes" ), Icon( "hexagon" )]
 public sealed class PolygonShapeNode : ShaderNodePlus
 {
 	[JsonIgnore, Hide, Browsable( false )]
